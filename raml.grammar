@@ -1,0 +1,116 @@
+
+# TODO: required fields
+#
+# string: string
+# integer: integer > 0
+# regex: regex
+# boolean: boolean
+# jsonSchema: jsonSchema
+# xmlSchema: xmlSchema
+
+Markdown: markdown | include
+
+root: [rootElement]
+
+path: string
+
+#include: !include path
+
+String: string | include
+
+title: ('title', String)
+
+version: ('version', string)
+
+model: (String, jsonSchema)
+
+schemas: ('schema', [model])
+
+baseUri: ('baseUri', string)
+
+name: string
+
+description: String
+
+type: 'string' | 'number' | 'integer' | 'date'
+
+enum: [string]
+
+pattern: ('pattern', regex)
+
+minLength: ('minLength', integer)
+
+maxLength: ('maxLength', integer)
+
+minimum: ('minimum', integer)
+
+maximum: ('maximum', integer)
+
+required: ('required', boolean)
+
+default: ('default', string)
+
+requires: ('requires', [string])
+
+excludes: ('excludes', [string])
+
+parameterProperty: name | description | type | enum | pattern | minLength | maxLength | maximum |
+  minimum | required | default | requires | excludes
+
+uriParameter: (string, [parameterProperty])
+
+uriParameters: ('uriParameters', [uriParameter])
+
+defaultMediaTypes: ('defaultMediaTypes', string | [string])
+
+chapter: ('title', string) | ('content', String)
+
+documentation: ('documentation', [chapter])
+
+summary: ('summary', string)
+
+description: ('description', Markdown)
+
+example: ('example', string)
+
+header: (string, [parameterProperty | example])
+
+headers: ('headers', [header])
+
+queryParameterDefinition: (string, [parameterProperty | example])
+
+queryParameters: ('queryParameters', [queryParameterDefinition])
+
+formParameters: ('formParameters', [parameterProperty | example])
+
+bodySchema: ('schema', xmlSchema | jsonSchema)
+
+mimeTypeParameters: [bodySchema | example]
+
+mimeType: ('application/x-www-form-urlencoded', [formParameters]) | ('multipart/form-data', [formParameters]) |  (string, [mimeTypeParameters])
+
+body: ('body', [mimeType])
+
+responseCode: (integer | [integer], [body | description])
+
+responses: ('responses', [responseCode])
+
+actionDefinition: summary | description | headers | queryParameters | body | responses
+
+action: ('get' | 'post' | 'put' | 'delete' | 'head' | 'patch' | 'options', [actionDefinition])
+
+use: ('use', [string])
+
+resourceDefinition: name | action | resource | use
+
+resource: (/[^/]+, [resourceDefinition])
+
+traitDefinition: (string, [description | provides | requires])
+
+trait: ('traits', traitDefinition)
+
+traits: [trait]
+
+rootElement: title | version | schemas | baseUri | uriParameters | defaultMediaTypes | documentation | resource | traits
+
+
