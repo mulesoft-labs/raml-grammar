@@ -1,6 +1,4 @@
 # TODO: required fields
-#
-#
 
 typeIsArray = Array.isArray || ( value ) -> return {}.toString.call( value ) is '[object Array]'
 
@@ -28,6 +26,9 @@ class PrimitiveAlternatives
 
 class Multiple
   constructor: (@element) ->
+
+class PostposedExecution
+  constructor: (@f) ->
 
 # primitives
 markdown = '<markdown>'
@@ -88,7 +89,7 @@ actionDefinition = new Alternatives(summary, description, headers, queryParamete
 #action = new Tuple(new Alternatives('get', 'post', 'put', 'delete', 'head', 'patch', 'options'),  new Multiple(actionDefinition))
 action = new Alternatives(((new Tuple(actionName, new Multiple(actionDefinition))) for actionName in ['get', 'post', 'put', 'delete', 'head', 'path', 'options'])...)
 use = new Tuple('use',  new Multiple(string))
-resourceDefinition = new Alternatives(name, action, use) #add resource
+resourceDefinition = new Alternatives(name, action, use, new Tuple(string, new PostposedExecution(() -> resourceDefinition)))
 resource = new Tuple(string,  new Multiple(resourceDefinition))
 traitDefinition = new Tuple(string,  new Multiple(new Alternatives(description, provides, requires)))
 trait = new Tuple('traits',  traitDefinition)
@@ -96,24 +97,27 @@ traits = new Multiple(trait)
 rootElement = new Alternatives(title, version, schemas, baseUri, uriParameters, defaultMediaTypes, documentation, resource, traits)
 root = new Multiple(rootElement) 
 
-transverse = (root, fa, ft, fm, fpa) ->
+transverse = (root, fa, ft, fm, fpa, fpr) ->
   switch
     when root instanceof Alternatives
-      alternatives = (transverse(alternative, fa, ft, fm, fpa) for alternative in root.alternatives)
+      alternatives = (transverse(alternative, fa, ft, fm, fpa, fpr) for alternative in root.alternatives)
       fa(root, alternatives)
     when root instanceof Tuple
-      a = transverse(root.key, fa, ft, fm, fpa)
-      b = transverse(root.value, fa, ft, fm, fpa)
+      a = transverse(root.key, fa, ft, fm, fpa, fpr)
+      b = transverse(root.value, fa, ft, fm, fpa, fpr)
       ft(root, a, b)
     when root instanceof Multiple
-      m = transverse(root.element, fa, ft, fm, fpa)
+      m = transverse(root.element, fa, ft, fm, fpa, fpr)
       fm(root, m)
     when root instanceof PrimitiveAlternatives
-      alternatives = (transverse(alternatives, fa, ft, fm, fpa) for alternatives in root.alternatives)
+      alternatives = (transverse(alternatives, fa, ft, fm, fpa, fpr) for alternatives in root.alternatives)
       fpa(root, alternatives)
+    when root instanceof PostposedExecution
+      promise = new PostposedExecution(() -> transverse(root.f(), fa, ft, fm, fpa, fpr))
+      fpr(root, promise)
 
     when typeof root == 'string' then root
-    else throw 'Invalid state: ' + typ3(root) + ' ' + root
+    else throw 'Invalid state: ' + typ3(root) + ' ' + JSON.stringify(root)
 
 i = 0
 
@@ -141,6 +145,9 @@ pa = (root, element) ->
   i = i - 1
   res
 
+pr = (root, promise) ->
+  promise
+
 
 # console.log(transverse(root, a, t, m))
 
@@ -163,18 +170,21 @@ tm = (root, key, value) ->
       for k in key
         switch typ3(k)
           when 'string'
-            d[k] = value
+            d[k] = () -> value
           else 
             throw k
     when 'object'
       for k in key
         switch typ3(k)
           when 'string'
-            d[k] = value
+            d[k] = () -> value
           else
             throw k
     else 
-      d[key] = value
+      if typ3(value) != 'function'
+        d[key] = () -> value
+      else
+        d[key] = value
   d
 
 mm = (root, element) ->
@@ -183,7 +193,10 @@ mm = (root, element) ->
 pam = (root, alternatives) ->
   alternatives
 
-map = transverse(root, am, tm, mm, pam)
+prm = (root, promise) ->
+  promise.f
+
+map = transverse(root, am, tm, mm, pam, prm)
 
 suggest = (root, index,  path...) ->
   key = path[index]
@@ -192,12 +205,15 @@ suggest = (root, index,  path...) ->
     return root
     
   val = root[key]
-
-  if not val?
+  if ! val?
     val = root['<string>']
+  
+  if typ3(val) == 'function'
+      val = val()
+
   suggest(val, index + 1, path...)
 
-console.log suggest(map, 0, '/lala')
+console.log suggest(map, 0, '/pet', '/hello', '/bye', 'get', 'queryParameters', 'limit', 'default')
 
 
 #repl = require('repl')
