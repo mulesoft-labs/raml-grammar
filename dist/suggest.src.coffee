@@ -1,4 +1,3 @@
-# TODO: required fields
 
 typ3 = (obj) ->
   if obj == undefined or obj == null
@@ -12,6 +11,8 @@ typ3 = (obj) ->
   return "object"
 
 # Grammar representation objects
+
+# TODO: Add required fields
 
 class Tuple
   constructor: (@key, @value) ->
@@ -50,7 +51,7 @@ class StringNode extends Node
 
 notImplemented = () -> throw new Error('Not implemented')
 
-class NodeMap
+class @NodeMap
   @markdown: notImplemented
   @include: notImplemented
   @jsonSchema: notImplemented
@@ -105,7 +106,7 @@ transversePrimitive = (nodeMap, node) ->
     else
       throw 'Invalid state: type ' + typ3(root) + ' object ' + root
 
-class TreeMap
+class @TreeMap
   @alternatives: notImplemented
   @tuple: notImplemented
   @multiple: notImplemented
@@ -139,17 +140,20 @@ transverse = (treeMap, root) ->
       treeMap.node(root)
     when typ3(root) == 'string'
       treeMap.string(root)
-    else 
-      throw 'Invalid state: type ' + typ3(root) + ' object ' + root
+    else
+      console.log(root)
+      throw new Error('Invalid state: type ' + typ3(root) + ' object ' + root)
 
-# RAML Grammar tree
-path = stringNode
-include = include 
+# Base Attributes
+
 title = new Tuple('title',  stringNode) 
 version = new Tuple('version',  stringNode) 
 model = new Tuple(stringNode,  jsonSchema) 
 schemas = new Tuple('schemas', new Multiple(model))
 baseUri = new Tuple('baseUri',  stringNode) 
+
+# Parameter fields
+
 name = new Tuple('name', stringNode)
 description = new Tuple('description',  stringNode)
 type = new Tuple('type', new PrimitiveAlternatives('string', 'number', 'integer', 'date' ))
@@ -166,6 +170,7 @@ provides = new Tuple('provides',  new Multiple(stringNode))
 excludes = new Tuple('excludes',  new Multiple(stringNode)) 
 parameterProperty = new Alternatives(name, description, type, enum2, pattern, minLength, 
   maxLength, maximum, minimum, required, d3fault, requires, excludes)
+
 uriParameter = new Tuple(stringNode,  new Multiple(parameterProperty))
 uriParameters = new Tuple('uriParameters',  new Multiple(uriParameter))
 defaultMediaTypes = new Tuple('defaultMediaTypes',  
@@ -174,36 +179,115 @@ chapter = new Alternatives(new Tuple('title',  stringNode), new Tuple('content',
 documentation = new Tuple('documentation',  new Multiple(chapter))
 summary = new Tuple('summary',  stringNode)
 example = new Tuple('example',  stringNode)
+
+# Header
+
 header = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty, example)))
 headers = new Tuple('headers',  new Multiple(header))
+
+# Parameters
+
 queryParameterDefinition = new Tuple(stringNode,  
   new Multiple(new Alternatives(parameterProperty, example)))
 queryParameters = new Tuple('queryParameters',  new Multiple(queryParameterDefinition))
 formParameters = new Tuple('formParameters',  
   new Multiple(new Alternatives(parameterProperty, example)))
+
+
+# Body and MIME Type
+
 bodySchema = new Tuple('schema',  new PrimitiveAlternatives(xmlSchema, jsonSchema))
 mimeTypeParameters = new Multiple(new Alternatives(bodySchema, example))
 mimeType = new Alternatives(new Tuple('application/x-www-form-urlencoded', 
   new Multiple(formParameters)), new Tuple('multipart/form-data',  new Multiple(formParameters)),  
   new Tuple(stringNode,  new Multiple(mimeTypeParameters)))
 body = new Tuple('body',  new Multiple(mimeType))
+
+# Responses
+
 responseCode = new Tuple(integer, new Multiple(integer), 
   new Multiple(new Alternatives(body, description)))
 responses = new Tuple('responses',  new Multiple(responseCode))
+
+# Actions
+
 actionDefinition = new Alternatives(summary, description, headers, queryParameters, 
   body, responses)
 action = new Alternatives(((new Tuple(actionName, new Multiple(actionDefinition))) for actionName in ['get', 'post', 'put', 'delete', 'head', 'path', 'options'])...)
+
+# Use
+
 use = new Tuple('use',  new Multiple(stringNode))
+
+# Resource
+
 resourceDefinition = new Alternatives(name, action, use, 
   new Tuple(stringNode, new PostposedExecution(() -> resourceDefinition)))
 resource = new Tuple(stringNode,  new Multiple(resourceDefinition))
+
+# Traits
+
 traitDefinition = new Tuple(stringNode,  new Multiple(
   new Alternatives(description, provides, requires)))
 trait = new Tuple('traits',  traitDefinition)
 traits = new Multiple(trait)
+
+# Root Element
+
 rootElement = new Alternatives(title, version, schemas, baseUri, uriParameters, 
   defaultMediaTypes, documentation, resource, traits)
 root = new Multiple(rootElement) 
+
+
+
+class TreeMapToSuggestionTree extends @TreeMap
+  @alternatives: (root, alternatives) ->
+    d = {}
+    for alternative in alternatives
+      for key, value of alternative
+        d[key] = value
+    d
+
+  @multiple: (root, element) ->
+    element
+
+  @tuple: (root, key, value) ->
+    d = {}
+    kind = typ3(key)
+    switch kind
+      when 'Array'
+        for k in key
+          switch typ3(k)
+            when 'string'
+              d[k] = () -> value
+            else 
+              throw k
+      when 'object'
+        for k in key
+          switch typ3(k)
+            when 'string'
+              d[k] = () -> value
+            else
+              throw k
+      else 
+        if typ3(value) != 'function'
+          d[key] = () -> value
+        else
+          d[key] = value
+    d
+
+  @primitiveAlternatives: (root, alternatives) ->
+    alternatives
+
+  @postponedExecution: (root, execution) ->
+    execution.f
+
+  @node: (root) ->
+    transversePrimitive NameNodeMap, root
+
+  @string: (root) ->
+    root
+ 
 
 suggestionTree = transverse(TreeMapToSuggestionTree, root)
 
@@ -220,7 +304,7 @@ suggest = (root, index,  path) ->
 
   suggest(val, index + 1, path)
 
-@suggest = suggest
 @suggestionTree = suggestionTree
-
-
+@suggest = suggest
+@transverse = transverse
+@root = root
