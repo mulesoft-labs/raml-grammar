@@ -1,5 +1,18 @@
+{typ3} = require './utils.coffee'
+{TreeMap, transverse, root, transversePrimitive} = require './main.coffee'
 
-class TreeMapToSuggestionTree extends @TreeMap
+class NameNodeMap
+  name = (node) -> node.constructor.name
+  @markdown: name
+  @include: name
+  @jsonSchema: name
+  @regex: name
+  @integer: name
+  @boolean: name
+  @xmlSchema: name
+  @stringNode: name
+
+class TreeMapToSuggestionTree extends TreeMap
   @alternatives: (root, alternatives) ->
     d = {}
     for alternative in alternatives

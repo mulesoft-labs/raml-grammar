@@ -1,19 +1,7 @@
-
-typ3 = (obj) ->
-  if obj == undefined or obj == null
-    return String obj
-  classToType = new Object
-  for name in "Boolean Number String Function Array Date RegExp".split(" ")
-    classToType["[object " + name + "]"] = name.toLowerCase()
-  myClass = Object.prototype.toString.call obj
-  if myClass of classToType
-    return classToType[myClass]
-  return "object"
+{typ3} = require './utils.coffee'
 
 # Grammar representation objects
-
 # TODO: Add required fields
-
 class Tuple
   constructor: (@key, @value) ->
     if not @key instanceof Node && typ3(@key) != 'string'
@@ -61,16 +49,6 @@ class @NodeMap
   @xmlSchema: notImplemented
   @stringNode: notImplemented
 
-class NameNodeMap
-  name = (node) -> node.constructor.name
-  @markdown: name
-  @include: name
-  @jsonSchema: name
-  @regex: name
-  @integer: name
-  @boolean: name
-  @xmlSchema: name
-  @stringNode: name
 
 # primitives
 markdown = new Markdown()
@@ -106,7 +84,7 @@ transversePrimitive = (nodeMap, node) ->
     else
       throw 'Invalid state: type ' + typ3(root) + ' object ' + root
 
-class @TreeMap
+class TreeMap
   @alternatives: notImplemented
   @tuple: notImplemented
   @multiple: notImplemented
@@ -143,6 +121,8 @@ transverse = (treeMap, root) ->
     else
       console.log(root)
       throw new Error('Invalid state: type ' + typ3(root) + ' object ' + root)
+
+@transverse = transverse
 
 # Base Attributes
 
@@ -238,3 +218,11 @@ rootElement = new Alternatives(title, version, schemas, baseUri, uriParameters,
   defaultMediaTypes, documentation, resource, traits)
 root = new Multiple(rootElement) 
 
+@root = root
+@transversePrimitive = transversePrimitive
+@TreeMap = TreeMap
+
+# Categories
+
+class Category
+  constructor: (@name, @elements) ->

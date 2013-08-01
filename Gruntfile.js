@@ -3,31 +3,26 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
-    coffee: {
-      options: {
-        sourceMap: true
-      },
-      compile: {
-        files: {
-          'dist/suggest.js': ['src/main.coffee', 'src/suggestion.coffee'],
-          'dist/test.js': 'test/*.coffee'
-          
-        }
-      }
-    },
     simplemocha: {
-      all: ['dist/test.js']
+      all: ['test/test.coffee']
     },
     watch: {
       files: ['<%= coffee.files %>'],
-      tasks: ['coffee', 'simplemocha']
+      tasks: ['browserify', 'simplemocha']
+    },
+    browserify: {
+      options: {
+        transform: ['coffeeify']
+      },
+      'dist/suggest.js': ['src/main.coffee', 'src/suggestion.coffee']
     }
   });
 
-  grunt.loadNpmTasks('grunt-contrib-coffee');
+  grunt.loadNpmTasks('grunt-coffeeify');
   grunt.loadNpmTasks('grunt-simple-mocha');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-browserify');
 
-  grunt.registerTask('default', ['coffee', 'simplemocha']);
+  grunt.registerTask('default', ['browserify', 'simplemocha']);
 
 };

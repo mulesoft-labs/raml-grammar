@@ -96,6 +96,12 @@
     });
   });
 
+  describe('Category', function() {
+    return it('should be obtained from a suggestion tree node', function() {
+      return suggestionTree;
+    });
+  });
+
 }).call(this);
 
 /*

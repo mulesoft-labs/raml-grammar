@@ -1,4 +1,5 @@
-{TreeMap, suggest, suggestionTree, transverse, root} = require './suggest'
+{transverse, TreeMap, root} = require '../src/main.coffee'
+{suggestionTree, suggest} = require '../src/suggestion.coffee'
 
 
 class TreeMapToString extends TreeMap
@@ -53,3 +54,7 @@ describe 'suggest',  ->
   it 'should work with resources', (done) ->
     suggest suggestionTree, 0, ['/hello', '/this', '/{is}', '/a', '/resource']
     done()
+
+describe 'Category', ->
+  it 'should be obtained from a suggestion tree node', ->
+    suggestionTree

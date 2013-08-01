@@ -238,9 +238,16 @@ rootElement = new Alternatives(title, version, schemas, baseUri, uriParameters,
   defaultMediaTypes, documentation, resource, traits)
 root = new Multiple(rootElement) 
 
+# Categories
+
+class Category
+  constructor: (@name, @elements) ->
 
 
-class TreeMapToSuggestionTree extends @TreeMap
+
+{TreeMap} = require 'main.coffee'
+
+class TreeMapToSuggestionTree extends TreeMap
   @alternatives: (root, alternatives) ->
     d = {}
     for alternative in alternatives
