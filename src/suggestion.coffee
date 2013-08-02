@@ -30,21 +30,11 @@ class SuggestionNodeMap extends NodeMap
 
 functionize = (value) -> if type(value) == 'function' then value else () -> value
 
-class Tuple
-  constructor: (@key, @value) ->
-
 class TreeMapToSuggestionTree extends TreeMap
   @alternatives: (root, alternatives) ->
     d = {}
     for alternative in alternatives
       switch
-        #when alternative instanceof Tuple
-        #  key = alternative.key
-        #  value = alternative.value
-        #  if key == stringWilcard
-        #    open = value
-        #  else
-        #    d[key] = value
         when alternative instanceof SimpleSuggestion
           ((d[key] = value) for key, value of alternative.suggestions)
         when alternative instanceof OpenSuggestion

@@ -3,7 +3,7 @@
 # Grammar representation objects
 # TODO: Add required fields
 class Tuple
-  constructor: (@key, @value, @category='spec') ->
+  constructor: (@key, @value, @category='raml specification') ->
     if not @key instanceof Node && typ3(@key) != 'string'
       throw "Key: '#{JSON.stringify(key)}' of type '#{typ3(key)}' must be an string"
 
@@ -196,7 +196,7 @@ responses = new Tuple(new ConstantString('responses'),  new Multiple(responseCod
 
 actionDefinition = new Alternatives(summary, description, headers, queryParameters, 
   body, responses)
-action = new Alternatives(((new Tuple(actionName, new Multiple(actionDefinition), 'method')) for actionName in [new ConstantString('get'), new ConstantString('post'), new ConstantString('put'), new ConstantString('delete'), new ConstantString('head'), new ConstantString('path'), new ConstantString('options')])...)
+action = new Alternatives(((new Tuple(actionName, new Multiple(actionDefinition), 'restful elements')) for actionName in [new ConstantString('get'), new ConstantString('post'), new ConstantString('put'), new ConstantString('delete'), new ConstantString('head'), new ConstantString('path'), new ConstantString('options')])...)
 
 
 # Use
