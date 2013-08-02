@@ -1,7 +1,22 @@
-{typ3} = require './utils.coffee'
-{TreeMap, transverse, root, transversePrimitive} = require './main.coffee'
+{typ3: type} = require './utils.coffee'
+{TreeMap, NodeMap, transverse, root, transversePrimitive} = require './main.coffee'
 
-class NameNodeMap
+class Suggestion
+
+class SimpleSuggestion extends Suggestion
+  constructor: (@suggestions) ->
+
+class OpenSuggestion extends Suggestion
+  constructor: (@suggestions, @open) ->
+
+class SuggestItem
+  constructor: (@open, @name, @category='spec') ->
+
+class StringWildcard
+
+stringWilcard = new StringWildcard
+
+class SuggestionNodeMap extends NodeMap
   name = (node) -> node.constructor.name
   @markdown: name
   @include: name
@@ -10,43 +25,49 @@ class NameNodeMap
   @integer: name
   @boolean: name
   @xmlSchema: name
-  @stringNode: name
+  @stringNode: () -> stringWilcard
+  @constantString: (root) -> root.value
+
+functionize = (value) -> if type(value) == 'function' then value else () -> value
+
+class Tuple
+  constructor: (@key, @value) ->
 
 class TreeMapToSuggestionTree extends TreeMap
   @alternatives: (root, alternatives) ->
     d = {}
     for alternative in alternatives
-      for key, value of alternative
-        d[key] = value
-    d
+      switch
+        #when alternative instanceof Tuple
+        #  key = alternative.key
+        #  value = alternative.value
+        #  if key == stringWilcard
+        #    open = value
+        #  else
+        #    d[key] = value
+        when alternative instanceof SimpleSuggestion
+          ((d[key] = value) for key, value of alternative.suggestions)
+        when alternative instanceof OpenSuggestion
+          ((d[key] = value) for key, value of alternative.suggestions)
+          open = alternative.open
+        else
+          throw new Error('Invalid type: ' + alternatives)
+    if open?
+      new OpenSuggestion(d, () -> open())
+    else 
+      new SimpleSuggestion(d)
 
-  @multiple: (root, element) ->
+  @multiple: (root, element) -> 
     element
 
-  @tuple: (root, key, value) ->
-    d = {}
-    kind = typ3(key)
-    switch kind
-      when 'Array'
-        for k in key
-          switch typ3(k)
-            when 'string'
-              d[k] = () -> value
-            else 
-              throw k
-      when 'object'
-        for k in key
-          switch typ3(k)
-            when 'string'
-              d[k] = () -> value
-            else
-              throw k
-      else 
-        if typ3(value) != 'function'
-          d[key] = () -> value
-        else
-          d[key] = value
-    d
+  @tuple: (root, key, value) -> 
+    if key == stringWilcard
+      new OpenSuggestion({}, functionize(value))
+    else
+      d = {}
+      d[key] = new SuggestItem(functionize(value), key, root.category)
+      new SimpleSuggestion(d)
+      #new Tuple(key, new SuggestItem(functionize(value), key, root.category))
 
   @primitiveAlternatives: (root, alternatives) ->
     alternatives
@@ -55,28 +76,24 @@ class TreeMapToSuggestionTree extends TreeMap
     execution.f
 
   @node: (root) ->
-    transversePrimitive NameNodeMap, root
+    transversePrimitive(SuggestionNodeMap, root)
 
-  @string: (root) ->
-    root
- 
 
 suggestionTree = transverse(TreeMapToSuggestionTree, root)
 
-suggest = (root, index,  path) ->
+suggest = (root, index, path) ->
   key = path[index]
 
-  if not path[index]?
+  if not key?
     return root
-    
-  val = root[key] or root['StringNode']
   
-  if typ3(val) == 'function'
-      val = val()
+  val = if root.suggestions[key]? then root.suggestions[key].open() else root.open()
 
   suggest(val, index + 1, path)
 
-@suggestionTree = suggestionTree
-@suggest = suggest
-@transverse = transverse
-@root = root
+suggestRAML = (path) ->
+  suggest suggestionTree, 0, path
+
+@suggestRAML = suggestRAML
+
+window.suggestRAML = suggestRAML if typeof window != 'undefined'

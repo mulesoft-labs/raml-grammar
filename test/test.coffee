@@ -1,6 +1,9 @@
 {transverse, TreeMap, root} = require '../src/main.coffee'
-{suggestionTree, suggest} = require '../src/suggestion.coffee'
-
+{suggestRAML} = require '../src/suggestion.coffee'
+{typ3: type} = require '../src/utils.coffee'
+type = 
+  of: type
+should = (require '../node_modules/chai/index').should()
 
 class TreeMapToString extends TreeMap
   @constructor: () ->
@@ -38,9 +41,6 @@ class TreeMapToString extends TreeMap
   
   @node: (root) ->
     root.constructor.name
-  
-  @string: (root) ->
-    root
 
 describe 'Tree Mapping', ->
   it 'should be able be used while transversing the tree', (done) ->
@@ -48,13 +48,81 @@ describe 'Tree Mapping', ->
     done()
 
 describe 'suggest',  ->
-  it 'should handle "title"', (done) ->
-    suggest suggestionTree, 0, ['title'] 
+  it 'should handle root node', (done) ->
+    suggestion = suggestRAML [] 
+    suggestion.should.be.ok
+    suggestion.should.have.property('suggestions')
+    suggestions = suggestion.suggestions
+    suggestions.title.should.be.ok
     done()
-  it 'should work with resources', (done) ->
-    suggest suggestionTree, 0, ['/hello', '/this', '/{is}', '/a', '/resource']
+  it 'should handle an string value nodes', (done) ->
+    suggestion = suggestRAML ['title']
+    suggestion.should.be.ok
+    done()
+  it 'should handle nested resources', (done) ->
+    suggestion = suggestRAML ['/hello', 'get']
+    suggestion.should.be.ok
+    done()
+  it 'should work with resources nodes', (done) ->
+    suggestion = suggestRAML ['/hello', '/this', '/{is}', '/a', '/resource']
+    suggestion.should.have.property('suggestions')
+    suggestions = suggestion.suggestions
+    suggestions.should.have.property(action) for action in ['get', 'put', 'post', 
+      'delete']
+
+    get = suggestions.get
+    get.should.have.property.open
+    open = get.open
+    type.of(open).should.be.equal('function')
+
     done()
 
-describe 'Category', ->
-  it 'should be obtained from a suggestion tree node', ->
-    suggestionTree
+  it 'should work with complex nested scenarios', (done) ->
+    suggestion = suggestRAML ['/tags', '/search', 'get', 'headers', 'asd']
+    suggestion.should.be.ok
+
+    suggestions = suggestion.suggestions
+
+    
+    suggestions.should.have.property(property) for property in ['name', 'description', 
+      'type', 'enum', 'pattern', 'minLength', 'maxLength', 'maximum', 'minimum', 'required',
+      'default', 'requires', 'excludes', 'example']
+
+    done()
+
+  it 'should be weakly equal when called multiple times', (done) ->
+    suggestion = suggestRAML ['/hello', '/this', '/{is}', '/a', '/resource']
+    suggestion2 = suggestRAML ['/hello', '/this', '/{is}', '/a', '/resource']
+
+    JSON.stringify(suggestion).should.be.equal(JSON.stringify(suggestion2))
+    done()
+
+
+describe 'Category assignment', ->
+  it 'should be "actions" for get, post, put and delete', (done) ->
+    suggestion = suggestRAML ['/pet']
+    suggestion.should.have.property('suggestions')
+    suggestions = suggestion.suggestions
+    suggestions.should.have.property(action) for action in ['get', 'put', 'post', 
+      'delete']
+
+    for methodName in ['get', 'put', 'post', 'delete']
+      method = suggestions[methodName]
+      method.should.have.property.open
+      open = method.open
+      type.of(open).should.be.equal('function')
+      method.should.have.property('category')
+      category = method.category
+      category.should.be.equal('method')
+      suggestion = suggestRAML ['/pet', 'get']
+    
+    done()
+    #catgories:
+    #  actions
+    #  resource data
+    #  method parameters
+    #  default: spec
+    #  abajo de queryParameter no va nada -> ' '
+    #  abajo de headers no va nada -> ' ' (a esa categoria va spec)
+    #  abajo de responses no va nada -> ' '
+

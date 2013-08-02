@@ -4,17 +4,22 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     simplemocha: {
+      options: {
+        useColors: true,
+        ui: 'bdd',
+        reporter: 'spec'
+      },
       all: ['test/test.coffee']
     },
     watch: {
-      files: ['<%= coffee.files %>'],
+      files: ['src/**/*.coffee', 'test/**/*.coffee'],
       tasks: ['browserify', 'simplemocha']
     },
     browserify: {
       options: {
         transform: ['coffeeify']
       },
-      'dist/suggest.js': ['src/main.coffee', 'src/suggestion.coffee']
+      'dist/suggest.js': ['src/suggestion.coffee']
     }
   });
 
