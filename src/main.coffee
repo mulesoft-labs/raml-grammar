@@ -188,7 +188,7 @@ body = new Tuple(new ConstantString('body'),  new Multiple(mimeType))
 
 # Responses
 
-responseCode = new Tuple(integer, new Multiple(integer), 
+responseCode = new Tuple(new Multiple(integer), 
   new Multiple(new Alternatives(body, description)))
 responses = new Tuple(new ConstantString('responses'),  new Multiple(responseCode))
 
@@ -226,8 +226,5 @@ root = new Multiple(rootElement)
 @transversePrimitive = transversePrimitive
 @TreeMap = TreeMap
 @NodeMap = NodeMap
+@integer = integer
 
-# Categories
-
-class Category
-  constructor: (@name, @elements) ->
