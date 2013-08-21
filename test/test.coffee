@@ -113,7 +113,7 @@ describe 'Category assignment', ->
       type.of(open).should.be.equal('function')
       method.should.have.property('category')
       category = method.category
-      category.should.be.equal('methods')
+      category.should.be.equal('restful elements')
       suggestion = suggestRAML ['/pet', 'get']
     
     done()
