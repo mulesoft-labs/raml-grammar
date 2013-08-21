@@ -130,12 +130,4 @@ describe 'Category assignment', ->
       suggestion = suggestRAML ['/pet', 'get']
     
     done()
-    #catgories:
-    #  actions
-    #  resource data
-    #  method parameters
-    #  default: spec
-    #  abajo de queryParameter no va nada -> ' '
-    #  abajo de headers no va nada -> ' ' (a esa categoria va spec)
-    #  abajo de responses no va nada -> ' '
 
