@@ -67,8 +67,7 @@ describe 'suggest',  ->
     suggestion = suggestRAML ['/hello', '/this', '/{is}', '/a', '/resource']
     suggestion.should.have.property('suggestions')
     suggestions = suggestion.suggestions
-    suggestions.should.have.property(action) for action in ['get', 'put', 'post', 
-      'delete']
+    suggestions.should.include.keys('get', 'put', 'post', 'delete')
 
     get = suggestions.get
     get.should.have.property.open
@@ -84,9 +83,9 @@ describe 'suggest',  ->
     suggestions = suggestion.suggestions
 
     
-    suggestions.should.have.property(property) for property in ['name', 'description', 
+    suggestions.should.include.keys('name', 'description', 
       'type', 'enum', 'pattern', 'minLength', 'maxLength', 'maximum', 'minimum', 'required',
-      'default', 'requires', 'excludes', 'example']
+      'default', 'requires', 'excludes', 'example')
 
     done()
 
@@ -95,6 +94,20 @@ describe 'suggest',  ->
     suggestion2 = suggestRAML ['/hello', '/this', '/{is}', '/a', '/resource']
 
     JSON.stringify(suggestion).should.be.equal(JSON.stringify(suggestion2))
+    done()
+
+  it 'should work with numerical fields', (done) ->
+    suggestion = suggestRAML ['/hello', '/bye', 'get', 'responses']
+    suggestion.should.be.ok
+    suggestion.should.have.property('open')
+    suggestions = suggestion.suggestions
+    (Object.keys suggestions).length.should.be.equal(0)
+
+    suggestion = suggestRAML ['/hello', '/bye', 'get', 'responses', '200']
+    suggestion.should.be.ok
+    suggestion.should.not.have.property('open')
+    suggestions = suggestion.suggestions
+    (Object.keys suggestions).should.include('body', 'description')
     done()
 
 

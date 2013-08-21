@@ -1,5 +1,5 @@
 {typ3: type} = require './utils.coffee'
-{TreeMap, NodeMap, transverse, root, transversePrimitive} = require './main.coffee'
+{TreeMap, NodeMap, transverse, root, transversePrimitive, integer} = require './main.coffee'
 
 class Suggestion
 
@@ -7,7 +7,7 @@ class SimpleSuggestion extends Suggestion
   constructor: (@suggestions) ->
 
 class OpenSuggestion extends Suggestion
-  constructor: (@suggestions, @open) ->
+  constructor: (@suggestions, @open, @category) ->
 
 class SuggestItem
   constructor: (@open, @name, @category='spec') ->
@@ -16,13 +16,17 @@ class StringWildcard
 
 stringWilcard = new StringWildcard
 
+class IntegerWildcard
+
+integerWildcard = new IntegerWildcard
+
 class SuggestionNodeMap extends NodeMap
   name = (node) -> node.constructor.name
   @markdown: name
   @include: name
   @jsonSchema: name
   @regex: name
-  @integer: name
+  @integer: () -> integerWildcard
   @boolean: name
   @xmlSchema: name
   @stringNode: () -> stringWilcard
@@ -40,10 +44,11 @@ class TreeMapToSuggestionTree extends TreeMap
         when alternative instanceof OpenSuggestion
           ((d[key] = value) for key, value of alternative.suggestions)
           open = alternative.open
+          cat = alternative.category
         else
           throw new Error('Invalid type: ' + alternatives)
     if open?
-      new OpenSuggestion(d, () -> open())
+      new OpenSuggestion(d, (() -> open()), 'snippets')
     else 
       new SimpleSuggestion(d)
 
@@ -52,7 +57,9 @@ class TreeMapToSuggestionTree extends TreeMap
 
   @tuple: (root, key, value) -> 
     if key == stringWilcard
-      new OpenSuggestion({}, functionize(value))
+      new OpenSuggestion({}, functionize(value), root.category)
+    else if key == integerWildcard
+      new OpenSuggestion({}, functionize(value), root.category)
     else
       d = {}
       d[key] = new SuggestItem(functionize(value), key, root.category)
