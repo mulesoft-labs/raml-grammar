@@ -181,8 +181,10 @@ formParameters = new Tuple(new ConstantString('formParameters'),
 
 bodySchema = new Tuple(new ConstantString('schema'),  new PrimitiveAlternatives(xmlSchema, jsonSchema))
 mimeTypeParameters = new Multiple(new Alternatives(bodySchema, example))
-mimeType = new Alternatives(new Tuple(new ConstantString('application/x-www-form-urlencoded'), 
-  new Multiple(formParameters)), new Tuple(new ConstantString('multipart/form-data'),  new Multiple(formParameters)),  
+mimeType = new Alternatives(
+  new Tuple(new ConstantString('application/x-www-form-urlencoded'), new Multiple(formParameters)),   new Tuple(new ConstantString('multipart/form-data'),  new Multiple(formParameters)),  
+  new Tuple(new ConstantString('application/json'),  new Multiple(mimeTypeParameters))
+  new Tuple(new ConstantString('application/xml'),  new Multiple(mimeTypeParameters)),
   new Tuple(stringNode,  new Multiple(mimeTypeParameters)))
 body = new Tuple(new ConstantString('body'),  new Multiple(mimeType))
 
