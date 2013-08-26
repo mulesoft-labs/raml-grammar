@@ -110,6 +110,13 @@ describe 'suggest',  ->
     (Object.keys suggestions).should.include('body', 'description')
     done()
 
+  describe 'body', ->
+    it 'should contain application/json and application/xml as a sublevel suggestions (RT-81)', (done) ->
+      suggestion = suggestRAML ['/hello', 'get', 'body']
+      suggestion.should.be.ok
+      suggestions = suggestion.suggestions
+      (Object.keys suggestions).should.include 'application/json', 'application/xml'
+      done()
 
 describe 'Category assignment', ->
   it 'should be "actions" for get, post, put and delete', (done) ->
