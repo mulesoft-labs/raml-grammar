@@ -12,7 +12,7 @@ class OpenSuggestion extends Suggestion
     @isScalar = false
 
 class SuggestItem
-  constructor: (@open, @name, @category='spec') ->
+  constructor: (@open, @value, @category='spec') ->
     @isScalar = false
 
 class StringWildcard
@@ -75,7 +75,6 @@ class TreeMapToSuggestionTree extends TreeMap
       d = {}
       d[key.name] = new SuggestItem(functionize(value), key, root.category)
       new SimpleSuggestion(d)
-      #new Tuple(key, new SuggestItem(functionize(value), key, root.category))
 
   @primitiveAlternatives: (root, alternatives) ->
     alternatives
