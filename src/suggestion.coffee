@@ -5,23 +5,32 @@ class Suggestion
 
 class SimpleSuggestion extends Suggestion
   constructor: (@suggestions) ->
+    @isScalar = false
 
 class OpenSuggestion extends Suggestion
   constructor: (@suggestions, @open, @category) ->
+    @isScalar = false
 
 class SuggestItem
   constructor: (@open, @name, @category='spec') ->
+    @isScalar = false
 
 class StringWildcard
+  constructor: () ->
+    @isScalar = true
 
 stringWilcard = new StringWildcard
 
 class IntegerWildcard
+  constructor: () ->
+    @isScalar = true
 
 integerWildcard = new IntegerWildcard
 
 class SuggestionNodeMap extends NodeMap
-  name = (node) -> node.constructor.name
+  name = (node) -> 
+    isScalar: true 
+    name: node.constructor.name
   @markdown: name
   @include: name
   @jsonSchema: name
@@ -30,7 +39,9 @@ class SuggestionNodeMap extends NodeMap
   @boolean: name
   @xmlSchema: name
   @stringNode: () -> stringWilcard
-  @constantString: (root) -> root.value
+  @constantString: (root) ->
+    isScalar: true
+    name: root.value
 
 functionize = (value) -> if type(value) == 'function' then value else () -> value
 
@@ -62,7 +73,7 @@ class TreeMapToSuggestionTree extends TreeMap
       new OpenSuggestion({}, functionize(value), root.category)
     else
       d = {}
-      d[key] = new SuggestItem(functionize(value), key, root.category)
+      d[key.name] = new SuggestItem(functionize(value), key, root.category)
       new SimpleSuggestion(d)
       #new Tuple(key, new SuggestItem(functionize(value), key, root.category))
 

@@ -110,6 +110,16 @@ describe 'suggest',  ->
     (Object.keys suggestions).should.include('body', 'description')
     done()
 
+  it 'should tell me whether a node is an scalar or not', () ->
+    suggestion = suggestRAML ['/tags']
+    suggestion.isScalar.should.be.equal false
+
+    suggestion = suggestRAML ['title']
+    suggestion.isScalar.should.be.equal true
+
+    suggestion = suggestRAML ['/tags', 'name']
+    suggestion.isScalar.should.be.equal true
+
   describe 'body', ->
     it 'should contain application/json and application/xml as a sublevel suggestions (RT-81)', (done) ->
       suggestion = suggestRAML ['/hello', 'get', 'body']
@@ -117,6 +127,8 @@ describe 'suggest',  ->
       suggestions = suggestion.suggestions
       (Object.keys suggestions).should.include 'application/json', 'application/xml'
       done()
+  
+
 
 describe 'Category assignment', ->
   it 'should be "actions" for get, post, put and delete', (done) ->
