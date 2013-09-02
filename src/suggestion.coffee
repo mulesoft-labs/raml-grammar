@@ -68,12 +68,12 @@ class TreeMapToSuggestionTree extends TreeMap
 
   @tuple: (root, key, value) -> 
     if key == stringWilcard
-      new OpenSuggestion({}, functionize(value), root.category)
+      new OpenSuggestion({}, functionize(value), root.metadata.category)
     else if key == integerWildcard
-      new OpenSuggestion({}, functionize(value), root.category)
+      new OpenSuggestion({}, functionize(value), root.metadata.category)
     else
       d = {}
-      d[key.name] = new SuggestItem(functionize(value), key, root.category)
+      d[key.name] = new SuggestItem(functionize(value), key, root.metadata.category)
       new SimpleSuggestion(d)
 
   @primitiveAlternatives: (root, alternatives) ->
