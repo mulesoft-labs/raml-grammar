@@ -422,14 +422,14 @@ use = new Tuple(new ConstantString('use'), new Multiple(stringNode));
 postposedResource = new Tuple(stringNode, new PostposedExecution(function() {
   return resourceDefinition;
 }), {
-  category: 'data',
+  category: 'snippets',
   id: 'resource'
 });
 
 resourceDefinition = new Alternatives(name, action, use, postposedResource);
 
 resource = new Tuple(stringNode, new Multiple(resourceDefinition), {
-  category: 'data',
+  category: 'snippets',
   id: 'resource'
 });
 
