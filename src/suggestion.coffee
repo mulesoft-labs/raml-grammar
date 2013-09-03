@@ -8,11 +8,11 @@ class SimpleSuggestion extends Suggestion
     @isScalar = false
 
 class OpenSuggestion extends Suggestion
-  constructor: (@suggestions, @open, @category) ->
+  constructor: (@suggestions, @open, @metadata) ->
     @isScalar = false
 
 class SuggestItem
-  constructor: (@open, @value, @category='spec') ->
+  constructor: (@open, @value, @metadata) ->
     @isScalar = false
 
 class StringWildcard
@@ -55,11 +55,11 @@ class TreeMapToSuggestionTree extends TreeMap
         when alternative instanceof OpenSuggestion
           ((d[key] = value) for key, value of alternative.suggestions)
           open = alternative.open
-          cat = alternative.category
+          cat = alternative.metadata
         else
           throw new Error('Invalid type: ' + alternatives)
     if open?
-      new OpenSuggestion(d, (() -> open()), 'snippets')
+      new OpenSuggestion(d, (() -> open()), cat)
     else 
       new SimpleSuggestion(d)
 
@@ -68,12 +68,12 @@ class TreeMapToSuggestionTree extends TreeMap
 
   @tuple: (root, key, value) -> 
     if key == stringWilcard
-      new OpenSuggestion({}, functionize(value), root.metadata.category)
+      new OpenSuggestion({}, functionize(value), root.metadata)
     else if key == integerWildcard
-      new OpenSuggestion({}, functionize(value), root.metadata.category)
+      new OpenSuggestion({}, functionize(value), root.metadata)
     else
       d = {}
-      d[key.name] = new SuggestItem(functionize(value), key, root.metadata.category)
+      d[key.name] = new SuggestItem(functionize(value), key, root.metadata)
       new SimpleSuggestion(d)
 
   @primitiveAlternatives: (root, alternatives) ->

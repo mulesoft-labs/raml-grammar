@@ -130,23 +130,32 @@ describe 'suggest',  ->
   
 
 
-describe 'Category assignment', ->
-  it 'should be "actions" for get, post, put and delete', (done) ->
-    suggestion = suggestRAML ['/pet']
-    suggestion.should.have.property('suggestions')
-    suggestions = suggestion.suggestions
-    suggestions.should.have.property(action) for action in ['get', 'put', 'post', 
-      'delete']
-
-    for methodName in ['get', 'put', 'post', 'delete']
-      method = suggestions[methodName]
-      method.should.have.property.open
-      open = method.open
-      type.of(open).should.be.equal('function')
-      method.should.have.property('category')
-      category = method.category
-      category.should.be.equal('restful elements')
-      suggestion = suggestRAML ['/pet', 'get']
-    
-    done()
+describe 'Metadata', ->
+  describe 'Category assignment', ->
+    it 'should be "actions" for get, post, put and delete', (done) ->
+      suggestion = suggestRAML ['/pet']
+      suggestion.should.have.property('suggestions')
+      suggestions = suggestion.suggestions
+      suggestions.should.have.property(action) for action in ['get', 'put', 'post', 
+        'delete']
+  
+      for methodName in ['get', 'put', 'post', 'delete']
+        method = suggestions[methodName]
+        method.should.have.property.open
+        open = method.open
+        type.of(open).should.be.equal('function')
+        method.should.have.property('metadata')
+        category = method.metadata.category
+        category.should.be.equal('restful elements')
+        suggestion = suggestRAML ['/pet', 'get']
+      
+      done()
+  describe 'id', ->
+    it 'should be assigned correctly to the resource node', ->
+      suggestion = suggestRAML ['/pet']
+      suggestion.should.have.property 'metadata'
+      suggestion.metadata.should.be.ok
+      id = suggestion.metadata.id
+      id.should.be.ok
+      id.should.be.equal 'resource'
 

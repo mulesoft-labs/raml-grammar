@@ -210,9 +210,13 @@ use = new Tuple(new ConstantString('use'),  new Multiple(stringNode))
 
 # Resource
 
-resourceDefinition = new Alternatives(name, action, use, 
-  new Tuple(stringNode, new PostposedExecution(() -> resourceDefinition)))
-resource = new Tuple(stringNode,  new Multiple(resourceDefinition), {category: 'data'})
+postposedResource = new Tuple(stringNode, new PostposedExecution(() -> resourceDefinition),
+  {category: 'data', id: 'resource'})
+
+resourceDefinition = new Alternatives(name, action, use, postposedResource)
+
+resource = new Tuple(stringNode,  new Multiple(resourceDefinition),
+  {category: 'data', id: 'resource'})
 
 # Traits
 
