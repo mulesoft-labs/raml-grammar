@@ -10,17 +10,13 @@ class Tuple
     if not @key instanceof Node && typ3(@key) != 'string'
       throw "Key: '#{JSON.stringify(key)}' of type '#{typ3(key)}' must be an string"
 
-class Alternatives
-  constructor: (@alternatives...) ->
+class Alternatives then constructor: (@alternatives...) ->
 
-class PrimitiveAlternatives
-  constructor: (@alternatives...) ->
+class PrimitiveAlternatives then constructor: (@alternatives...) ->
 
-class Multiple
-  constructor: (@element) ->
+class Multiple then constructor: (@element) ->
 
-class PostposedExecution
-  constructor: (@f) ->
+class PostposedExecution then constructor: (@f) ->
 
 class Node
 
@@ -40,10 +36,9 @@ class XMLSchema extends Node
 
 class StringNode extends Node
 
-class ConstantString extends Node
-  constructor: (@value) ->
+class ConstantString extends Node then constructor: (@value) ->
 
-notImplemented = () -> throw new Error('Not implemented')
+notImplemented = -> throw new Error('Not implemented')
 
 class NodeMap
   @markdown: notImplemented
@@ -71,27 +66,27 @@ transversePrimitive = (nodeMap, node) ->
   if node == undefined
     throw new Error('Invalid root specified')
 
-  switch
-    when node instanceof Markdown
+  switch node.constructor
+    when Markdown
       nodeMap.markdown(node)
-    when node instanceof Include
+    when Include
       nodeMap.include(node)
-    when node instanceof JSONSchema
+    when JSONSchema
       nodeMap.jsonSchema(node)
-    when node instanceof Regex
+    when Regex
       nodeMap.regex(node)
-    when node instanceof Integer
+    when Integer
       nodeMap.integer(node)
-    when node instanceof Boolean
+    when Boolean
       nodeMap.boolean(node)
-    when node instanceof XMLSchema
+    when XMLSchema
       nodeMap.xmlSchema(node)
-    when node instanceof StringNode
+    when StringNode
       nodeMap.stringNode(node)
-    when node instanceof ConstantString
+    when ConstantString
       nodeMap.constantString(node)
     else
-      throw 'Invalid state: type ' + typ3(root) + ' object ' + root
+      throw "Invalid state: type '#{typ3(root)}' object '#{root}'"
 
 class TreeMap
   @alternatives: notImplemented
@@ -210,7 +205,7 @@ use = new Tuple(new ConstantString('use'),  new Multiple(stringNode))
 
 # Resource
 
-postposedResource = new Tuple(stringNode, new PostposedExecution(() -> resourceDefinition),
+postposedResource = new Tuple(stringNode, new PostposedExecution( -> resourceDefinition),
   {category: 'snippets', id: 'resource'})
 
 resourceDefinition = new Alternatives(name, action, use, postposedResource)

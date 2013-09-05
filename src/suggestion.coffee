@@ -11,13 +11,9 @@ class OpenSuggestion extends Suggestion
   constructor: (@suggestions, @open, @metadata) ->
     @isScalar = false
 
-class SuggestItem
-  constructor: (@open, @value, @metadata) ->
-    @isScalar = false
+class SuggestItem then constructor: (@open, @value, @metadata) -> @isScalar = false
 
-class StringWildcard
-  constructor: () ->
-    @isScalar = true
+class StringWildcard then constructor: () -> @isScalar = true
 
 stringWilcard = new StringWildcard
 
@@ -49,17 +45,18 @@ class TreeMapToSuggestionTree extends TreeMap
   @alternatives: (root, alternatives) ->
     d = {}
     for alternative in alternatives
-      switch
-        when alternative instanceof SimpleSuggestion
-          ((d[key] = value) for key, value of alternative.suggestions)
-        when alternative instanceof OpenSuggestion
-          ((d[key] = value) for key, value of alternative.suggestions)
-          open = alternative.open
-          cat = alternative.metadata
+      switch alternative.constructor
+        when SimpleSuggestion
+          {suggestions} = alternative
+          ((d[key] = value) for key, value of suggestions)
+        when OpenSuggestion
+          {suggestions} = alternative
+          ((d[key] = value) for key, value of suggestions)
+          {open, metadata} = alternative
         else
           throw new Error('Invalid type: ' + alternatives)
     if open?
-      new OpenSuggestion(d, (() -> open()), cat)
+      new OpenSuggestion(d, ( -> open()), metadata)
     else 
       new SimpleSuggestion(d)
 
@@ -67,14 +64,17 @@ class TreeMapToSuggestionTree extends TreeMap
     element
 
   @tuple: (root, key, value) -> 
-    if key == stringWilcard
-      new OpenSuggestion({}, functionize(value), root.metadata)
-    else if key == integerWildcard
-      new OpenSuggestion({}, functionize(value), root.metadata)
-    else
-      d = {}
-      d[key.name] = new SuggestItem(functionize(value), key, root.metadata)
-      new SimpleSuggestion(d)
+    {metadata} = root
+    
+    switch key.constructor
+      when StringWildcard
+        new OpenSuggestion({}, functionize(value), metadata)
+      when IntegerWildcard
+        new OpenSuggestion({}, functionize(value), metadata)
+      else
+        d = {}
+        d[key.name] = new SuggestItem(functionize(value), key, metadata)
+        new SimpleSuggestion(d)
 
   @primitiveAlternatives: (root, alternatives) ->
     alternatives
@@ -93,8 +93,11 @@ suggest = (root, index, path) ->
 
   if not key?
     return root
+
+  {suggestions} = root
+  currentSuggestion = suggestions[key]
   
-  val = if root.suggestions[key]? then root.suggestions[key].open() else root.open()
+  val = if currentSuggestion? then currentSuggestion.open() else root.open()
 
   suggest(val, index + 1, path)
 

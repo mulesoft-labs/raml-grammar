@@ -52,7 +52,7 @@ describe 'suggest',  ->
     suggestion = suggestRAML [] 
     suggestion.should.be.ok
     suggestion.should.have.property('suggestions')
-    suggestions = suggestion.suggestions
+    {suggestions} = suggestion
     suggestions.title.should.be.ok
     done()
   it 'should handle an string value nodes', (done) ->
@@ -66,7 +66,7 @@ describe 'suggest',  ->
   it 'should work with resources nodes', (done) ->
     suggestion = suggestRAML ['/hello', '/this', '/{is}', '/a', '/resource']
     suggestion.should.have.property('suggestions')
-    suggestions = suggestion.suggestions
+    {suggestions} = suggestion
     suggestions.should.include.keys('get', 'put', 'post', 'delete')
 
     get = suggestions.get
@@ -80,7 +80,7 @@ describe 'suggest',  ->
     suggestion = suggestRAML ['/tags', '/search', 'get', 'headers', 'asd']
     suggestion.should.be.ok
 
-    suggestions = suggestion.suggestions
+    {suggestions} = suggestion
 
     
     suggestions.should.include.keys('name', 'description', 
@@ -100,17 +100,17 @@ describe 'suggest',  ->
     suggestion = suggestRAML ['/hello', '/bye', 'get', 'responses']
     suggestion.should.be.ok
     suggestion.should.have.property('open')
-    suggestions = suggestion.suggestions
+    {suggestions} = suggestion
     (Object.keys suggestions).length.should.be.equal(0)
 
     suggestion = suggestRAML ['/hello', '/bye', 'get', 'responses', '200']
     suggestion.should.be.ok
     suggestion.should.not.have.property('open')
-    suggestions = suggestion.suggestions
+    {suggestions} = suggestion
     (Object.keys suggestions).should.include('body', 'description')
     done()
 
-  it 'should tell me whether a node is an scalar or not', () ->
+  it 'should tell me whether a node is an scalar or not', ->
     suggestion = suggestRAML ['/tags']
     suggestion.isScalar.should.be.equal false
 
@@ -124,7 +124,7 @@ describe 'suggest',  ->
     it 'should contain application/json and application/xml as a sublevel suggestions (RT-81)', (done) ->
       suggestion = suggestRAML ['/hello', 'get', 'body']
       suggestion.should.be.ok
-      suggestions = suggestion.suggestions
+      {suggestions} = suggestion
       (Object.keys suggestions).should.include 'application/json', 'application/xml'
       done()
   
@@ -145,7 +145,7 @@ describe 'Metadata', ->
         open = method.open
         type.of(open).should.be.equal('function')
         method.should.have.property('metadata')
-        category = method.metadata.category
+        {metadata: {category}} = method
         category.should.be.equal('restful elements')
         suggestion = suggestRAML ['/pet', 'get']
       
@@ -155,7 +155,7 @@ describe 'Metadata', ->
       suggestion = suggestRAML ['/pet']
       suggestion.should.have.property 'metadata'
       suggestion.metadata.should.be.ok
-      id = suggestion.metadata.id
+      {metadata: {id}} = suggestion
       id.should.be.ok
       id.should.be.equal 'resource'
 
