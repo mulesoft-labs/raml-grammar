@@ -1,5 +1,5 @@
 ;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
-var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, Markdown, Multiple, Node, NodeMap, PostposedExecution, PrimitiveAlternatives, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionName, baseUri, body, bodySchema, boolean, chapter, d3fault, defaultMediaTypes, description, documentation, enum2, example, excludes, formParameters, header, headers, include, integer, jsonSchema, markdown, maxLength, maximum, mimeType, mimeTypeParameters, minLength, minimum, model, name, notImplemented, parameterProperty, pattern, postposedResource, provides, queryParameterDefinition, queryParameters, regex, required, requires, resource, resourceDefinition, responseCode, responses, root, rootElement, schemas, stringNode, summary, title, trait, traitDefinition, traits, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, use, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7,
+var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, Markdown, Multiple, Node, NodeMap, PostposedExecution, PrimitiveAlternatives, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionName, baseUri, body, bodySchema, boolean, cache, chapter, d3fault, defaultMediaTypes, description, documentation, enum2, example, excludes, formParameters, header, headers, include, integer, jsonSchema, markdown, maxLength, maximum, mimeType, mimeTypeParameters, minLength, minimum, model, name, notImplemented, parameterProperty, pattern, postposedResource, provides, queryParameterDefinition, queryParameters, regex, required, requires, resource, resourceDefinition, responseCode, responses, root, rootElement, schemas, stringNode, summary, title, trait, traitDefinition, traits, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, use, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7,
   __slice = [].slice,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -228,27 +228,27 @@ transversePrimitive = function(nodeMap, node) {
   if (node === void 0) {
     throw new Error('Invalid root specified');
   }
-  switch (false) {
-    case !(node instanceof Markdown):
+  switch (node.constructor) {
+    case Markdown:
       return nodeMap.markdown(node);
-    case !(node instanceof Include):
+    case Include:
       return nodeMap.include(node);
-    case !(node instanceof JSONSchema):
+    case JSONSchema:
       return nodeMap.jsonSchema(node);
-    case !(node instanceof Regex):
+    case Regex:
       return nodeMap.regex(node);
-    case !(node instanceof Integer):
+    case Integer:
       return nodeMap.integer(node);
-    case !(node instanceof Boolean):
+    case Boolean:
       return nodeMap.boolean(node);
-    case !(node instanceof XMLSchema):
+    case XMLSchema:
       return nodeMap.xmlSchema(node);
-    case !(node instanceof StringNode):
+    case StringNode:
       return nodeMap.stringNode(node);
-    case !(node instanceof ConstantString):
+    case ConstantString:
       return nodeMap.constantString(node);
     default:
-      throw 'Invalid state: type ' + typ3(root) + ' object ' + root;
+      throw "Invalid state: type '" + (typ3(root)) + "' object '" + root + "'";
   }
 };
 
@@ -271,53 +271,75 @@ TreeMap = (function() {
 
 })();
 
+cache = [];
+
 transverse = function(treeMap, root) {
-  var a, alternative, alternatives, b, m, promise;
+  var a, alternative, alternatives, b, cachedResult, cachedRoot, cachedTree, elem, element, f, key, m, promise, result, value, _i, _len;
   if (root === void 0) {
     throw new Error('Invalid root specified');
   }
-  switch (false) {
-    case !(root instanceof Alternatives):
-      alternatives = (function() {
-        var _i, _len, _ref8, _results;
-        _ref8 = root.alternatives;
-        _results = [];
-        for (_i = 0, _len = _ref8.length; _i < _len; _i++) {
-          alternative = _ref8[_i];
-          _results.push(transverse(treeMap, alternative));
-        }
-        return _results;
-      })();
-      return treeMap.alternatives(root, alternatives);
-    case !(root instanceof Tuple):
-      a = transverse(treeMap, root.key);
-      b = transverse(treeMap, root.value);
-      return treeMap.tuple(root, a, b);
-    case !(root instanceof Multiple):
-      m = transverse(treeMap, root.element);
-      return treeMap.multiple(root, m);
-    case !(root instanceof PrimitiveAlternatives):
-      alternatives = (function() {
-        var _i, _len, _ref8, _results;
-        _ref8 = root.alternatives;
-        _results = [];
-        for (_i = 0, _len = _ref8.length; _i < _len; _i++) {
-          alternative = _ref8[_i];
-          _results.push(transverse(treeMap, alternative));
-        }
-        return _results;
-      })();
-      return treeMap.primitiveAlternatives(root, alternatives);
-    case !(root instanceof PostposedExecution):
-      promise = new PostposedExecution(function() {
-        return transverse(treeMap, root.f());
-      });
-      return treeMap.postponedExecution(root, promise);
-    case !(root instanceof Node):
-      return treeMap.node(root);
-    default:
-      throw new Error('Invalid state: type ' + typ3(root) + ' object ' + root);
+  for (_i = 0, _len = cache.length; _i < _len; _i++) {
+    elem = cache[_i];
+    cachedTree = elem.cachedTree, cachedRoot = elem.cachedRoot, cachedResult = elem.cachedResult;
+    if (cachedTree === treeMap && cachedRoot === root) {
+      return cachedResult;
+    }
   }
+  result = (function() {
+    switch (root.constructor) {
+      case Alternatives:
+        alternatives = root.alternatives;
+        alternatives = (function() {
+          var _j, _len1, _results;
+          _results = [];
+          for (_j = 0, _len1 = alternatives.length; _j < _len1; _j++) {
+            alternative = alternatives[_j];
+            _results.push(transverse(treeMap, alternative));
+          }
+          return _results;
+        })();
+        return treeMap.alternatives(root, alternatives);
+      case Tuple:
+        key = root.key, value = root.value;
+        a = transverse(treeMap, key);
+        b = transverse(treeMap, value);
+        return treeMap.tuple(root, a, b);
+      case Multiple:
+        element = root.element;
+        m = transverse(treeMap, element);
+        return treeMap.multiple(root, m);
+      case PrimitiveAlternatives:
+        alternatives = root.alternatives;
+        alternatives = (function() {
+          var _j, _len1, _results;
+          _results = [];
+          for (_j = 0, _len1 = root.length; _j < _len1; _j++) {
+            alternative = root[_j];
+            _results.push(transverse(treeMap, alternative));
+          }
+          return _results;
+        })();
+        return treeMap.primitiveAlternatives(root, alternatives);
+      case PostposedExecution:
+        f = root.f;
+        promise = new PostposedExecution(function() {
+          return transverse(treeMap, f());
+        });
+        return treeMap.postponedExecution(root, promise);
+      default:
+        if (root instanceof Node) {
+          return treeMap.node(root);
+        } else {
+          throw new Error("Invalid state: type '" + (typ3(root)) + "' object '" + root + "'");
+        }
+    }
+  })();
+  cache.push({
+    cachedTree: treeMap,
+    cachedRoot: root,
+    cachedResult: result
+  });
+  return result;
 };
 
 this.transverse = transverse;
@@ -597,26 +619,25 @@ TreeMapToSuggestionTree = (function(_super) {
   }
 
   TreeMapToSuggestionTree.alternatives = function(root, alternatives) {
-    var alternative, cat, d, key, open, value, _i, _len, _ref3, _ref4;
+    var alternative, d, key, metadata, open, suggestions, value, _i, _len;
     d = {};
     for (_i = 0, _len = alternatives.length; _i < _len; _i++) {
       alternative = alternatives[_i];
-      switch (false) {
-        case !(alternative instanceof SimpleSuggestion):
-          _ref3 = alternative.suggestions;
-          for (key in _ref3) {
-            value = _ref3[key];
+      switch (alternative.constructor) {
+        case SimpleSuggestion:
+          suggestions = alternative.suggestions;
+          for (key in suggestions) {
+            value = suggestions[key];
             d[key] = value;
           }
           break;
-        case !(alternative instanceof OpenSuggestion):
-          _ref4 = alternative.suggestions;
-          for (key in _ref4) {
-            value = _ref4[key];
+        case OpenSuggestion:
+          suggestions = alternative.suggestions;
+          for (key in suggestions) {
+            value = suggestions[key];
             d[key] = value;
           }
-          open = alternative.open;
-          cat = alternative.metadata;
+          open = alternative.open, metadata = alternative.metadata;
           break;
         default:
           throw new Error('Invalid type: ' + alternatives);
@@ -625,7 +646,7 @@ TreeMapToSuggestionTree = (function(_super) {
     if (open != null) {
       return new OpenSuggestion(d, (function() {
         return open();
-      }), cat);
+      }), metadata);
     } else {
       return new SimpleSuggestion(d);
     }
@@ -636,15 +657,17 @@ TreeMapToSuggestionTree = (function(_super) {
   };
 
   TreeMapToSuggestionTree.tuple = function(root, key, value) {
-    var d;
-    if (key === stringWilcard) {
-      return new OpenSuggestion({}, functionize(value), root.metadata);
-    } else if (key === integerWildcard) {
-      return new OpenSuggestion({}, functionize(value), root.metadata);
-    } else {
-      d = {};
-      d[key.name] = new SuggestItem(functionize(value), key, root.metadata);
-      return new SimpleSuggestion(d);
+    var d, metadata;
+    metadata = root.metadata;
+    switch (key.constructor) {
+      case StringWildcard:
+        return new OpenSuggestion({}, functionize(value), metadata);
+      case IntegerWildcard:
+        return new OpenSuggestion({}, functionize(value), metadata);
+      default:
+        d = {};
+        d[key.name] = new SuggestItem(functionize(value), key, metadata);
+        return new SimpleSuggestion(d);
     }
   };
 
@@ -667,12 +690,14 @@ TreeMapToSuggestionTree = (function(_super) {
 suggestionTree = transverse(TreeMapToSuggestionTree, root);
 
 suggest = function(root, index, path) {
-  var key, val;
+  var currentSuggestion, key, suggestions, val;
   key = path[index];
   if (key == null) {
     return root;
   }
-  val = root.suggestions[key] != null ? root.suggestions[key].open() : root.open();
+  suggestions = root.suggestions;
+  currentSuggestion = suggestions[key];
+  val = currentSuggestion != null ? currentSuggestion.open() : root.open();
   return suggest(val, index + 1, path);
 };
 

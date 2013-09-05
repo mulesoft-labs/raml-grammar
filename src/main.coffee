@@ -96,32 +96,53 @@ class TreeMap
   @postponedExecution: notImplemented
   @nodeMap: notImplemented
 
+cache = []
+
 transverse = (treeMap, root) ->
 
   if root == undefined
     throw new Error('Invalid root specified')
 
-  switch
-    when root instanceof Alternatives
-      alternatives = (transverse(treeMap, alternative) for alternative in root.alternatives)
+  for elem in cache
+    {cachedTree, cachedRoot, cachedResult} = elem
+    if cachedTree is treeMap and cachedRoot is root
+      return cachedResult
+
+  result = switch root.constructor
+    when Alternatives
+      {alternatives} = root
+      alternatives = (transverse(treeMap, alternative) for alternative in alternatives)
       treeMap.alternatives(root, alternatives)
-    when root instanceof Tuple
-      a = transverse(treeMap, root.key)
-      b = transverse(treeMap, root.value)
+    when Tuple
+      {key, value} = root
+      a = transverse(treeMap, key)
+      b = transverse(treeMap, value)
       treeMap.tuple(root, a, b)
-    when root instanceof Multiple
-      m = transverse(treeMap, root.element)
+    when Multiple
+      {element} = root
+      m = transverse(treeMap, element)
       treeMap.multiple(root, m)
-    when root instanceof PrimitiveAlternatives
-      alternatives = (transverse(treeMap, alternative) for alternative in root.alternatives)
+    when PrimitiveAlternatives
+      {alternatives} = root
+      alternatives = (transverse(treeMap, alternative) for alternative in root)
       treeMap.primitiveAlternatives(root, alternatives)
-    when root instanceof PostposedExecution
-      promise = new PostposedExecution(() -> transverse(treeMap, root.f()))
+    when PostposedExecution
+      {f} = root
+      promise = new PostposedExecution( -> transverse(treeMap, f()))
       treeMap.postponedExecution(root, promise)
-    when root instanceof Node
-      treeMap.node(root)
     else
-      throw new Error('Invalid state: type ' + typ3(root) + ' object ' + root)
+      if root instanceof Node
+        treeMap.node(root)
+      else
+        throw new Error("Invalid state: type '#{typ3(root)}' object '#{root}'")
+
+  cache.push(
+    cachedTree: treeMap
+    cachedRoot: root
+    cachedResult: result
+  )
+
+  return result
 
 @transverse = transverse
 
