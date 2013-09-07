@@ -302,5 +302,35 @@ describe '0.2', ->
       suggestion = suggestRAML ['/hello/bye', 'is']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
+    
+    it 'should offer "type" keyword as part of the suggestions', ->
+      suggestion = suggestRAML ['/hello']
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'type'
+      
+      suggestion = suggestRAML ['/hello', '/bye']
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'type'
+      
+      suggestion = suggestRAML ['/hello/bye']
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'type'
+      
+
+    it 'should display "type" suggestion as being scalar (in order to indent it on the same line)', ->
+      suggestion = suggestRAML ['/hello', 'type']
+      suggestion.should.be.ok
+      suggestion.isScalar.should.be.true
+      
+      suggestion = suggestRAML ['/hello', '/bye', 'type']
+      suggestion.should.be.ok
+      suggestion.isScalar.should.be.true
+      
+      suggestion = suggestRAML ['/hello/bye', 'type']
+      suggestion.should.be.ok
+      suggestion.isScalar.should.be.true
+
+    
+
 
 
