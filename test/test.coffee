@@ -85,7 +85,7 @@ describe 'suggest',  ->
     
     suggestions.should.include.keys('name', 'description', 
       'type', 'enum', 'pattern', 'minLength', 'maxLength', 'maximum', 'minimum', 'required',
-      'default', 'requires', 'excludes', 'example')
+      'default', 'example')
 
     done()
 
@@ -121,7 +121,7 @@ describe 'suggest',  ->
     suggestion.isScalar.should.be.equal true
 
   describe 'body', ->
-    it 'should contain application/json and application/xml as a sublevel suggestions (RT-81)', (done) ->
+    it 'should contain application/json and application/xml as sublevel suggestions (RT-81)', (done) ->
       suggestion = suggestRAML ['/hello', 'get', 'body']
       suggestion.should.be.ok
       {suggestions} = suggestion
@@ -158,4 +158,91 @@ describe 'Metadata', ->
       {metadata: {id}} = suggestion
       id.should.be.ok
       id.should.be.equal 'resource'
+
+describe 'cache', ->
+  # TODO Add tests here
+
+describe '0.2', ->
+  describe 'Traits', ->
+    it 'should support traits keyword', ->
+      suggestion = suggestRAML ['traits']
+      suggestion.should.be.ok
+      suggestion.should.have.property('open')
+      {suggestions} = suggestion
+      (Object.keys suggestions).length.should.be.equal(0)
+
+    it 'should support a particular trait definition', ->
+      suggestion = suggestRAML ['traits', '- traitA']
+      suggestion.should.be.ok
+      suggestion.should.not.have.property('open')
+      
+    it 'should include the name property', ->
+      suggestion = suggestRAML ['traits', '- traitA']
+      {suggestions} = suggestion
+      (Object.keys suggestions).should.include 'name'
+
+    it 'should contain all the properties found in methods', ->
+      suggestion = suggestRAML ['traits', '- traitA']
+      {suggestions} = suggestion
+      {suggestions: getMethodSuggestions} = suggestRAML ['/hello', 'get']
+      suggestions.should.include.keys (Object.keys getMethodSuggestions)
+    
+    it 'should support nesting inside properties', ->
+      suggestion = suggestRAML ['traits', 'traitA', 'responses']
+      suggestion.should.be.ok
+      suggestion.should.have.property 'open'
+      {suggestions} = suggestion
+      (Object.keys suggestions).length.should.be.equal(0)
+
+      suggestion = suggestRAML ['traits', 'traitA', 'responses', '200']
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'description'
+
+    it 'should not offer "provides" or "requires" keywords', ->
+      suggestion = suggestRAML ['traits', '- traitA']
+      {suggestions} = suggestion
+      {suggestions: getMethodSuggestions} = suggestRAML ['/hello', 'get']
+      suggestions.should.not.include.keys 'provides', 'requires'
+
+    describe 'Resources', ->
+      it 'should offer "is" keyword as part of the suggestions', ->
+        suggestion = suggestRAML ['/hello']
+        {suggestions} = suggestion
+        suggestions.should.include.keys 'is'
+        
+        suggestion = suggestRAML ['/hello', '/bye']
+        {suggestions} = suggestion
+        suggestions.should.include.keys 'is'
+        
+        suggestion = suggestRAML ['/hello/bye']
+        {suggestions} = suggestion
+        suggestions.should.include.keys 'is'
+        
+
+      it 'should not offer the "use" keyword as part of the suggestions', ->
+        suggestion = suggestRAML ['/hello']
+        {suggestions} = suggestion
+        suggestions.should.not.include.keys 'use'
+        
+        suggestion = suggestRAML ['/hello', '/bye']
+        {suggestions} = suggestion
+        suggestions.should.not.include.keys 'use'
+        
+        suggestion = suggestRAML ['/hello/bye']
+        {suggestions} = suggestion
+        suggestions.should.not.include.keys 'use'
+
+      it 'should display "is" suggestion as being scalar (in order to indent it on the same line)', ->
+        suggestion = suggestRAML ['/hello', 'is']
+        suggestion.should.be.ok
+        suggestion.isScalar.should.be.true
+        
+        suggestion = suggestRAML ['/hello', '/bye', 'is']
+        suggestion.should.be.ok
+        suggestion.isScalar.should.be.true
+        
+        suggestion = suggestRAML ['/hello/bye', 'is']
+        suggestion.should.be.ok
+        suggestion.isScalar.should.be.true
+
 

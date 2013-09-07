@@ -13,20 +13,18 @@ class OpenSuggestion extends Suggestion
 
 class SuggestItem then constructor: (@open, @value, @metadata) -> @isScalar = false
 
-class StringWildcard then constructor: () -> @isScalar = true
+class SuggestionNode then constructor: (@name, @isScalar=true) ->
+
+class StringWildcard extends SuggestionNode then constructor: -> @isScalar = true
 
 stringWilcard = new StringWildcard
 
-class IntegerWildcard
-  constructor: () ->
-    @isScalar = true
+class IntegerWildcard extends SuggestionNode then constructor: -> @isScalar = true
 
 integerWildcard = new IntegerWildcard
 
 class SuggestionNodeMap extends NodeMap
-  name = (node) -> 
-    isScalar: true 
-    name: node.constructor.name
+  name = (node) -> new SuggestionNode(node.constructor.name)
   @markdown: name
   @include: name
   @jsonSchema: name
@@ -35,9 +33,8 @@ class SuggestionNodeMap extends NodeMap
   @boolean: name
   @xmlSchema: name
   @stringNode: () -> stringWilcard
-  @constantString: (root) ->
-    isScalar: true
-    name: root.value
+  @listNode: () -> stringWilcard
+  @constantString: (root) -> new SuggestionNode(root.value)
 
 functionize = (value) -> if type(value) == 'function' then value else () -> value
 
@@ -53,8 +50,17 @@ class TreeMapToSuggestionTree extends TreeMap
           {suggestions} = alternative
           ((d[key] = value) for key, value of suggestions)
           {open, metadata} = alternative
+        when SuggestionNode
+          # TODO Nothing interesting to do here
+          undefined
+        when StringWildcard
+          # TODO Nothing interesting to do here
+          undefined
+        when IntegerWildcard
+          # TODO Nothing interesting to do here
+          undefined
         else
-          throw new Error('Invalid type: ' + alternatives)
+          throw new Error("Invalid type: #{alternative} of type #{alternative.constructor}")
     if open?
       new OpenSuggestion(d, ( -> open()), metadata)
     else 
@@ -75,9 +81,6 @@ class TreeMapToSuggestionTree extends TreeMap
         d = {}
         d[key.name] = new SuggestItem(functionize(value), key, metadata)
         new SimpleSuggestion(d)
-
-  @primitiveAlternatives: (root, alternatives) ->
-    alternatives
 
   @postponedExecution: (root, execution) ->
     execution.f

@@ -1,5 +1,5 @@
-;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
-var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, Markdown, Multiple, Node, NodeMap, PostposedExecution, PrimitiveAlternatives, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionName, baseUri, body, bodySchema, boolean, cache, chapter, d3fault, defaultMediaTypes, description, documentation, enum2, example, excludes, formParameters, header, headers, include, integer, jsonSchema, markdown, maxLength, maximum, mimeType, mimeTypeParameters, minLength, minimum, model, name, notImplemented, parameterProperty, pattern, postposedResource, provides, queryParameterDefinition, queryParameters, regex, required, requires, resource, resourceDefinition, responseCode, responses, root, rootElement, schemas, stringNode, summary, title, trait, traitDefinition, traits, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, use, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7,
+;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, ListNode, Markdown, Multiple, Node, NodeMap, PostposedExecution, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionName, baseUri, body, bodySchema, boolean, cache, chapter, d3fault, defaultMediaTypes, description, documentation, enum2, example, formParameters, header, headers, include, integer, isTrait, jsonSchema, listNode, markdown, maxLength, maximum, mimeType, mimeTypeParameters, minLength, minimum, model, name, notImplemented, parameterProperty, pattern, postposedResource, queryParameterDefinition, queryParameters, regex, required, resource, resourceDefinition, responseCode, responses, root, rootElement, schemas, stringNode, summary, title, trait, traitDefinition, traits, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
   __slice = [].slice,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -33,17 +33,6 @@ Alternatives = (function() {
   }
 
   return Alternatives;
-
-})();
-
-PrimitiveAlternatives = (function() {
-  function PrimitiveAlternatives() {
-    var alternatives;
-    alternatives = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    this.alternatives = alternatives;
-  }
-
-  return PrimitiveAlternatives;
 
 })();
 
@@ -168,6 +157,18 @@ StringNode = (function(_super) {
 
 })(Node);
 
+ListNode = (function(_super) {
+  __extends(ListNode, _super);
+
+  function ListNode() {
+    _ref8 = ListNode.__super__.constructor.apply(this, arguments);
+    return _ref8;
+  }
+
+  return ListNode;
+
+})(Node);
+
 ConstantString = (function(_super) {
   __extends(ConstantString, _super);
 
@@ -202,6 +203,8 @@ NodeMap = (function() {
 
   NodeMap.stringNode = notImplemented;
 
+  NodeMap.listNode = notImplemented;
+
   NodeMap.constantString = notImplemented;
 
   return NodeMap;
@@ -224,6 +227,8 @@ xmlSchema = new XMLSchema();
 
 stringNode = new StringNode();
 
+listNode = new ListNode();
+
 transversePrimitive = function(nodeMap, node) {
   if (node === void 0) {
     throw new Error('Invalid root specified');
@@ -245,6 +250,8 @@ transversePrimitive = function(nodeMap, node) {
       return nodeMap.xmlSchema(node);
     case StringNode:
       return nodeMap.stringNode(node);
+    case ListNode:
+      return nodeMap.listNode(node);
     case ConstantString:
       return nodeMap.constantString(node);
     default:
@@ -260,8 +267,6 @@ TreeMap = (function() {
   TreeMap.tuple = notImplemented;
 
   TreeMap.multiple = notImplemented;
-
-  TreeMap.primitiveAlternatives = notImplemented;
 
   TreeMap.postponedExecution = notImplemented;
 
@@ -308,18 +313,6 @@ transverse = function(treeMap, root) {
         element = root.element;
         m = transverse(treeMap, element);
         return treeMap.multiple(root, m);
-      case PrimitiveAlternatives:
-        alternatives = root.alternatives;
-        alternatives = (function() {
-          var _j, _len1, _results;
-          _results = [];
-          for (_j = 0, _len1 = root.length; _j < _len1; _j++) {
-            alternative = root[_j];
-            _results.push(transverse(treeMap, alternative));
-          }
-          return _results;
-        })();
-        return treeMap.primitiveAlternatives(root, alternatives);
       case PostposedExecution:
         f = root.f;
         promise = new PostposedExecution(function() {
@@ -358,7 +351,7 @@ name = new Tuple(new ConstantString('name'), stringNode);
 
 description = new Tuple(new ConstantString('description'), stringNode);
 
-type = new Tuple(new ConstantString('type'), new PrimitiveAlternatives(new ConstantString('string'), new ConstantString('number'), new ConstantString('integer'), new ConstantString('date')));
+type = new Tuple(new ConstantString('type'), new Alternatives(new ConstantString('string'), new ConstantString('number'), new ConstantString('integer'), new ConstantString('date')));
 
 enum2 = new Tuple(new ConstantString('enum'), new Multiple(stringNode));
 
@@ -376,19 +369,13 @@ required = new Tuple(new ConstantString('required'), boolean);
 
 d3fault = new Tuple(new ConstantString('default'), stringNode);
 
-requires = new Tuple(new ConstantString('requires'), new Multiple(stringNode));
-
-provides = new Tuple(new ConstantString('provides'), new Multiple(stringNode));
-
-excludes = new Tuple(new ConstantString('excludes'), new Multiple(stringNode));
-
-parameterProperty = new Alternatives(name, description, type, enum2, pattern, minLength, maxLength, maximum, minimum, required, d3fault, requires, excludes);
+parameterProperty = new Alternatives(name, description, type, enum2, pattern, minLength, maxLength, maximum, minimum, required, d3fault);
 
 uriParameter = new Tuple(stringNode, new Multiple(parameterProperty));
 
 uriParameters = new Tuple(new ConstantString('uriParameters'), new Multiple(uriParameter));
 
-defaultMediaTypes = new Tuple(new ConstantString('defaultMediaTypes'), new PrimitiveAlternatives(stringNode, new Multiple(stringNode)));
+defaultMediaTypes = new Tuple(new ConstantString('defaultMediaTypes'), new Alternatives(stringNode, new Multiple(stringNode)));
 
 chapter = new Alternatives(new Tuple(new ConstantString('title'), stringNode), new Tuple(new ConstantString('content'), stringNode));
 
@@ -408,7 +395,7 @@ queryParameters = new Tuple(new ConstantString('queryParameters'), new Multiple(
 
 formParameters = new Tuple(new ConstantString('formParameters'), new Multiple(new Alternatives(parameterProperty, example)));
 
-bodySchema = new Tuple(new ConstantString('schema'), new PrimitiveAlternatives(xmlSchema, jsonSchema));
+bodySchema = new Tuple(new ConstantString('schema'), new Alternatives(xmlSchema, jsonSchema));
 
 mimeTypeParameters = new Multiple(new Alternatives(bodySchema, example));
 
@@ -427,11 +414,11 @@ action = (function(func, args, ctor) {
   var child = new ctor, result = func.apply(child, args);
   return Object(result) === result ? result : child;
 })(Alternatives, (function() {
-  var _i, _len, _ref8, _results;
-  _ref8 = [new ConstantString('get'), new ConstantString('post'), new ConstantString('put'), new ConstantString('delete'), new ConstantString('head'), new ConstantString('path'), new ConstantString('options')];
+  var _i, _len, _ref9, _results;
+  _ref9 = [new ConstantString('get'), new ConstantString('post'), new ConstantString('put'), new ConstantString('delete'), new ConstantString('head'), new ConstantString('path'), new ConstantString('options')];
   _results = [];
-  for (_i = 0, _len = _ref8.length; _i < _len; _i++) {
-    actionName = _ref8[_i];
+  for (_i = 0, _len = _ref9.length; _i < _len; _i++) {
+    actionName = _ref9[_i];
     _results.push(new Tuple(actionName, new Multiple(actionDefinition), {
       category: 'restful elements'
     }));
@@ -439,7 +426,7 @@ action = (function(func, args, ctor) {
   return _results;
 })(), function(){});
 
-use = new Tuple(new ConstantString('use'), new Multiple(stringNode));
+isTrait = new Tuple(new ConstantString('is'), new Multiple(listNode));
 
 postposedResource = new Tuple(stringNode, new PostposedExecution(function() {
   return resourceDefinition;
@@ -448,14 +435,14 @@ postposedResource = new Tuple(stringNode, new PostposedExecution(function() {
   id: 'resource'
 });
 
-resourceDefinition = new Alternatives(name, action, use, postposedResource);
+resourceDefinition = new Alternatives(name, action, isTrait, postposedResource);
 
 resource = new Tuple(stringNode, new Multiple(resourceDefinition), {
   category: 'snippets',
   id: 'resource'
 });
 
-traitDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, provides, requires)));
+traitDefinition = new Tuple(stringNode, new Multiple(new Alternatives(name, summary, description, headers, queryParameters, body, responses)));
 
 trait = new Tuple(new ConstantString('traits'), traitDefinition);
 
@@ -477,7 +464,7 @@ this.integer = integer;
 
 
 },{"./utils.coffee":3}],2:[function(require,module,exports){
-var IntegerWildcard, NodeMap, OpenSuggestion, SimpleSuggestion, StringWildcard, SuggestItem, Suggestion, SuggestionNodeMap, TreeMap, TreeMapToSuggestionTree, functionize, integer, integerWildcard, root, stringWilcard, suggest, suggestRAML, suggestionTree, transverse, transversePrimitive, type, _ref, _ref1, _ref2,
+var IntegerWildcard, NodeMap, OpenSuggestion, SimpleSuggestion, StringWildcard, SuggestItem, Suggestion, SuggestionNode, SuggestionNodeMap, TreeMap, TreeMapToSuggestionTree, functionize, integer, integerWildcard, root, stringWilcard, suggest, suggestRAML, suggestionTree, transverse, transversePrimitive, type, _ref, _ref1, _ref2,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -530,25 +517,39 @@ SuggestItem = (function() {
 
 })();
 
-StringWildcard = (function() {
+SuggestionNode = (function() {
+  function SuggestionNode(name, isScalar) {
+    this.name = name;
+    this.isScalar = isScalar != null ? isScalar : true;
+  }
+
+  return SuggestionNode;
+
+})();
+
+StringWildcard = (function(_super) {
+  __extends(StringWildcard, _super);
+
   function StringWildcard() {
     this.isScalar = true;
   }
 
   return StringWildcard;
 
-})();
+})(SuggestionNode);
 
 stringWilcard = new StringWildcard;
 
-IntegerWildcard = (function() {
+IntegerWildcard = (function(_super) {
+  __extends(IntegerWildcard, _super);
+
   function IntegerWildcard() {
     this.isScalar = true;
   }
 
   return IntegerWildcard;
 
-})();
+})(SuggestionNode);
 
 integerWildcard = new IntegerWildcard;
 
@@ -563,10 +564,7 @@ SuggestionNodeMap = (function(_super) {
   }
 
   name = function(node) {
-    return {
-      isScalar: true,
-      name: node.constructor.name
-    };
+    return new SuggestionNode(node.constructor.name);
   };
 
   SuggestionNodeMap.markdown = name;
@@ -589,11 +587,12 @@ SuggestionNodeMap = (function(_super) {
     return stringWilcard;
   };
 
+  SuggestionNodeMap.listNode = function() {
+    return stringWilcard;
+  };
+
   SuggestionNodeMap.constantString = function(root) {
-    return {
-      isScalar: true,
-      name: root.value
-    };
+    return new SuggestionNode(root.value);
   };
 
   return SuggestionNodeMap;
@@ -639,8 +638,17 @@ TreeMapToSuggestionTree = (function(_super) {
           }
           open = alternative.open, metadata = alternative.metadata;
           break;
+        case SuggestionNode:
+          void 0;
+          break;
+        case StringWildcard:
+          void 0;
+          break;
+        case IntegerWildcard:
+          void 0;
+          break;
         default:
-          throw new Error('Invalid type: ' + alternatives);
+          throw new Error("Invalid type: " + alternative + " of type " + alternative.constructor);
       }
     }
     if (open != null) {
@@ -669,10 +677,6 @@ TreeMapToSuggestionTree = (function(_super) {
         d[key.name] = new SuggestItem(functionize(value), key, metadata);
         return new SimpleSuggestion(d);
     }
-  };
-
-  TreeMapToSuggestionTree.primitiveAlternatives = function(root, alternatives) {
-    return alternatives;
   };
 
   TreeMapToSuggestionTree.postponedExecution = function(root, execution) {
