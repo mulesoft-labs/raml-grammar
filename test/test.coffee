@@ -255,6 +255,13 @@ describe '0.2', ->
       suggestion = suggestRAML ['resourceTypes', '- collection', 'type', 'hello']
       suggestion.constructor.name.should.be.equal('InvalidState')
 
+  describe 'Responses', ->
+    it 'should support arrays as keys', ->
+      arraysAsKeysSuggestion = suggestRAML ['/foo', 'get', 'responses', '[200, 210]']
+      suggestion = suggestRAML ['/foo', 'get', 'responses', '200']
+
+      arraysAsKeysSuggestion.suggestions.should.include.keys (Object.keys suggestion.suggestions)
+    
   describe 'Resources', ->
     it 'should offer "is" keyword as part of the suggestions', ->
       suggestion = suggestRAML ['/hello']
