@@ -30,12 +30,6 @@ class TreeMapToString extends TreeMap
     @i = @i - 1
     res
   
-  @primitiveAlternatives: (root, alternatives) ->
-    @i = @i + 1
-    res =  '(' + @getSpaces() + alternatives.join(' | ') + ')'
-    i = @i - 1
-    res
-  
   @postponedExecution: (root, promise) ->
     promise
   
@@ -43,7 +37,7 @@ class TreeMapToString extends TreeMap
     root.constructor.name
 
 describe 'Tree Mapping', ->
-  it 'should be able be used while transversing the tree', (done) ->
+  it 'should be able to be used while transversing the tree', (done) ->
     mappedTree = transverse(TreeMapToString, root)
     done()
 
@@ -329,8 +323,61 @@ describe '0.2', ->
       suggestion = suggestRAML ['/hello/bye', 'type']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
-
     
+    it 'should allow to use "securedBy" to specify a securing policy for all the actions', ->
+      suggestion = suggestRAML ['/hello', 'securedBy']
+      suggestion.should.be.ok
+      suggestion.isScalar.should.be.true
+      
+      suggestion = suggestRAML ['/hello', '/bye', 'securedBy']
+      suggestion.should.be.ok
+      suggestion.isScalar.should.be.true
+      
+      suggestion = suggestRAML ['/hello/bye', 'securedBy']
+      suggestion.should.be.ok
+      suggestion.isScalar.should.be.true
 
+  describe 'Actions', ->
+    it 'should allow to use "securedBy" to specify a securing policy', ->
+      suggestion = suggestRAML ['/hello', 'get', 'securedBy']
+      suggestion.should.be.ok
+      suggestion.constructor.name.should.not.be.equal('InvalidState')
+
+  describe 'Security Schemes', ->
+    it 'support "securitySchemes" keyword at the root level', ->
+      suggestion = suggestRAML ['securitySchemes']
+      suggestion.should.be.ok
+      suggestion.constructor.name.should.not.be.equal('InvalidState')
+      suggestion.suggestions.should.not.include.key 'get'
+    
+    it 'should include the "description" keyword', ->
+      suggestion = suggestRAML ['securitySchemes', '- oauth_2_0']
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'description'
+    
+    it 'should support "type" keyword', ->
+      suggestion = suggestRAML ['securitySchemes', '- oauth_2_0']
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'type'
+      
+    it.skip 'should support "type" suggestions', ->
+      suggestion = suggestRAML ['securitySchemes', '- oauth_2_0', 'type']
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'OAuth 1.0', 'OAuth 2.0', 'Basic Authentication',
+        'Digest Authentication'
+      suggestion.should.have.property 'open'
+
+    it 'should support "settings" attribute', ->
+      suggestion = suggestRAML ['securitySchemes', '- oauth_2_0', 'settings']
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'requestTokenUri', 'authorizationUri', 'tokenCredentialsUri',
+        'accessTokenUri', 'authorizationGrants', 'scopes'
+      suggestion.should.have.property 'open'
+    
+    it 'should support "securedBy" as a root element', ->
+      suggestion = suggestRAML ['securedBy']
+      suggestion.should.be.ok
+      suggestion.constructor.name.should.not.be.equal('InvalidState')
+      
 
 

@@ -209,10 +209,14 @@ responseCode = new Tuple(new Multiple(integer),
   new Multiple(new Alternatives(body, description)))
 responses = new Tuple(new ConstantString('responses'),  new Multiple(responseCode))
 
+# Secured by
+
+securedBy = new Tuple(new ConstantString('securedBy'), listNode)
+
 # Actions
 
 actionDefinition = new Alternatives(summary, description, headers, queryParameters, 
-  body, responses)
+  body, responses, securedBy)
 action = new Alternatives(((new Tuple(actionName, new Multiple(actionDefinition), {category: 'restful elements'})) for actionName in [new ConstantString('get'), new ConstantString('post'), new ConstantString('put'), new ConstantString('delete'), new ConstantString('head'), new ConstantString('path'), new ConstantString('options')])...)
 
 
@@ -229,7 +233,7 @@ type = new Tuple(new ConstantString('type'), stringNode)
 postposedResource = new Tuple(stringNode, new PostposedExecution( -> resourceDefinition),
   {category: 'snippets', id: 'resource'})
 
-resourceDefinition = new Alternatives(name, action, isTrait, type, postposedResource)
+resourceDefinition = new Alternatives(name, action, isTrait, type, postposedResource, securedBy)
 
 resource = new Tuple(stringNode,  new Multiple(resourceDefinition),
   {category: 'snippets', id: 'resource'})
@@ -237,19 +241,47 @@ resource = new Tuple(stringNode,  new Multiple(resourceDefinition),
 # Traits
 
 traitsDefinition = new Tuple(stringNode,  new Multiple(
-  new Alternatives(name, summary, description, headers, queryParameters, body, responses)))
+  new Alternatives(name, summary, description, headers, queryParameters, body, responses, securedBy)))
 traits = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition))
 
 # Resource Types
 
 resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(summary, description, name, action,
-  isTrait, type)))
+  isTrait, type, securedBy)))
 resourceTypes = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition)
+
+# Security Schemes
+securityType = new Tuple(new ConstantString('type'), new Alternatives(
+  new ConstantString('OAuth 1.0'), new ConstantString('OAuth 2.0'),
+  new ConstantString('Basic Authentication'), 
+  new ConstantString('Digest Authentication'), stringNode), {category: 'security'})
+describedBy = new Tuple(new ConstantString('describedBy'), 
+  new Alternatives(headers, queryParameters, responses), {category: 'security'})
+settings = new Tuple(new ConstantString('settings'), new Alternatives(
+
+  # OAuth 1.0
+  new Tuple(new ConstantString('requestTokenUri'), stringNode, {category: 'security', type: ['OAuth 1.0']}),
+  new Tuple(new ConstantString('authorizationUri'), stringNode, 
+    {category: 'security', type: ['OAuth 1.0', 'OAuth 2.0']}),
+  new Tuple(new ConstantString('tokenCredentialsUri'), stringNode, {category: 'security', type: ['OAuth 1.0']})
+  
+  # OAuth 2.0
+  new Tuple(new ConstantString('accessTokenUri'), stringNode, {category: 'security', type: ['OAuth 2.0']})
+  new Tuple(new ConstantString('authorizationGrants'), stringNode, {category: 'security', type: ['OAuth 2.0']})
+  new Tuple(new ConstantString('scopes'), stringNode, {category: 'security', type: ['OAuth 2.0']})
+
+  # Other
+  new Tuple(stringNode, stringNode, {category: 'security'})
+  
+  ))
+securitySchemesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(
+  description, securityType, settings, describedBy)))
+securitySchemes = new Tuple(new ConstantString('securitySchemes'), securitySchemesDefinition)
 
 # Root Element
 
 rootElement = new Alternatives(title, version, schemas, baseUri, uriParameters, 
-  defaultMediaTypes, documentation, resource, traits, resourceTypes)
+  defaultMediaTypes, documentation, resource, traits, resourceTypes, securitySchemes, securedBy)
 root = new Multiple(rootElement)
 
 @root = root
