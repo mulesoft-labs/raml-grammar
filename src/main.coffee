@@ -157,7 +157,7 @@ schemas = new Tuple(new ConstantString('schemas'), new Multiple(model))
 
 name = new Tuple(new ConstantString('name'), stringNode)
 description = new Tuple(new ConstantString('description'),  stringNode)
-type = new Tuple(new ConstantString('type'), new Alternatives(new ConstantString('string'), new ConstantString('number'), new ConstantString('integer'), new ConstantString('date') ))
+parameterType = new Tuple(new ConstantString('type'), new Alternatives(new ConstantString('string'), new ConstantString('number'), new ConstantString('integer'), new ConstantString('date') ))
 enum2 = new Tuple(new ConstantString('enum'), new Multiple(stringNode))
 pattern = new Tuple(new ConstantString('pattern'),  regex) 
 minLength = new Tuple(new ConstantString('minLength'),  integer) 
@@ -166,7 +166,7 @@ minimum = new Tuple(new ConstantString('minimum'),  integer)
 maximum = new Tuple(new ConstantString('maximum'),  integer) 
 required = new Tuple(new ConstantString('required'),  boolean) 
 d3fault = new Tuple(new ConstantString('default'),  stringNode) 
-parameterProperty = new Alternatives(name, description, type, enum2, pattern, minLength, 
+parameterProperty = new Alternatives(name, description, parameterType, enum2, pattern, minLength, 
   maxLength, maximum, minimum, required, d3fault)
 
 uriParameter = new Tuple(stringNode,  new Multiple(parameterProperty))
@@ -218,30 +218,39 @@ action = new Alternatives(((new Tuple(actionName, new Multiple(actionDefinition)
 
 # Is
 
-isTrait = new Tuple(new ConstantString('is'),  new Multiple(listNode))
+isTrait = new Tuple(new ConstantString('is'),  listNode)
+
+# Type
+
+type = new Tuple(new ConstantString('type'), stringNode)
 
 # Resource
 
 postposedResource = new Tuple(stringNode, new PostposedExecution( -> resourceDefinition),
   {category: 'snippets', id: 'resource'})
 
-resourceDefinition = new Alternatives(name, action, isTrait, postposedResource)
+resourceDefinition = new Alternatives(name, action, isTrait, type, postposedResource)
 
 resource = new Tuple(stringNode,  new Multiple(resourceDefinition),
   {category: 'snippets', id: 'resource'})
 
 # Traits
 
-traitDefinition = new Tuple(stringNode,  new Multiple(
+traitsDefinition = new Tuple(stringNode,  new Multiple(
   new Alternatives(name, summary, description, headers, queryParameters, body, responses)))
-trait = new Tuple(new ConstantString('traits'),  traitDefinition)
-traits = new Multiple(trait)
+traits = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition))
+
+# Resource Types
+
+resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(summary, description, name, action,
+  isTrait, type)))
+resourceTypes = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition)
 
 # Root Element
 
 rootElement = new Alternatives(title, version, schemas, baseUri, uriParameters, 
-  defaultMediaTypes, documentation, resource, traits)
-root = new Multiple(rootElement) 
+  defaultMediaTypes, documentation, resource, traits, resourceTypes)
+root = new Multiple(rootElement)
 
 @root = root
 @transversePrimitive = transversePrimitive

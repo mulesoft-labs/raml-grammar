@@ -159,6 +159,9 @@ describe 'Metadata', ->
       id.should.be.ok
       id.should.be.equal 'resource'
 
+describe 'InvalidState', ->
+  # TODO Add tests of InvalidState here
+
 describe 'cache', ->
   # TODO Add tests here
 
@@ -201,48 +204,96 @@ describe '0.2', ->
     it 'should not offer "provides" or "requires" keywords', ->
       suggestion = suggestRAML ['traits', '- traitA']
       {suggestions} = suggestion
-      {suggestions: getMethodSuggestions} = suggestRAML ['/hello', 'get']
       suggestions.should.not.include.keys 'provides', 'requires'
 
-    describe 'Resources', ->
-      it 'should offer "is" keyword as part of the suggestions', ->
-        suggestion = suggestRAML ['/hello']
-        {suggestions} = suggestion
-        suggestions.should.include.keys 'is'
-        
-        suggestion = suggestRAML ['/hello', '/bye']
-        {suggestions} = suggestion
-        suggestions.should.include.keys 'is'
-        
-        suggestion = suggestRAML ['/hello/bye']
-        {suggestions} = suggestion
-        suggestions.should.include.keys 'is'
-        
+  describe 'Resource Types', ->
+    it 'should support resourceTypes keyword', ->
+      suggestion = suggestRAML ['resourceTypes']
+      suggestion.should.be.ok
+      suggestion.should.have.property('open')
+      {suggestions} = suggestion
+      (Object.keys suggestions).length.should.be.equal(0)
+    
+    it 'should support a particular resourceType definition', ->
+      suggestion = suggestRAML ['resourceTypes', '- collection']
+      suggestion.should.be.ok
+      suggestion.should.not.have.property('open')
+    
+    it 'should include name, description and type properties', ->
+      suggestion = suggestRAML ['resourceTypes', '- collection']
+      {suggestions} = suggestion
+      (Object.keys suggestions).should.include 'name'
+      (Object.keys suggestions).should.include 'description'
+      (Object.keys suggestions).should.include 'type'
+    
+    it 'should contain all the properties found in a resource', ->
+      suggestion = suggestRAML ['resourceTypes', '- collection']
+      {suggestions} = suggestion
+      {suggestions: resourceSuggestions} = suggestRAML ['/hello']
+      suggestions.should.include.keys (Object.keys resourceSuggestions)
+    
+    it 'should support nesting inside properties', ->
+      suggestion = suggestRAML ['resourceTypes', '- collection', 'get']
+      suggestion.should.be.ok
+      suggestion.should.not.have.property 'open'
+      {suggestions} = suggestion
+      {suggestions: getMethodSuggestions} = suggestRAML ['/hello', 'get']
+      suggestions.should.include.keys (Object.keys getMethodSuggestions)
 
-      it 'should not offer the "use" keyword as part of the suggestions', ->
-        suggestion = suggestRAML ['/hello']
-        {suggestions} = suggestion
-        suggestions.should.not.include.keys 'use'
-        
-        suggestion = suggestRAML ['/hello', '/bye']
-        {suggestions} = suggestion
-        suggestions.should.not.include.keys 'use'
-        
-        suggestion = suggestRAML ['/hello/bye']
-        {suggestions} = suggestion
-        suggestions.should.not.include.keys 'use'
+      suggestion = suggestRAML ['resourceTypes', '- collection', 'get', 'responses', '200']
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'description'
 
-      it 'should display "is" suggestion as being scalar (in order to indent it on the same line)', ->
-        suggestion = suggestRAML ['/hello', 'is']
-        suggestion.should.be.ok
-        suggestion.isScalar.should.be.true
-        
-        suggestion = suggestRAML ['/hello', '/bye', 'is']
-        suggestion.should.be.ok
-        suggestion.isScalar.should.be.true
-        
-        suggestion = suggestRAML ['/hello/bye', 'is']
-        suggestion.should.be.ok
-        suggestion.isScalar.should.be.true
+    it 'should not allow nesting of resources', ->
+      suggestion = suggestRAML ['resourceTypes', '- collection', '/hello']
+      suggestion.constructor.name.should.be.equal('InvalidState')
+
+    it 'should allow using "type" property', ->
+      suggestion = suggestRAML ['resourceTypes', '- collection', 'type']
+      suggestion.constructor.name.should.not.be.equal('InvalidState')
+      
+      suggestion = suggestRAML ['resourceTypes', '- collection', 'type', 'hello']
+      suggestion.constructor.name.should.be.equal('InvalidState')
+
+  describe 'Resources', ->
+    it 'should offer "is" keyword as part of the suggestions', ->
+      suggestion = suggestRAML ['/hello']
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'is'
+      
+      suggestion = suggestRAML ['/hello', '/bye']
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'is'
+      
+      suggestion = suggestRAML ['/hello/bye']
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'is'
+      
+
+    it 'should not offer the "use" keyword as part of the suggestions', ->
+      suggestion = suggestRAML ['/hello']
+      {suggestions} = suggestion
+      suggestions.should.not.include.keys 'use'
+      
+      suggestion = suggestRAML ['/hello', '/bye']
+      {suggestions} = suggestion
+      suggestions.should.not.include.keys 'use'
+      
+      suggestion = suggestRAML ['/hello/bye']
+      {suggestions} = suggestion
+      suggestions.should.not.include.keys 'use'
+
+    it 'should display "is" suggestion as being scalar (in order to indent it on the same line)', ->
+      suggestion = suggestRAML ['/hello', 'is']
+      suggestion.should.be.ok
+      suggestion.isScalar.should.be.true
+      
+      suggestion = suggestRAML ['/hello', '/bye', 'is']
+      suggestion.should.be.ok
+      suggestion.isScalar.should.be.true
+      
+      suggestion = suggestRAML ['/hello/bye', 'is']
+      suggestion.should.be.ok
+      suggestion.isScalar.should.be.true
 
 

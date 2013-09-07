@@ -23,6 +23,12 @@ class IntegerWildcard extends SuggestionNode then constructor: -> @isScalar = tr
 
 integerWildcard = new IntegerWildcard
 
+class InvalidState
+  constructor: (@suggestions={}) ->
+  open: -> @
+
+invalidState = new InvalidState
+
 class SuggestionNodeMap extends NodeMap
   name = (node) -> new SuggestionNode(node.constructor.name)
   @markdown: name
@@ -98,9 +104,35 @@ suggest = (root, index, path) ->
     return root
 
   {suggestions} = root
-  currentSuggestion = suggestions[key]
+  if suggestions
+    currentSuggestion = suggestions[key]
+  else
+    currentSuggestion = undefined
   
-  val = if currentSuggestion? then currentSuggestion.open() else root.open()
+  val = if currentSuggestion
+    switch currentSuggestion.constructor
+      when OpenSuggestion
+        currentSuggestion
+      when SuggestItem
+        currentSuggestion
+      else
+        switch root.constructor
+          when OpenSuggestion
+            root
+          when SuggestItem
+            root
+          else
+            invalidState
+  else
+    switch root.constructor
+      when OpenSuggestion
+        root
+      when SuggestItem
+        root
+      else
+        invalidState
+
+  val = val.open()
 
   suggest(val, index + 1, path)
 

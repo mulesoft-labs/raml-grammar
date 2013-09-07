@@ -1,5 +1,5 @@
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, ListNode, Markdown, Multiple, Node, NodeMap, PostposedExecution, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionName, baseUri, body, bodySchema, boolean, cache, chapter, d3fault, defaultMediaTypes, description, documentation, enum2, example, formParameters, header, headers, include, integer, isTrait, jsonSchema, listNode, markdown, maxLength, maximum, mimeType, mimeTypeParameters, minLength, minimum, model, name, notImplemented, parameterProperty, pattern, postposedResource, queryParameterDefinition, queryParameters, regex, required, resource, resourceDefinition, responseCode, responses, root, rootElement, schemas, stringNode, summary, title, trait, traitDefinition, traits, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
+var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, ListNode, Markdown, Multiple, Node, NodeMap, PostposedExecution, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionName, baseUri, body, bodySchema, boolean, cache, chapter, d3fault, defaultMediaTypes, description, documentation, enum2, example, formParameters, header, headers, include, integer, isTrait, jsonSchema, listNode, markdown, maxLength, maximum, mimeType, mimeTypeParameters, minLength, minimum, model, name, notImplemented, parameterProperty, parameterType, pattern, postposedResource, queryParameterDefinition, queryParameters, regex, required, resource, resourceDefinition, resourceTypes, resourceTypesDefinition, responseCode, responses, root, rootElement, schemas, stringNode, summary, title, traits, traitsDefinition, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
   __slice = [].slice,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -351,7 +351,7 @@ name = new Tuple(new ConstantString('name'), stringNode);
 
 description = new Tuple(new ConstantString('description'), stringNode);
 
-type = new Tuple(new ConstantString('type'), new Alternatives(new ConstantString('string'), new ConstantString('number'), new ConstantString('integer'), new ConstantString('date')));
+parameterType = new Tuple(new ConstantString('type'), new Alternatives(new ConstantString('string'), new ConstantString('number'), new ConstantString('integer'), new ConstantString('date')));
 
 enum2 = new Tuple(new ConstantString('enum'), new Multiple(stringNode));
 
@@ -369,7 +369,7 @@ required = new Tuple(new ConstantString('required'), boolean);
 
 d3fault = new Tuple(new ConstantString('default'), stringNode);
 
-parameterProperty = new Alternatives(name, description, type, enum2, pattern, minLength, maxLength, maximum, minimum, required, d3fault);
+parameterProperty = new Alternatives(name, description, parameterType, enum2, pattern, minLength, maxLength, maximum, minimum, required, d3fault);
 
 uriParameter = new Tuple(stringNode, new Multiple(parameterProperty));
 
@@ -426,7 +426,9 @@ action = (function(func, args, ctor) {
   return _results;
 })(), function(){});
 
-isTrait = new Tuple(new ConstantString('is'), new Multiple(listNode));
+isTrait = new Tuple(new ConstantString('is'), listNode);
+
+type = new Tuple(new ConstantString('type'), stringNode);
 
 postposedResource = new Tuple(stringNode, new PostposedExecution(function() {
   return resourceDefinition;
@@ -435,20 +437,22 @@ postposedResource = new Tuple(stringNode, new PostposedExecution(function() {
   id: 'resource'
 });
 
-resourceDefinition = new Alternatives(name, action, isTrait, postposedResource);
+resourceDefinition = new Alternatives(name, action, isTrait, type, postposedResource);
 
 resource = new Tuple(stringNode, new Multiple(resourceDefinition), {
   category: 'snippets',
   id: 'resource'
 });
 
-traitDefinition = new Tuple(stringNode, new Multiple(new Alternatives(name, summary, description, headers, queryParameters, body, responses)));
+traitsDefinition = new Tuple(stringNode, new Multiple(new Alternatives(name, summary, description, headers, queryParameters, body, responses)));
 
-trait = new Tuple(new ConstantString('traits'), traitDefinition);
+traits = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition));
 
-traits = new Multiple(trait);
+resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(summary, description, name, action, isTrait, type)));
 
-rootElement = new Alternatives(title, version, schemas, baseUri, uriParameters, defaultMediaTypes, documentation, resource, traits);
+resourceTypes = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition);
+
+rootElement = new Alternatives(title, version, schemas, baseUri, uriParameters, defaultMediaTypes, documentation, resource, traits, resourceTypes);
 
 root = new Multiple(rootElement);
 
@@ -464,7 +468,7 @@ this.integer = integer;
 
 
 },{"./utils.coffee":3}],2:[function(require,module,exports){
-var IntegerWildcard, NodeMap, OpenSuggestion, SimpleSuggestion, StringWildcard, SuggestItem, Suggestion, SuggestionNode, SuggestionNodeMap, TreeMap, TreeMapToSuggestionTree, functionize, integer, integerWildcard, root, stringWilcard, suggest, suggestRAML, suggestionTree, transverse, transversePrimitive, type, _ref, _ref1, _ref2,
+var IntegerWildcard, InvalidState, NodeMap, OpenSuggestion, SimpleSuggestion, StringWildcard, SuggestItem, Suggestion, SuggestionNode, SuggestionNodeMap, TreeMap, TreeMapToSuggestionTree, functionize, integer, integerWildcard, invalidState, root, stringWilcard, suggest, suggestRAML, suggestionTree, transverse, transversePrimitive, type, _ref, _ref1, _ref2,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -552,6 +556,21 @@ IntegerWildcard = (function(_super) {
 })(SuggestionNode);
 
 integerWildcard = new IntegerWildcard;
+
+InvalidState = (function() {
+  function InvalidState(suggestions) {
+    this.suggestions = suggestions != null ? suggestions : {};
+  }
+
+  InvalidState.prototype.open = function() {
+    return this;
+  };
+
+  return InvalidState;
+
+})();
+
+invalidState = new InvalidState;
 
 SuggestionNodeMap = (function(_super) {
   var name;
@@ -700,8 +719,40 @@ suggest = function(root, index, path) {
     return root;
   }
   suggestions = root.suggestions;
-  currentSuggestion = suggestions[key];
-  val = currentSuggestion != null ? currentSuggestion.open() : root.open();
+  if (suggestions) {
+    currentSuggestion = suggestions[key];
+  } else {
+    currentSuggestion = void 0;
+  }
+  val = (function() {
+    if (currentSuggestion) {
+      switch (currentSuggestion.constructor) {
+        case OpenSuggestion:
+          return currentSuggestion;
+        case SuggestItem:
+          return currentSuggestion;
+        default:
+          switch (root.constructor) {
+            case OpenSuggestion:
+              return root;
+            case SuggestItem:
+              return root;
+            default:
+              return invalidState;
+          }
+      }
+    } else {
+      switch (root.constructor) {
+        case OpenSuggestion:
+          return root;
+        case SuggestItem:
+          return root;
+        default:
+          return invalidState;
+      }
+    }
+  })();
+  val = val.open();
   return suggest(val, index + 1, path);
 };
 
