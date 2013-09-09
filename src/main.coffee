@@ -157,7 +157,8 @@ schemas = new Tuple(new ConstantString('schemas'), new Multiple(model))
 
 name = new Tuple(new ConstantString('displayName'), stringNode)
 description = new Tuple(new ConstantString('description'),  stringNode)
-parameterType = new Tuple(new ConstantString('type'), new Alternatives(new ConstantString('string'), new ConstantString('number'), new ConstantString('integer'), new ConstantString('date') ))
+parameterType = new Tuple(new ConstantString('type'), new Alternatives(new ConstantString('string'), new ConstantString('number'), new ConstantString('integer'), new ConstantString('date'),
+  new ConstantString('boolean')))
 enum2 = new Tuple(new ConstantString('enum'), new Multiple(stringNode))
 pattern = new Tuple(new ConstantString('pattern'),  regex) 
 minLength = new Tuple(new ConstantString('minLength'),  integer) 
