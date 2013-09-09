@@ -155,7 +155,7 @@ schemas = new Tuple(new ConstantString('schemas'), new Multiple(model))
 
 # Parameter fields
 
-name = new Tuple(new ConstantString('name'), stringNode)
+name = new Tuple(new ConstantString('displayName'), stringNode)
 description = new Tuple(new ConstantString('description'),  stringNode)
 parameterType = new Tuple(new ConstantString('type'), new Alternatives(new ConstantString('string'), new ConstantString('number'), new ConstantString('integer'), new ConstantString('date') ))
 enum2 = new Tuple(new ConstantString('enum'), new Multiple(stringNode))

@@ -347,7 +347,7 @@ model = new Tuple(stringNode, jsonSchema);
 
 schemas = new Tuple(new ConstantString('schemas'), new Multiple(model));
 
-name = new Tuple(new ConstantString('name'), stringNode);
+name = new Tuple(new ConstantString('displayName'), stringNode);
 
 description = new Tuple(new ConstantString('description'), stringNode);
 
@@ -759,13 +759,11 @@ suggest = function(root, index, path) {
     if (currentSuggestion) {
       switch (currentSuggestion.constructor) {
         case OpenSuggestion:
-          return currentSuggestion;
         case SuggestItem:
           return currentSuggestion;
         default:
           switch (root.constructor) {
             case OpenSuggestion:
-              return root;
             case SuggestItem:
               return root;
             default:
@@ -775,7 +773,6 @@ suggest = function(root, index, path) {
     } else {
       switch (root.constructor) {
         case OpenSuggestion:
-          return root;
         case SuggestItem:
           return root;
         default:

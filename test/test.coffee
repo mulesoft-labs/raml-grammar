@@ -77,7 +77,7 @@ describe 'suggest',  ->
     {suggestions} = suggestion
 
     
-    suggestions.should.include.keys('name', 'description', 
+    suggestions.should.include.keys('displayName', 'description', 
       'type', 'enum', 'pattern', 'minLength', 'maxLength', 'maximum', 'minimum', 'required',
       'default', 'example')
 
@@ -111,7 +111,7 @@ describe 'suggest',  ->
     suggestion = suggestRAML ['title']
     suggestion.isScalar.should.be.equal true
 
-    suggestion = suggestRAML ['/tags', 'name']
+    suggestion = suggestRAML ['/tags', 'displayName']
     suggestion.isScalar.should.be.equal true
 
   describe 'body', ->
@@ -176,7 +176,7 @@ describe '0.2', ->
     it 'should include the name property', ->
       suggestion = suggestRAML ['traits', '- traitA']
       {suggestions} = suggestion
-      (Object.keys suggestions).should.include 'name'
+      (Object.keys suggestions).should.include 'displayName'
 
     it 'should contain all the properties found in methods', ->
       suggestion = suggestRAML ['traits', '- traitA']
@@ -213,10 +213,10 @@ describe '0.2', ->
       suggestion.should.be.ok
       suggestion.should.not.have.property('open')
     
-    it 'should include name, description and type properties', ->
+    it 'should include displayName, description and type properties', ->
       suggestion = suggestRAML ['resourceTypes', '- collection']
       {suggestions} = suggestion
-      (Object.keys suggestions).should.include 'name'
+      (Object.keys suggestions).should.include 'displayName'
       (Object.keys suggestions).should.include 'description'
       (Object.keys suggestions).should.include 'type'
     
