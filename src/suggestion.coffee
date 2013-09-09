@@ -35,14 +35,14 @@ class SuggestionNodeMap extends NodeMap
   @include: name
   @jsonSchema: name
   @regex: name
-  @integer: () -> integerWildcard
+  @integer: -> integerWildcard
   @boolean: name
   @xmlSchema: name
-  @stringNode: () -> stringWilcard
-  @listNode: () -> stringWilcard
+  @stringNode: -> stringWilcard
+  @listNode: -> stringWilcard
   @constantString: (root) -> new SuggestionNode(root.value)
 
-functionize = (value) -> if type(value) == 'function' then value else () -> value
+functionize = (value) -> if type(value) == 'function' then value else -> value
 
 class TreeMapToSuggestionTree extends TreeMap
   @alternatives: (root, alternatives) ->
@@ -56,13 +56,7 @@ class TreeMapToSuggestionTree extends TreeMap
           {suggestions} = alternative
           ((d[key] = value) for key, value of suggestions)
           {open, metadata} = alternative
-        when SuggestionNode
-          # TODO Nothing interesting to do here
-          undefined
-        when StringWildcard
-          # TODO Nothing interesting to do here
-          undefined
-        when IntegerWildcard
+        when SuggestionNode, StringWildcard, IntegerWildcard
           # TODO Nothing interesting to do here
           undefined
         else
@@ -79,9 +73,7 @@ class TreeMapToSuggestionTree extends TreeMap
     {metadata} = root
     
     switch key.constructor
-      when StringWildcard
-        new OpenSuggestion({}, functionize(value), metadata)
-      when IntegerWildcard
+      when StringWildcard, IntegerWildcard
         new OpenSuggestion({}, functionize(value), metadata)
       else
         d = {}
@@ -111,23 +103,17 @@ suggest = (root, index, path) ->
   
   val = if currentSuggestion
     switch currentSuggestion.constructor
-      when OpenSuggestion
-        currentSuggestion
-      when SuggestItem
+      when OpenSuggestion, SuggestItem
         currentSuggestion
       else
         switch root.constructor
-          when OpenSuggestion
-            root
-          when SuggestItem
+          when OpenSuggestion, SuggestItem
             root
           else
             invalidState
   else
     switch root.constructor
-      when OpenSuggestion
-        root
-      when SuggestItem
+      when OpenSuggestion, SuggestItem
         root
       else
         invalidState
