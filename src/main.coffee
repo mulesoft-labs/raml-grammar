@@ -106,8 +106,7 @@ transverse = (treeMap, root) ->
   if root == undefined
     throw new Error('Invalid root specified')
 
-  for elem in cache
-    {cachedTree, cachedRoot, cachedResult} = elem
+  for {cachedTree, cachedRoot, cachedResult} in cache
     if cachedTree is treeMap and cachedRoot is root
       return cachedResult
 

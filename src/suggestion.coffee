@@ -48,21 +48,25 @@ class TreeMapToSuggestionTree extends TreeMap
   @alternatives: (root, alternatives) ->
     d = {}
     for alternative in alternatives
-      switch alternative.constructor
+      {
+        suggestions
+        open: possibleOpen
+        metadata: possibleMetadata
+        constructor
+      } = alternative
+      switch constructor
         when SimpleSuggestion
-          {suggestions} = alternative
           ((d[key] = value) for key, value of suggestions)
         when OpenSuggestion
-          {suggestions} = alternative
           ((d[key] = value) for key, value of suggestions)
-          {open, metadata} = alternative
+          [open, metadata] = [possibleOpen, possibleMetadata]
         when SuggestionNode, StringWildcard, IntegerWildcard
           # TODO Nothing interesting to do here
           undefined
         else
-          throw new Error("Invalid type: #{alternative} of type #{alternative.constructor}")
+          throw new Error("Invalid type: #{alternative} of type #{constructor}")
     if open?
-      new OpenSuggestion(d, ( -> open()), metadata)
+      new OpenSuggestion(d, ( -> do open), metadata)
     else 
       new SimpleSuggestion(d)
 
@@ -118,7 +122,7 @@ suggest = (root, index, path) ->
       else
         invalidState
 
-  val = val.open()
+  val = do val.open
 
   suggest(val, index + 1, path)
 
