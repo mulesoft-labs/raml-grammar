@@ -97,7 +97,7 @@ class TreeMap
   @tuple: notImplemented
   @multiple: notImplemented
   @postponedExecution: notImplemented
-  @nodeMap: notImplemented
+  @node: notImplemented
 
 cache = []
 
@@ -174,7 +174,7 @@ uriParameter = new Tuple(stringNode,  new Multiple(parameterProperty))
 uriParameters = new Tuple(new ConstantString('uriParameters'),  new Multiple(uriParameter))
 defaultMediaTypes = new Tuple(new ConstantString('defaultMediaTypes'),  
   new Alternatives(stringNode, new Multiple(stringNode)))
-chapter = new Alternatives(new Tuple(new ConstantString('title'),  stringNode), new Tuple(new ConstantString('content'),  stringNode))
+chapter = new Alternatives(title, new Tuple(new ConstantString('content'),  stringNode))
 documentation = new Tuple(new ConstantString('documentation'),  new Multiple(chapter))
 summary = new Tuple(new ConstantString('summary'),  stringNode)
 example = new Tuple(new ConstantString('example'),  stringNode)
