@@ -1,116 +1,109 @@
+title: ("title", <any string>)
 
-# TODO: required fields
-#
-# string: string
-# integer: integer > 0
-# regex: regex
-# boolean: boolean
-# jsonSchema: jsonSchema
-# xmlSchema: xmlSchema
+version: ("version", <any string>)
 
-Markdown: markdown | include
+schemas: ("schemas", ((<any string>, JSONSchema))*)
 
-root: [rootElement]
+baseUri: ("baseUri", <any string>)
 
-path: string
+displayName: ("displayName", <any string>)
 
-#include: !include path
+description: ("description", <any string>)
 
-String: string | include
+type: ("type", string | number | integer | date | boolean)
 
-title: ('title', String)
+enum: ("enum", (<any string>)*)
 
-version: ('version', string)
+pattern: ("pattern", Regex)
 
-model: (String, jsonSchema)
+minLength: ("minLength", Integer)
 
-schemas: ('schema', [model])
+maxLength: ("maxLength", Integer)
 
-baseUri: ('baseUri', string)
+maximum: ("maximum", Integer)
 
-name: string
+minimum: ("minimum", Integer)
 
-description: String
+required: ("required", Boolean)
 
-type: 'string' | 'number' | 'integer' | 'date'
+default: ("default", <any string>)
 
-enum: [string]
+uriParameters: ("uriParameters", ((<any string>, (displayName | description | type | enum | pattern | minLength | maxLength | maximum | minimum | required | default)*))*)
 
-pattern: ('pattern', regex)
+defaultMediaTypes: ("defaultMediaTypes", <any string> | (<any string>)*)
 
-minLength: ('minLength', integer)
+content: ("content", <any string>)
 
-maxLength: ('maxLength', integer)
+documentation: ("documentation", (title | content)*)
 
-minimum: ('minimum', integer)
+summary: ("summary", <any string>)
 
-maximum: ('maximum', integer)
+example: ("example", <any string>)
 
-required: ('required', boolean)
+headers: ("headers", ((<any string>, (displayName | description | type | enum | pattern | minLength | maxLength | maximum | minimum | required | default | example)*))*)
 
-default: ('default', string)
+queryParameters: ("queryParameters", ((<any string>, (displayName | description | type | enum | pattern | minLength | maxLength | maximum | minimum | required | default | example)*))*)
 
-requires: ('requires', [string])
+formParameters: ("formParameters", (displayName | description | type | enum | pattern | minLength | maxLength | maximum | minimum | required | default | example)*)
 
-excludes: ('excludes', [string])
+application/x-www-form-urlencoded: ("application/x-www-form-urlencoded", (formParameters)*)
 
-parameterProperty: name | description | type | enum | pattern | minLength | maxLength | maximum |
-  minimum | required | default | requires | excludes
+multipart/form-data: ("multipart/form-data", (formParameters)*)
 
-uriParameter: (string, [parameterProperty])
+schema: ("schema", XMLSchema | JSONSchema)
 
-uriParameters: ('uriParameters', [uriParameter])
+application/json: ("application/json", ((schema | example)*)*)
 
-defaultMediaTypes: ('defaultMediaTypes', string | [string])
+application/xml: ("application/xml", ((schema | example)*)*)
 
-chapter: ('title', string) | ('content', String)
+body: ("body", (application/x-www-form-urlencoded | multipart/form-data | application/json | application/xml | (<any string>, ((schema | example)*)*))*)
 
-documentation: ('documentation', [chapter])
+(Integer)*: ("(Integer)*", (body | description)*)
 
-summary: ('summary', string)
+responses: ("responses", ((Integer)*)*)
 
-description: ('description', Markdown)
+securedBy: ("securedBy", list)
 
-example: ('example', string)
+get: ("get", (summary | description | headers | queryParameters | body | responses | securedBy)*)
 
-header: (string, [parameterProperty | example])
+post: ("post", (summary | description | headers | queryParameters | body | responses | securedBy)*)
 
-headers: ('headers', [header])
+put: ("put", (summary | description | headers | queryParameters | body | responses | securedBy)*)
 
-queryParameterDefinition: (string, [parameterProperty | example])
+delete: ("delete", (summary | description | headers | queryParameters | body | responses | securedBy)*)
 
-queryParameters: ('queryParameters', [queryParameterDefinition])
+head: ("head", (summary | description | headers | queryParameters | body | responses | securedBy)*)
 
-formParameters: ('formParameters', [parameterProperty | example])
+path: ("path", (summary | description | headers | queryParameters | body | responses | securedBy)*)
 
-bodySchema: ('schema', xmlSchema | jsonSchema)
+options: ("options", (summary | description | headers | queryParameters | body | responses | securedBy)*)
 
-mimeTypeParameters: [bodySchema | example]
+is: ("is", list)
 
-mimeType: ('application/x-www-form-urlencoded', [formParameters]) | ('multipart/form-data', [formParameters]) |  (string, [mimeTypeParameters])
+type': ("type", <any string>)
 
-body: ('body', [mimeType])
+traits: ("traits", ((<any string>, (displayName | summary | description | headers | queryParameters | body | responses | securedBy)*))*)
 
-responseCode: (integer | [integer], [body | description])
+resourceTypes: ("resourceTypes", (<any string>, (summary | description | displayName | get | post | put | delete | head | path | options | is | type' | securedBy)*))
 
-responses: ('responses', [responseCode])
+type'': ("type", OAuth 1.0 | OAuth 2.0 | Basic Authentication | Digest Authentication | <any string>)
 
-actionDefinition: summary | description | headers | queryParameters | body | responses
+requestTokenUri: ("requestTokenUri", <any string>)
 
-action: ('get' | 'post' | 'put' | 'delete' | 'head' | 'patch' | 'options', [actionDefinition])
+authorizationUri: ("authorizationUri", <any string>)
 
-use: ('use', [string])
+tokenCredentialsUri: ("tokenCredentialsUri", <any string>)
 
-resourceDefinition: name | action | resource | use
+accessTokenUri: ("accessTokenUri", <any string>)
 
-resource: (/[^/]+, [resourceDefinition])
+authorizationGrants: ("authorizationGrants", <any string>)
 
-traitDefinition: (string, [description | provides | requires])
+scopes: ("scopes", <any string>)
 
-trait: ('traits', traitDefinition)
+settings: ("settings", requestTokenUri | authorizationUri | tokenCredentialsUri | accessTokenUri | authorizationGrants | scopes | (<any string>, <any string>))
 
-traits: [trait]
+describedBy: ("describedBy", headers | queryParameters | responses)
 
-rootElement: title | version | schemas | baseUri | uriParameters | defaultMediaTypes | documentation | resource | traits
+securitySchemes: ("securitySchemes", (<any string>, (description | type'' | settings | describedBy)*))
 
-
+root: (title | version | schemas | baseUri | uriParameters | defaultMediaTypes | documentation | (<any string>, (displayName | get | post | put | delete | head | path | options | is | type' | (<any string>, PostposedExecution) | securedBy)*) | traits | resourceTypes | securitySchemes | securedBy)*
