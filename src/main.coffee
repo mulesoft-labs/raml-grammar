@@ -218,7 +218,7 @@ securedBy = new Tuple(new ConstantString('securedBy'), listNode)
 
 actionDefinition = new Alternatives(summary, description, headers, queryParameters, 
   body, responses, securedBy)
-action = new Alternatives(((new Tuple(actionName, new Multiple(actionDefinition), {category: 'restful elements'})) for actionName in [new ConstantString('get'), new ConstantString('post'), new ConstantString('put'), new ConstantString('delete'), new ConstantString('head'), new ConstantString('path'), new ConstantString('options')])...)
+action = new Alternatives(((new Tuple(actionName, new Multiple(actionDefinition), {category: 'restful elements'})) for actionName in [new ConstantString('get'), new ConstantString('post'), new ConstantString('put'), new ConstantString('delete'), new ConstantString('head'), new ConstantString('patch'), new ConstantString('options')])...)
 
 
 # Is

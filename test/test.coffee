@@ -122,6 +122,12 @@ describe 'suggest',  ->
       (Object.keys suggestions).should.include 'application/json', 'application/xml'
       done()
   
+describe 'Methods', ->
+  describe 'patch', ->
+    it 'should be written correctly', ->
+      suggestion = suggestRAML ['/hello']
+      {suggestions} = suggestion
+      suggestions.should.include.key 'patch'
 
 
 describe 'Metadata', ->
