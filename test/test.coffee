@@ -384,6 +384,13 @@ describe '0.2', ->
       suggestion = suggestRAML ['securedBy']
       suggestion.should.be.ok
       suggestion.constructor.name.should.not.be.equal('InvalidState')
+
+  describe 'Root', ->
+    it 'should suggest "mediaType" and not "defaultMediaType"', ->
+      suggestion = suggestRAML []
+      suggestion.should.be.ok
+      {suggestions} = suggestion
+      suggestions.should.include.key 'mediaType'
       
 
 

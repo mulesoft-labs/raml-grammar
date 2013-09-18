@@ -171,7 +171,7 @@ parameterProperty = new Alternatives(name, description, parameterType, enum2, pa
 
 uriParameter = new Tuple(stringNode,  new Multiple(parameterProperty))
 uriParameters = new Tuple(new ConstantString('uriParameters'),  new Multiple(uriParameter))
-defaultMediaTypes = new Tuple(new ConstantString('defaultMediaTypes'),  
+mediaType = new Tuple(new ConstantString('mediaType'),  
   new Alternatives(stringNode, new Multiple(stringNode)))
 chapter = new Alternatives(title, new Tuple(new ConstantString('content'),  stringNode))
 documentation = new Tuple(new ConstantString('documentation'),  new Multiple(chapter))
@@ -281,7 +281,7 @@ securitySchemes = new Tuple(new ConstantString('securitySchemes'), securitySchem
 # Root Element
 
 rootElement = new Alternatives(title, version, schemas, baseUri, uriParameters, 
-  defaultMediaTypes, documentation, resource, traits, resourceTypes, securitySchemes, securedBy)
+  mediaType, documentation, resource, traits, resourceTypes, securitySchemes, securedBy)
 root = new Multiple(rootElement)
 
 @root = root
