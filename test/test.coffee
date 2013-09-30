@@ -230,6 +230,7 @@ describe '0.2', ->
       suggestion = suggestRAML ['resourceTypes', '- collection']
       {suggestions} = suggestion
       {suggestions: resourceSuggestions} = suggestRAML ['/hello']
+
       suggestions.should.include.keys (Object.keys resourceSuggestions)
     
     it 'should support nesting inside properties', ->
@@ -342,13 +343,36 @@ describe '0.2', ->
       suggestion = suggestRAML ['/hello/bye', 'securedBy']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
+    
+    it 'should suggest "baseUriParameters" and "uriParameters"', ->
+      suggestion = suggestRAML ['/hello']
+      suggestion.should.be.ok
+      
+      {suggestions} = suggestion
+
+      suggestions.should.include.key 'uriParameters'
+      suggestions.should.include.key 'baseUriParameters'
+      
+      suggestion = suggestRAML ['/hello', '/bye']
+      suggestion.should.be.ok
+      {suggestions} = suggestion
+
+      suggestions.should.include.key 'uriParameters'
+      suggestions.should.include.key 'baseUriParameters'
+      
+      suggestion = suggestRAML ['/hello/bye']
+      suggestion.should.be.ok
+      {suggestions} = suggestion
+
+      suggestions.should.include.key 'uriParameters'
+      suggestions.should.include.key 'baseUriParameters'
 
   describe 'Actions', ->
     it 'should allow to use "securedBy" to specify a securing policy', ->
       suggestion = suggestRAML ['/hello', 'get', 'securedBy']
       suggestion.should.be.ok
       suggestion.constructor.name.should.not.be.equal('InvalidState')
-
+    
   describe 'Security Schemes', ->
     it 'support "securitySchemes" keyword at the root level', ->
       suggestion = suggestRAML ['securitySchemes']
@@ -390,7 +414,19 @@ describe '0.2', ->
       suggestion = suggestRAML []
       suggestion.should.be.ok
       {suggestions} = suggestion
+
       suggestions.should.include.key 'mediaType'
       
+      suggestions.should.not.include.key 'defaultMediaType'
+      
+
+    it 'should suggest "baseUriParameters" and not "uriParameters"', ->
+      suggestion = suggestRAML []
+      suggestion.should.be.ok
+      {suggestions} = suggestion
+      suggestions.should.include.key 'baseUriParameters'
+      
+      suggestions.should.not.include.key 'uriParameters'
+
 
 

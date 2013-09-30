@@ -171,6 +171,7 @@ parameterProperty = new Alternatives(name, description, parameterType, enum2, pa
 
 uriParameter = new Tuple(stringNode,  new Multiple(parameterProperty))
 uriParameters = new Tuple(new ConstantString('uriParameters'),  new Multiple(uriParameter))
+baseUriParameters = new Tuple(new ConstantString('baseUriParameters'),  new Multiple(uriParameter))
 mediaType = new Tuple(new ConstantString('mediaType'),  
   new Alternatives(stringNode, new Multiple(stringNode)))
 chapter = new Alternatives(title, new Tuple(new ConstantString('content'),  stringNode))
@@ -233,7 +234,8 @@ type = new Tuple(new ConstantString('type'), stringNode)
 postposedResource = new Tuple(stringNode, new PostposedExecution( -> resourceDefinition),
   {category: 'snippets', id: 'resource'})
 
-resourceDefinition = new Alternatives(name, action, isTrait, type, postposedResource, securedBy)
+resourceDefinition = new Alternatives(name, action, isTrait, type, postposedResource, securedBy,
+  uriParameters, baseUriParameters)
 
 resource = new Tuple(stringNode,  new Multiple(resourceDefinition),
   {category: 'snippets', id: 'resource'})
@@ -247,7 +249,7 @@ traits = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition))
 # Resource Types
 
 resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(summary, description, name, action,
-  isTrait, type, securedBy)))
+  isTrait, type, securedBy, baseUriParameters, uriParameters)))
 resourceTypes = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition)
 
 # Security Schemes
@@ -280,7 +282,7 @@ securitySchemes = new Tuple(new ConstantString('securitySchemes'), securitySchem
 
 # Root Element
 
-rootElement = new Alternatives(title, version, schemas, baseUri, uriParameters, 
+rootElement = new Alternatives(title, version, schemas, baseUri, baseUriParameters, 
   mediaType, documentation, resource, traits, resourceTypes, securitySchemes, securedBy)
 root = new Multiple(rootElement)
 
