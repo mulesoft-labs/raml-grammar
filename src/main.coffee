@@ -14,6 +14,8 @@ class Alternatives then constructor: (@alternatives...) ->
 
 class Multiple then constructor: (@element) ->
 
+class List then constructor: (@elements...) ->
+
 class PostposedExecution then constructor: (@f) ->
 
 class Node
@@ -34,8 +36,6 @@ class XMLSchema extends Node
 
 class StringNode extends Node
 
-class ListNode extends Node
-
 class ConstantString extends Node then constructor: (@value) ->
 
 notImplemented = -> throw new Error('Not implemented')
@@ -49,9 +49,7 @@ class NodeMap
   @boolean: notImplemented
   @xmlSchema: notImplemented
   @stringNode: notImplemented
-  @listNode: notImplemented
   @constantString: notImplemented
-
 
 # primitives
 markdown = new Markdown()
@@ -62,7 +60,6 @@ integer = new Integer()
 boolean = new Boolean()
 xmlSchema = new XMLSchema()
 stringNode = new StringNode()
-listNode = new ListNode()
 
 transversePrimitive = (nodeMap, node) ->
   if node == undefined
@@ -85,8 +82,6 @@ transversePrimitive = (nodeMap, node) ->
       nodeMap.xmlSchema(node)
     when StringNode
       nodeMap.stringNode(node)
-    when ListNode
-      nodeMap.listNode(node)
     when ConstantString
       nodeMap.constantString(node)
     else
@@ -98,6 +93,7 @@ class TreeMap
   @multiple: notImplemented
   @postponedExecution: notImplemented
   @node: notImplemented
+  @list: notImplemented
 
 cache = []
 
@@ -124,6 +120,10 @@ transverse = (treeMap, root) ->
       {element} = root
       m = transverse(treeMap, element)
       treeMap.multiple(root, m)
+    when List
+      {elements} = root
+      elements = (transverse(treeMap, element) for element in elements)
+      treeMap.list(root, elements)
     when PostposedExecution
       {f} = root
       promise = new PostposedExecution( -> transverse(treeMap, f()))
@@ -164,7 +164,11 @@ model   = new Tuple(stringNode,  jsonSchema, rootCategory)
 schemas = new Tuple(new ConstantString('schemas'), new Multiple(model), rootCategory)
 
 # Protocols
-protocolsAlternatives = new Alternatives(new ConstantString('HTTP'), new ConstantString('HTTPS'))
+protocolsAlternatives = new List(
+                          new Multiple(
+                            new Alternatives(
+                                      new ConstantString('HTTP'),
+                                      new ConstantString('HTTPS'))))
 protocols             = new Tuple(new ConstantString('protocols'), protocolsAlternatives, rootCategory)
 
 # Parameter fields
@@ -176,7 +180,7 @@ parameterType = new Tuple(new ConstantString('type'), new Alternatives(
                     new ConstantString('integer'),
                     new ConstantString('date'),
                     new ConstantString('boolean')), parametersCategory)
-enum2         = new Tuple(new ConstantString('enum'), new Multiple(stringNode), parametersCategory)
+enum2         = new Tuple(new ConstantString('enum'), new List(stringNode), parametersCategory)
 pattern       = new Tuple(new ConstantString('pattern'),  regex, parametersCategory)
 minLength     = new Tuple(new ConstantString('minLength'),  integer, parametersCategory)
 maxLength     = new Tuple(new ConstantString('maxLength'),  integer, parametersCategory)
@@ -187,8 +191,8 @@ d3fault       = new Tuple(new ConstantString('default'),  stringNode, parameters
 parameterProperty = new Alternatives(name, description, parameterType, enum2, pattern, minLength,  maxLength, maximum, minimum, required, d3fault)
 
 uriParameter      = new Tuple(stringNode,  new Multiple(parameterProperty), parametersCategory)
-uriParameters     = new Tuple(new ConstantString('uriParameters'),  new Multiple(uriParameter), parametersCategory)
-baseUriParameters = new Tuple(new ConstantString('baseUriParameters'),  new Multiple(uriParameter), parametersCategory)
+uriParameters     = new Tuple(new ConstantString('uriParameters'),  new List(uriParameter), parametersCategory)
+baseUriParameters = new Tuple(new ConstantString('baseUriParameters'),  new List(uriParameter), parametersCategory)
 mediaType         = new Tuple(new ConstantString('mediaType'), new Alternatives(stringNode, new Multiple(stringNode)), rootCategory)
 chapter           = new Alternatives(title, new Tuple(new ConstantString('content'),  stringNode))
 documentation     = new Tuple(new ConstantString('documentation'),  new Multiple(chapter), rootCategory)
@@ -219,7 +223,7 @@ responseCode  = new Tuple(new Multiple(integer), new Multiple(new Alternatives(b
 responses     = new Tuple(new ConstantString('responses'),  new Multiple(responseCode), responsesCategory)
 
 # Secured by
-securedBy = new Tuple(new ConstantString('securedBy'), listNode, securityCategory)
+securedBy = new Tuple(new ConstantString('securedBy'), new List(stringNode), securityCategory)
 
 # Actions
 actionDefinition = new Alternatives(
@@ -236,7 +240,7 @@ action = new Alternatives(
       for actionName in ['get', 'post', 'put', 'delete', 'head', 'patch', 'options'])...)
 
 # Is
-isTrait = new Tuple(new ConstantString('is'),  listNode, traitsAndResourceTypesCategory)
+isTrait = new Tuple(new ConstantString('is'),  new List(stringNode), traitsAndResourceTypesCategory)
 
 # Type
 type = new Tuple(new ConstantString('type'), stringNode, traitsAndResourceTypesCategory)
@@ -248,11 +252,11 @@ resource            = new Tuple(stringNode,  new Multiple(resourceDefinition),  
 
 # Traits
 traitsDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(name, summary, description, headers, queryParameters, body, responses, securedBy, protocols)), traitsAndResourceTypesCategory)
-traits            = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition), traitsAndResourceTypesCategory)
+traits            = new Tuple(new ConstantString('traits'), new List(traitsDefinition), traitsAndResourceTypesCategory)
 
 # Resource Types
 resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(summary, description, name, action,  isTrait, type, securedBy, baseUriParameters, uriParameters)), traitsAndResourceTypesCategory)
-resourceTypes           = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition, traitsAndResourceTypesCategory)
+resourceTypes           = new Tuple(new ConstantString('resourceTypes'), new List(resourceTypesDefinition), traitsAndResourceTypesCategory)
 
 # Security Schemes
 settingAlternative = []
@@ -268,7 +272,6 @@ settingAlternative = settingAlternative.concat( [
   new Tuple(new ConstantString('authorizationGrants'), stringNode,  {category: 'security', type: ['OAuth 2.0']})
   new Tuple(new ConstantString('scopes'), stringNode,               {category: 'security', type: ['OAuth 2.0']})
 ])
-# Other
 settingAlternative = settingAlternative.concat( [
   new Tuple(stringNode, stringNode, {category: 'security'})
 ])
@@ -281,7 +284,7 @@ securityType              = new Tuple(new ConstantString('type'), new Alternativ
 describedBy               = new Tuple(new ConstantString('describedBy'), new Alternatives(headers, queryParameters, responses), {category: 'security'})
 settings                  = new Tuple(new ConstantString('settings'), new Alternatives(settingAlternative...))
 securitySchemesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, securityType, settings, describedBy)))
-securitySchemes           = new Tuple(new ConstantString('securitySchemes'), securitySchemesDefinition)
+securitySchemes           = new Tuple(new ConstantString('securitySchemes'), new List(securitySchemesDefinition))
 
 # Root Element
 rootElement = new Alternatives(

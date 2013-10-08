@@ -12,7 +12,7 @@ description: ("description", <any string>)
 
 type: ("type", string | number | integer | date | boolean)
 
-enum: ("enum", (<any string>)*)
+enum: ("enum", [<any string>])
 
 pattern: ("pattern", Regex)
 
@@ -28,9 +28,9 @@ required: ("required", Boolean)
 
 default: ("default", <any string>)
 
-uriParameters: ("uriParameters", ((<any string>, (displayName | description | type | enum | pattern | minLength | maxLength | maximum | minimum | required | default)*))*)
+baseUriParameters: ("baseUriParameters", [(<any string>, (displayName | description | type | enum | pattern | minLength | maxLength | maximum | minimum | required | default)*)])
 
-defaultMediaTypes: ("defaultMediaTypes", <any string> | (<any string>)*)
+mediaType: ("mediaType", <any string> | (<any string>)*)
 
 content: ("content", <any string>)
 
@@ -62,29 +62,33 @@ body: ("body", (application/x-www-form-urlencoded | multipart/form-data | applic
 
 responses: ("responses", ((Integer)*)*)
 
-securedBy: ("securedBy", list)
+securedBy: ("securedBy", [<any string>])
 
-get: ("get", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+protocols: ("protocols", [(HTTP | HTTPS)*])
 
-post: ("post", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+get: ("get", (summary | description | headers | queryParameters | body | responses | securedBy | protocols)*)
 
-put: ("put", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+post: ("post", (summary | description | headers | queryParameters | body | responses | securedBy | protocols)*)
 
-delete: ("delete", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+put: ("put", (summary | description | headers | queryParameters | body | responses | securedBy | protocols)*)
 
-head: ("head", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+delete: ("delete", (summary | description | headers | queryParameters | body | responses | securedBy | protocols)*)
 
-path: ("path", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+head: ("head", (summary | description | headers | queryParameters | body | responses | securedBy | protocols)*)
 
-options: ("options", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+patch: ("patch", (summary | description | headers | queryParameters | body | responses | securedBy | protocols)*)
 
-is: ("is", list)
+options: ("options", (summary | description | headers | queryParameters | body | responses | securedBy | protocols)*)
+
+is: ("is", [<any string>])
 
 type': ("type", <any string>)
 
-traits: ("traits", ((<any string>, (displayName | summary | description | headers | queryParameters | body | responses | securedBy)*))*)
+uriParameters: ("uriParameters", [(<any string>, (displayName | description | type | enum | pattern | minLength | maxLength | maximum | minimum | required | default)*)])
 
-resourceTypes: ("resourceTypes", (<any string>, (summary | description | displayName | get | post | put | delete | head | path | options | is | type' | securedBy)*))
+traits: ("traits", [(<any string>, (displayName | summary | description | headers | queryParameters | body | responses | securedBy | protocols)*)])
+
+resourceTypes: ("resourceTypes", [(<any string>, (summary | description | displayName | get | post | put | delete | head | patch | options | is | type' | securedBy | baseUriParameters | uriParameters)*)])
 
 type'': ("type", OAuth 1.0 | OAuth 2.0 | Basic Authentication | Digest Authentication | <any string>)
 
@@ -104,6 +108,6 @@ settings: ("settings", requestTokenUri | authorizationUri | tokenCredentialsUri 
 
 describedBy: ("describedBy", headers | queryParameters | responses)
 
-securitySchemes: ("securitySchemes", (<any string>, (description | type'' | settings | describedBy)*))
+securitySchemes: ("securitySchemes", [(<any string>, (description | type'' | settings | describedBy)*)])
 
-root: (title | version | schemas | baseUri | uriParameters | defaultMediaTypes | documentation | (<any string>, (displayName | get | post | put | delete | head | path | options | is | type' | (<any string>, PostposedExecution) | securedBy)*) | traits | resourceTypes | securitySchemes | securedBy)*
+root: (title | version | schemas | baseUri | baseUriParameters | mediaType | documentation | (<any string>, (displayName | get | post | put | delete | head | patch | options | is | type' | (<any string>, PostposedExecution) | securedBy | uriParameters | baseUriParameters)*) | traits | resourceTypes | securitySchemes | securedBy | protocols)*

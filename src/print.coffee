@@ -23,7 +23,6 @@ printRAMLGrammar = ->
     @boolean: id
     @xmlSchema: id
     @stringNode: -> StringNode
-    @listNode: -> 'list'
     @constantString: (root) -> root.value
     
 
@@ -41,6 +40,7 @@ printRAMLGrammar = ->
     @multiple: (root, element) -> "(#{element})*"
     @postponedExecution: id
     @node: (root) -> transversePrimitive(StringNodeMap, root)
+    @list: (root, elements) -> "[#{elements}]"
 
   parentNode = transverse StringTreeMap, root
   s = ("#{key}: #{value}" for key, value of result).join('\n\n')

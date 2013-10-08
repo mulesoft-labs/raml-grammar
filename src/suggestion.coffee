@@ -39,7 +39,6 @@ class SuggestionNodeMap extends NodeMap
   @boolean: name
   @xmlSchema: name
   @stringNode: -> stringWilcard
-  @listNode: -> stringWilcard
   @constantString: (root) -> new SuggestionNode(root.value)
 
 functionize = (value) -> if type(value) == 'function' then value else -> value
@@ -71,6 +70,9 @@ class TreeMapToSuggestionTree extends TreeMap
 
   @multiple: (root, element) -> 
     element
+
+  @list: (root, elements) ->
+    @alternatives root, elements
 
   @tuple: (root, key, value) -> 
     {metadata} = root

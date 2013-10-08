@@ -1,5 +1,5 @@
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, ListNode, Markdown, Multiple, Node, NodeMap, PostposedExecution, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionName, baseUri, baseUriParameters, body, bodyCategory, bodySchema, boolean, cache, chapter, d3fault, describedBy, description, docsCategory, documentation, enum2, example, formParameters, header, headers, include, integer, isTrait, jsonSchema, listNode, markdown, maxLength, maximum, mediaType, methodsCategory, mimeType, mimeTypeParameters, minLength, minimum, model, name, notImplemented, parameterProperty, parameterType, parametersCategory, pattern, postposedResource, protocols, protocolsAlternatives, queryParameterDefinition, queryParameters, regex, required, resource, resourceDefinition, resourceTypes, resourceTypesDefinition, resourcesCategory, responseCode, responses, responsesCategory, root, rootCategory, rootElement, schemas, schemasCategory, securedBy, securityCategory, securitySchemes, securitySchemesDefinition, securityType, settingAlternative, settings, stringNode, summary, title, traits, traitsAndResourceTypesCategory, traitsDefinition, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
+var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, List, Markdown, Multiple, Node, NodeMap, PostposedExecution, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionName, baseUri, baseUriParameters, body, bodyCategory, bodySchema, boolean, cache, chapter, d3fault, describedBy, description, docsCategory, documentation, enum2, example, formParameters, header, headers, include, integer, isTrait, jsonSchema, markdown, maxLength, maximum, mediaType, methodsCategory, mimeType, mimeTypeParameters, minLength, minimum, model, name, notImplemented, parameterProperty, parameterType, parametersCategory, pattern, postposedResource, protocols, protocolsAlternatives, queryParameterDefinition, queryParameters, regex, required, resource, resourceDefinition, resourceTypes, resourceTypesDefinition, resourcesCategory, responseCode, responses, responsesCategory, root, rootCategory, rootElement, schemas, schemasCategory, securedBy, securityCategory, securitySchemes, securitySchemesDefinition, securityType, settingAlternative, settings, stringNode, summary, title, traits, traitsAndResourceTypesCategory, traitsDefinition, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7,
   __slice = [].slice,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -42,6 +42,17 @@ Multiple = (function() {
   }
 
   return Multiple;
+
+})();
+
+List = (function() {
+  function List() {
+    var elements;
+    elements = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    this.elements = elements;
+  }
+
+  return List;
 
 })();
 
@@ -157,18 +168,6 @@ StringNode = (function(_super) {
 
 })(Node);
 
-ListNode = (function(_super) {
-  __extends(ListNode, _super);
-
-  function ListNode() {
-    _ref8 = ListNode.__super__.constructor.apply(this, arguments);
-    return _ref8;
-  }
-
-  return ListNode;
-
-})(Node);
-
 ConstantString = (function(_super) {
   __extends(ConstantString, _super);
 
@@ -203,8 +202,6 @@ NodeMap = (function() {
 
   NodeMap.stringNode = notImplemented;
 
-  NodeMap.listNode = notImplemented;
-
   NodeMap.constantString = notImplemented;
 
   return NodeMap;
@@ -227,8 +224,6 @@ xmlSchema = new XMLSchema();
 
 stringNode = new StringNode();
 
-listNode = new ListNode();
-
 transversePrimitive = function(nodeMap, node) {
   if (node === void 0) {
     throw new Error('Invalid root specified');
@@ -250,8 +245,6 @@ transversePrimitive = function(nodeMap, node) {
       return nodeMap.xmlSchema(node);
     case StringNode:
       return nodeMap.stringNode(node);
-    case ListNode:
-      return nodeMap.listNode(node);
     case ConstantString:
       return nodeMap.constantString(node);
     default:
@@ -272,6 +265,8 @@ TreeMap = (function() {
 
   TreeMap.node = notImplemented;
 
+  TreeMap.list = notImplemented;
+
   return TreeMap;
 
 })();
@@ -279,12 +274,12 @@ TreeMap = (function() {
 cache = [];
 
 transverse = function(treeMap, root) {
-  var a, alternative, alternatives, b, cachedResult, cachedRoot, cachedTree, element, f, key, m, promise, result, value, _i, _len, _ref9;
+  var a, alternative, alternatives, b, cachedResult, cachedRoot, cachedTree, element, elements, f, key, m, promise, result, value, _i, _len, _ref8;
   if (root === void 0) {
     throw new Error('Invalid root specified');
   }
   for (_i = 0, _len = cache.length; _i < _len; _i++) {
-    _ref9 = cache[_i], cachedTree = _ref9.cachedTree, cachedRoot = _ref9.cachedRoot, cachedResult = _ref9.cachedResult;
+    _ref8 = cache[_i], cachedTree = _ref8.cachedTree, cachedRoot = _ref8.cachedRoot, cachedResult = _ref8.cachedResult;
     if (cachedTree === treeMap && cachedRoot === root) {
       return cachedResult;
     }
@@ -312,6 +307,18 @@ transverse = function(treeMap, root) {
         element = root.element;
         m = transverse(treeMap, element);
         return treeMap.multiple(root, m);
+      case List:
+        elements = root.elements;
+        elements = (function() {
+          var _j, _len1, _results;
+          _results = [];
+          for (_j = 0, _len1 = elements.length; _j < _len1; _j++) {
+            element = elements[_j];
+            _results.push(transverse(treeMap, element));
+          }
+          return _results;
+        })();
+        return treeMap.list(root, elements);
       case PostposedExecution:
         f = root.f;
         promise = new PostposedExecution(function() {
@@ -387,7 +394,7 @@ model = new Tuple(stringNode, jsonSchema, rootCategory);
 
 schemas = new Tuple(new ConstantString('schemas'), new Multiple(model), rootCategory);
 
-protocolsAlternatives = new Alternatives(new ConstantString('HTTP'), new ConstantString('HTTPS'));
+protocolsAlternatives = new List(new Multiple(new Alternatives(new ConstantString('HTTP'), new ConstantString('HTTPS'))));
 
 protocols = new Tuple(new ConstantString('protocols'), protocolsAlternatives, rootCategory);
 
@@ -397,7 +404,7 @@ description = new Tuple(new ConstantString('description'), stringNode, docsCateg
 
 parameterType = new Tuple(new ConstantString('type'), new Alternatives(new ConstantString('string'), new ConstantString('number'), new ConstantString('integer'), new ConstantString('date'), new ConstantString('boolean')), parametersCategory);
 
-enum2 = new Tuple(new ConstantString('enum'), new Multiple(stringNode), parametersCategory);
+enum2 = new Tuple(new ConstantString('enum'), new List(stringNode), parametersCategory);
 
 pattern = new Tuple(new ConstantString('pattern'), regex, parametersCategory);
 
@@ -417,9 +424,9 @@ parameterProperty = new Alternatives(name, description, parameterType, enum2, pa
 
 uriParameter = new Tuple(stringNode, new Multiple(parameterProperty), parametersCategory);
 
-uriParameters = new Tuple(new ConstantString('uriParameters'), new Multiple(uriParameter), parametersCategory);
+uriParameters = new Tuple(new ConstantString('uriParameters'), new List(uriParameter), parametersCategory);
 
-baseUriParameters = new Tuple(new ConstantString('baseUriParameters'), new Multiple(uriParameter), parametersCategory);
+baseUriParameters = new Tuple(new ConstantString('baseUriParameters'), new List(uriParameter), parametersCategory);
 
 mediaType = new Tuple(new ConstantString('mediaType'), new Alternatives(stringNode, new Multiple(stringNode)), rootCategory);
 
@@ -453,7 +460,7 @@ responseCode = new Tuple(new Multiple(integer), new Multiple(new Alternatives(bo
 
 responses = new Tuple(new ConstantString('responses'), new Multiple(responseCode), responsesCategory);
 
-securedBy = new Tuple(new ConstantString('securedBy'), listNode, securityCategory);
+securedBy = new Tuple(new ConstantString('securedBy'), new List(stringNode), securityCategory);
 
 actionDefinition = new Alternatives(summary, description, headers, queryParameters, body, responses, securedBy, protocols);
 
@@ -462,17 +469,17 @@ action = (function(func, args, ctor) {
   var child = new ctor, result = func.apply(child, args);
   return Object(result) === result ? result : child;
 })(Alternatives, (function() {
-  var _i, _len, _ref9, _results;
-  _ref9 = ['get', 'post', 'put', 'delete', 'head', 'patch', 'options'];
+  var _i, _len, _ref8, _results;
+  _ref8 = ['get', 'post', 'put', 'delete', 'head', 'patch', 'options'];
   _results = [];
-  for (_i = 0, _len = _ref9.length; _i < _len; _i++) {
-    actionName = _ref9[_i];
+  for (_i = 0, _len = _ref8.length; _i < _len; _i++) {
+    actionName = _ref8[_i];
     _results.push(new Tuple(new ConstantString(actionName), new Multiple(actionDefinition), methodsCategory));
   }
   return _results;
 })(), function(){});
 
-isTrait = new Tuple(new ConstantString('is'), listNode, traitsAndResourceTypesCategory);
+isTrait = new Tuple(new ConstantString('is'), new List(stringNode), traitsAndResourceTypesCategory);
 
 type = new Tuple(new ConstantString('type'), stringNode, traitsAndResourceTypesCategory);
 
@@ -486,11 +493,11 @@ resource = new Tuple(stringNode, new Multiple(resourceDefinition), resourcesCate
 
 traitsDefinition = new Tuple(stringNode, new Multiple(new Alternatives(name, summary, description, headers, queryParameters, body, responses, securedBy, protocols)), traitsAndResourceTypesCategory);
 
-traits = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition), traitsAndResourceTypesCategory);
+traits = new Tuple(new ConstantString('traits'), new List(traitsDefinition), traitsAndResourceTypesCategory);
 
 resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(summary, description, name, action, isTrait, type, securedBy, baseUriParameters, uriParameters)), traitsAndResourceTypesCategory);
 
-resourceTypes = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition, traitsAndResourceTypesCategory);
+resourceTypes = new Tuple(new ConstantString('resourceTypes'), new List(resourceTypesDefinition), traitsAndResourceTypesCategory);
 
 settingAlternative = [];
 
@@ -542,7 +549,7 @@ settings = new Tuple(new ConstantString('settings'), (function(func, args, ctor)
 
 securitySchemesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, securityType, settings, describedBy)));
 
-securitySchemes = new Tuple(new ConstantString('securitySchemes'), securitySchemesDefinition);
+securitySchemes = new Tuple(new ConstantString('securitySchemes'), new List(securitySchemesDefinition));
 
 rootElement = new Alternatives(title, version, schemas, baseUri, baseUriParameters, mediaType, documentation, resource, traits, resourceTypes, securitySchemes, securedBy, protocols);
 
@@ -698,10 +705,6 @@ SuggestionNodeMap = (function(_super) {
     return stringWilcard;
   };
 
-  SuggestionNodeMap.listNode = function() {
-    return stringWilcard;
-  };
-
   SuggestionNodeMap.constantString = function(root) {
     return new SuggestionNode(root.value);
   };
@@ -764,6 +767,10 @@ TreeMapToSuggestionTree = (function(_super) {
 
   TreeMapToSuggestionTree.multiple = function(root, element) {
     return element;
+  };
+
+  TreeMapToSuggestionTree.list = function(root, elements) {
+    return this.alternatives(root, elements);
   };
 
   TreeMapToSuggestionTree.tuple = function(root, key, value) {

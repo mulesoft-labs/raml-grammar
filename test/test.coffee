@@ -30,6 +30,12 @@ class TreeMapToString extends TreeMap
     @i = @i - 1
     res
 
+  @list: (root, elements) ->
+    @i = @i + 1
+    res =  '(' + @getSpaces() + elements.join(' | ') + ')'
+    @i = @i - 1
+    res
+
   @postponedExecution: (root, promise) ->
     promise
 
@@ -297,7 +303,7 @@ describe '0.2', ->
       {suggestions} = suggestion
       suggestions.should.not.include.keys 'use'
 
-    it 'should display "is" suggestion as being scalar (in order to indent it on the same line)', ->
+    it.skip 'should display "is" suggestion as being scalar (in order to indent it on the same line)', ->
       suggestion = suggestRAML ['/hello', 'is']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
@@ -340,15 +346,15 @@ describe '0.2', ->
     it 'should allow to use "securedBy" to specify a securing policy for all the actions', ->
       suggestion = suggestRAML ['/hello', 'securedBy']
       suggestion.should.be.ok
-      suggestion.isScalar.should.be.true
+      suggestion.isScalar.should.be.false
 
       suggestion = suggestRAML ['/hello', '/bye', 'securedBy']
       suggestion.should.be.ok
-      suggestion.isScalar.should.be.true
+      suggestion.isScalar.should.be.false
 
       suggestion = suggestRAML ['/hello/bye', 'securedBy']
       suggestion.should.be.ok
-      suggestion.isScalar.should.be.true
+      suggestion.isScalar.should.be.false
 
     it 'should suggest "baseUriParameters" and "uriParameters"', ->
       suggestion = suggestRAML ['/hello']
