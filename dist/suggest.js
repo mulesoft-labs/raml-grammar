@@ -1,5 +1,5 @@
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, ListNode, Markdown, Multiple, Node, NodeMap, PostposedExecution, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionName, baseUri, baseUriParameters, body, bodyCategory, bodySchema, boolean, cache, chapter, d3fault, describedBy, description, docsCategory, documentation, enum2, example, formParameters, header, headers, include, integer, isTrait, jsonSchema, listNode, markdown, maxLength, maximum, mediaType, methodsCategory, mimeType, mimeTypeParameters, minLength, minimum, model, name, notImplemented, parameterProperty, parameterType, parametersCategory, pattern, postposedResource, queryParameterDefinition, queryParameters, regex, required, resource, resourceDefinition, resourceTypes, resourceTypesDefinition, resourcesCategory, responseCode, responses, responsesCategory, root, rootCategory, rootElement, schemas, schemasCategory, securedBy, securityCategory, securitySchemes, securitySchemesDefinition, securityType, settings, stringNode, summary, title, traits, traitsAndResourceTypesCategory, traitsDefinition, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
+var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, ListNode, Markdown, Multiple, Node, NodeMap, PostposedExecution, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionName, baseUri, baseUriParameters, body, bodyCategory, bodySchema, boolean, cache, chapter, d3fault, describedBy, description, docsCategory, documentation, enum2, example, formParameters, header, headers, include, integer, isTrait, jsonSchema, listNode, markdown, maxLength, maximum, mediaType, methodsCategory, mimeType, mimeTypeParameters, minLength, minimum, model, name, notImplemented, parameterProperty, parameterType, parametersCategory, pattern, postposedResource, protocols, protocolsAlternatives, queryParameterDefinition, queryParameters, regex, required, resource, resourceDefinition, resourceTypes, resourceTypesDefinition, resourcesCategory, responseCode, responses, responsesCategory, root, rootCategory, rootElement, schemas, schemasCategory, securedBy, securityCategory, securitySchemes, securitySchemesDefinition, securityType, settingAlternative, settings, stringNode, summary, title, traits, traitsAndResourceTypesCategory, traitsDefinition, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
   __slice = [].slice,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -387,6 +387,10 @@ model = new Tuple(stringNode, jsonSchema, rootCategory);
 
 schemas = new Tuple(new ConstantString('schemas'), new Multiple(model), rootCategory);
 
+protocolsAlternatives = new Alternatives(new ConstantString('HTTP'), new ConstantString('HTTPS'));
+
+protocols = new Tuple(new ConstantString('protocols'), protocolsAlternatives, rootCategory);
+
 name = new Tuple(new ConstantString('displayName'), stringNode, docsCategory);
 
 description = new Tuple(new ConstantString('description'), stringNode, docsCategory);
@@ -451,7 +455,7 @@ responses = new Tuple(new ConstantString('responses'), new Multiple(responseCode
 
 securedBy = new Tuple(new ConstantString('securedBy'), listNode, securityCategory);
 
-actionDefinition = new Alternatives(summary, description, headers, queryParameters, body, responses, securedBy);
+actionDefinition = new Alternatives(summary, description, headers, queryParameters, body, responses, securedBy, protocols);
 
 action = (function(func, args, ctor) {
   ctor.prototype = func.prototype;
@@ -459,11 +463,11 @@ action = (function(func, args, ctor) {
   return Object(result) === result ? result : child;
 })(Alternatives, (function() {
   var _i, _len, _ref9, _results;
-  _ref9 = [new ConstantString('get'), new ConstantString('post'), new ConstantString('put'), new ConstantString('delete'), new ConstantString('head'), new ConstantString('patch'), new ConstantString('options')];
+  _ref9 = ['get', 'post', 'put', 'delete', 'head', 'patch', 'options'];
   _results = [];
   for (_i = 0, _len = _ref9.length; _i < _len; _i++) {
     actionName = _ref9[_i];
-    _results.push(new Tuple(actionName, new Multiple(actionDefinition), methodsCategory));
+    _results.push(new Tuple(new ConstantString(actionName), new Multiple(actionDefinition), methodsCategory));
   }
   return _results;
 })(), function(){});
@@ -480,7 +484,7 @@ resourceDefinition = new Alternatives(name, action, isTrait, type, postposedReso
 
 resource = new Tuple(stringNode, new Multiple(resourceDefinition), resourcesCategory);
 
-traitsDefinition = new Tuple(stringNode, new Multiple(new Alternatives(name, summary, description, headers, queryParameters, body, responses, securedBy)), traitsAndResourceTypesCategory);
+traitsDefinition = new Tuple(stringNode, new Multiple(new Alternatives(name, summary, description, headers, queryParameters, body, responses, securedBy, protocols)), traitsAndResourceTypesCategory);
 
 traits = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition), traitsAndResourceTypesCategory);
 
@@ -488,35 +492,59 @@ resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(su
 
 resourceTypes = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition, traitsAndResourceTypesCategory);
 
-securityType = new Tuple(new ConstantString('type'), new Alternatives(new ConstantString('OAuth 1.0'), new ConstantString('OAuth 2.0'), new ConstantString('Basic Authentication'), new ConstantString('Digest Authentication'), stringNode), securityCategory);
+settingAlternative = [];
 
-describedBy = new Tuple(new ConstantString('describedBy'), new Alternatives(headers, queryParameters, responses), securityCategory);
+settingAlternative = settingAlternative.concat([
+  new Tuple(new ConstantString('requestTokenUri'), stringNode, {
+    category: 'security',
+    type: ['OAuth 1.0']
+  }), new Tuple(new ConstantString('authorizationUri'), stringNode, {
+    category: 'security',
+    type: ['OAuth 1.0', 'OAuth 2.0']
+  }), new Tuple(new ConstantString('tokenCredentialsUri'), stringNode, {
+    category: 'security',
+    type: ['OAuth 1.0']
+  })
+]);
 
-settings = new Tuple(new ConstantString('settings'), new Alternatives(new Tuple(new ConstantString('requestTokenUri'), stringNode, {
-  category: 'security',
-  type: ['OAuth 1.0']
-}), new Tuple(new ConstantString('authorizationUri'), stringNode, {
-  category: 'security',
-  type: ['OAuth 1.0', 'OAuth 2.0']
-}), new Tuple(new ConstantString('tokenCredentialsUri'), stringNode, {
-  category: 'security',
-  type: ['OAuth 1.0']
-}), new Tuple(new ConstantString('accessTokenUri'), stringNode, {
-  category: 'security',
-  type: ['OAuth 2.0']
-}), new Tuple(new ConstantString('authorizationGrants'), stringNode, {
-  category: 'security',
-  type: ['OAuth 2.0']
-}), new Tuple(new ConstantString('scopes'), stringNode, {
-  category: 'security',
-  type: ['OAuth 2.0']
-}), new Tuple(stringNode, stringNode, securityCategory)));
+settingAlternative = settingAlternative.concat([
+  new Tuple(new ConstantString('accessTokenUri'), stringNode, {
+    category: 'security',
+    type: ['OAuth 2.0']
+  }), new Tuple(new ConstantString('authorizationGrants'), stringNode, {
+    category: 'security',
+    type: ['OAuth 2.0']
+  }), new Tuple(new ConstantString('scopes'), stringNode, {
+    category: 'security',
+    type: ['OAuth 2.0']
+  })
+]);
 
-securitySchemesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, securityType, settings, describedBy)), securityCategory);
+settingAlternative = settingAlternative.concat([
+  new Tuple(stringNode, stringNode, {
+    category: 'security'
+  })
+]);
 
-securitySchemes = new Tuple(new ConstantString('securitySchemes'), securitySchemesDefinition, securityCategory);
+securityType = new Tuple(new ConstantString('type'), new Alternatives(new ConstantString('OAuth 1.0'), new ConstantString('OAuth 2.0'), new ConstantString('Basic Authentication'), new ConstantString('Digest Authentication'), stringNode), {
+  category: 'security'
+});
 
-rootElement = new Alternatives(title, version, schemas, baseUri, baseUriParameters, mediaType, documentation, resource, traits, resourceTypes, securitySchemes, securedBy);
+describedBy = new Tuple(new ConstantString('describedBy'), new Alternatives(headers, queryParameters, responses), {
+  category: 'security'
+});
+
+settings = new Tuple(new ConstantString('settings'), (function(func, args, ctor) {
+  ctor.prototype = func.prototype;
+  var child = new ctor, result = func.apply(child, args);
+  return Object(result) === result ? result : child;
+})(Alternatives, settingAlternative, function(){}));
+
+securitySchemesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, securityType, settings, describedBy)));
+
+securitySchemes = new Tuple(new ConstantString('securitySchemes'), securitySchemesDefinition);
+
+rootElement = new Alternatives(title, version, schemas, baseUri, baseUriParameters, mediaType, documentation, resource, traits, resourceTypes, securitySchemes, securedBy, protocols);
 
 root = new Multiple(rootElement);
 
@@ -714,10 +742,6 @@ TreeMapToSuggestionTree = (function(_super) {
           }
           break;
         case OpenSuggestion:
-          for (key in suggestions) {
-            value = suggestions[key];
-            d[key] = value;
-          }
           _ref3 = [possibleOpen, possibleMetadata], open = _ref3[0], metadata = _ref3[1];
           break;
         case SuggestionNode:
