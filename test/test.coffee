@@ -1,38 +1,38 @@
 {transverse, TreeMap, root} = require '../src/main.coffee'
 {suggestRAML} = require '../src/suggestion.coffee'
 {typ3: type} = require '../src/utils.coffee'
-type = 
+type =
   of: type
 should = (require '../node_modules/chai/index').should()
 
 class TreeMapToString extends TreeMap
   @constructor: () ->
     @i = 0
-  
-  @getSpaces: () -> 
+
+  @getSpaces: () ->
     (' ' for num in [1..@i]).join('')
-  
-  @alternatives: (root, alternatives) -> 
+
+  @alternatives: (root, alternatives) ->
     @i = @i + 1
     res =  '(' + @getSpaces() + alternatives.join(' | ') + ')'
     @i = @i - 1
     res
 
-  @tuple: (root, key, value) -> 
+  @tuple: (root, key, value) ->
     @i = @i + 1
     res = '(' + key + ': ' + value + ')'
     @i = @i - 1
     res
 
-  @multiple: (root, element) -> 
+  @multiple: (root, element) ->
     @i = @i + 1
     res = '[' + @getSpaces() + element + ']'
     @i = @i - 1
     res
-  
+
   @postponedExecution: (root, promise) ->
     promise
-  
+
   @node: (root) ->
     root.constructor.name
 
@@ -43,7 +43,7 @@ describe 'Tree Mapping', ->
 
 describe 'suggest',  ->
   it 'should handle root node', (done) ->
-    suggestion = suggestRAML [] 
+    suggestion = suggestRAML []
     suggestion.should.be.ok
     suggestion.should.have.property('suggestions')
     {suggestions} = suggestion
@@ -76,8 +76,8 @@ describe 'suggest',  ->
 
     {suggestions} = suggestion
 
-    
-    suggestions.should.include.keys('displayName', 'description', 
+
+    suggestions.should.include.keys('displayName', 'description',
       'type', 'enum', 'pattern', 'minLength', 'maxLength', 'maximum', 'minimum', 'required',
       'default', 'example')
 
@@ -121,7 +121,7 @@ describe 'suggest',  ->
       {suggestions} = suggestion
       (Object.keys suggestions).should.include 'application/json', 'application/xml'
       done()
-  
+
 describe 'Methods', ->
   describe 'patch', ->
     it 'should be written correctly', ->
@@ -136,9 +136,9 @@ describe 'Metadata', ->
       suggestion = suggestRAML ['/pet']
       suggestion.should.have.property('suggestions')
       suggestions = suggestion.suggestions
-      suggestions.should.have.property(action) for action in ['get', 'put', 'post', 
+      suggestions.should.have.property(action) for action in ['get', 'put', 'post',
         'delete']
-  
+
       for methodName in ['get', 'put', 'post', 'delete']
         method = suggestions[methodName]
         method.should.have.property.open
@@ -146,9 +146,9 @@ describe 'Metadata', ->
         type.of(open).should.be.equal('function')
         method.should.have.property('metadata')
         {metadata: {category}} = method
-        category.should.be.equal('restful elements')
+        category.should.be.equal('methods')
         suggestion = suggestRAML ['/pet', 'get']
-      
+
       done()
   describe 'id', ->
     it 'should be assigned correctly to the resource node', ->
@@ -178,7 +178,7 @@ describe '0.2', ->
       suggestion = suggestRAML ['traits', '- traitA']
       suggestion.should.be.ok
       suggestion.should.not.have.property('open')
-      
+
     it 'should include the name property', ->
       suggestion = suggestRAML ['traits', '- traitA']
       {suggestions} = suggestion
@@ -189,7 +189,7 @@ describe '0.2', ->
       {suggestions} = suggestion
       {suggestions: getMethodSuggestions} = suggestRAML ['/hello', 'get']
       suggestions.should.include.keys (Object.keys getMethodSuggestions)
-    
+
     it 'should support nesting inside properties', ->
       suggestion = suggestRAML ['traits', 'traitA', 'responses']
       suggestion.should.be.ok
@@ -213,26 +213,26 @@ describe '0.2', ->
       suggestion.should.have.property('open')
       {suggestions} = suggestion
       (Object.keys suggestions).length.should.be.equal(0)
-    
+
     it 'should support a particular resourceType definition', ->
       suggestion = suggestRAML ['resourceTypes', '- collection']
       suggestion.should.be.ok
       suggestion.should.not.have.property('open')
-    
+
     it 'should include displayName, description and type properties', ->
       suggestion = suggestRAML ['resourceTypes', '- collection']
       {suggestions} = suggestion
       (Object.keys suggestions).should.include 'displayName'
       (Object.keys suggestions).should.include 'description'
       (Object.keys suggestions).should.include 'type'
-    
+
     it 'should contain all the properties found in a resource', ->
       suggestion = suggestRAML ['resourceTypes', '- collection']
       {suggestions} = suggestion
       {suggestions: resourceSuggestions} = suggestRAML ['/hello']
 
       suggestions.should.include.keys (Object.keys resourceSuggestions)
-    
+
     it 'should support nesting inside properties', ->
       suggestion = suggestRAML ['resourceTypes', '- collection', 'get']
       suggestion.should.be.ok
@@ -252,7 +252,7 @@ describe '0.2', ->
     it 'should allow using "type" property', ->
       suggestion = suggestRAML ['resourceTypes', '- collection', 'type']
       suggestion.constructor.name.should.not.be.equal('InvalidState')
-      
+
       suggestion = suggestRAML ['resourceTypes', '- collection', 'type', 'hello']
       suggestion.constructor.name.should.be.equal('InvalidState')
 
@@ -262,31 +262,31 @@ describe '0.2', ->
       suggestion = suggestRAML ['/foo', 'get', 'responses', '200']
 
       arraysAsKeysSuggestion.suggestions.should.include.keys (Object.keys suggestion.suggestions)
-    
+
   describe 'Resources', ->
     it 'should offer "is" keyword as part of the suggestions', ->
       suggestion = suggestRAML ['/hello']
       {suggestions} = suggestion
       suggestions.should.include.keys 'is'
-      
+
       suggestion = suggestRAML ['/hello', '/bye']
       {suggestions} = suggestion
       suggestions.should.include.keys 'is'
-      
+
       suggestion = suggestRAML ['/hello/bye']
       {suggestions} = suggestion
       suggestions.should.include.keys 'is'
-      
+
 
     it 'should not offer the "use" keyword as part of the suggestions', ->
       suggestion = suggestRAML ['/hello']
       {suggestions} = suggestion
       suggestions.should.not.include.keys 'use'
-      
+
       suggestion = suggestRAML ['/hello', '/bye']
       {suggestions} = suggestion
       suggestions.should.not.include.keys 'use'
-      
+
       suggestion = suggestRAML ['/hello/bye']
       {suggestions} = suggestion
       suggestions.should.not.include.keys 'use'
@@ -295,71 +295,71 @@ describe '0.2', ->
       suggestion = suggestRAML ['/hello', 'is']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
-      
+
       suggestion = suggestRAML ['/hello', '/bye', 'is']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
-      
+
       suggestion = suggestRAML ['/hello/bye', 'is']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
-    
+
     it 'should offer "type" keyword as part of the suggestions', ->
       suggestion = suggestRAML ['/hello']
       {suggestions} = suggestion
       suggestions.should.include.keys 'type'
-      
+
       suggestion = suggestRAML ['/hello', '/bye']
       {suggestions} = suggestion
       suggestions.should.include.keys 'type'
-      
+
       suggestion = suggestRAML ['/hello/bye']
       {suggestions} = suggestion
       suggestions.should.include.keys 'type'
-      
+
 
     it 'should display "type" suggestion as being scalar (in order to indent it on the same line)', ->
       suggestion = suggestRAML ['/hello', 'type']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
-      
+
       suggestion = suggestRAML ['/hello', '/bye', 'type']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
-      
+
       suggestion = suggestRAML ['/hello/bye', 'type']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
-    
+
     it 'should allow to use "securedBy" to specify a securing policy for all the actions', ->
       suggestion = suggestRAML ['/hello', 'securedBy']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
-      
+
       suggestion = suggestRAML ['/hello', '/bye', 'securedBy']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
-      
+
       suggestion = suggestRAML ['/hello/bye', 'securedBy']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
-    
+
     it 'should suggest "baseUriParameters" and "uriParameters"', ->
       suggestion = suggestRAML ['/hello']
       suggestion.should.be.ok
-      
+
       {suggestions} = suggestion
 
       suggestions.should.include.key 'uriParameters'
       suggestions.should.include.key 'baseUriParameters'
-      
+
       suggestion = suggestRAML ['/hello', '/bye']
       suggestion.should.be.ok
       {suggestions} = suggestion
 
       suggestions.should.include.key 'uriParameters'
       suggestions.should.include.key 'baseUriParameters'
-      
+
       suggestion = suggestRAML ['/hello/bye']
       suggestion.should.be.ok
       {suggestions} = suggestion
@@ -372,24 +372,24 @@ describe '0.2', ->
       suggestion = suggestRAML ['/hello', 'get', 'securedBy']
       suggestion.should.be.ok
       suggestion.constructor.name.should.not.be.equal('InvalidState')
-    
+
   describe 'Security Schemes', ->
     it 'support "securitySchemes" keyword at the root level', ->
       suggestion = suggestRAML ['securitySchemes']
       suggestion.should.be.ok
       suggestion.constructor.name.should.not.be.equal('InvalidState')
       suggestion.suggestions.should.not.include.key 'get'
-    
+
     it 'should include the "description" keyword', ->
       suggestion = suggestRAML ['securitySchemes', '- oauth_2_0']
       {suggestions} = suggestion
       suggestions.should.include.keys 'description'
-    
+
     it 'should support "type" keyword', ->
       suggestion = suggestRAML ['securitySchemes', '- oauth_2_0']
       {suggestions} = suggestion
       suggestions.should.include.keys 'type'
-      
+
     it.skip 'should support "type" suggestions', ->
       suggestion = suggestRAML ['securitySchemes', '- oauth_2_0', 'type']
       {suggestions} = suggestion
@@ -403,7 +403,7 @@ describe '0.2', ->
       suggestions.should.include.keys 'requestTokenUri', 'authorizationUri', 'tokenCredentialsUri',
         'accessTokenUri', 'authorizationGrants', 'scopes'
       suggestion.should.have.property 'open'
-    
+
     it 'should support "securedBy" as a root element', ->
       suggestion = suggestRAML ['securedBy']
       suggestion.should.be.ok
@@ -416,16 +416,16 @@ describe '0.2', ->
       {suggestions} = suggestion
 
       suggestions.should.include.key 'mediaType'
-      
+
       suggestions.should.not.include.key 'defaultMediaType'
-      
+
 
     it 'should suggest "baseUriParameters" and not "uriParameters"', ->
       suggestion = suggestRAML []
       suggestion.should.be.ok
       {suggestions} = suggestion
       suggestions.should.include.key 'baseUriParameters'
-      
+
       suggestions.should.not.include.key 'uriParameters'
 
 
