@@ -145,157 +145,159 @@ transverse = (treeMap, root) ->
 @transverse = transverse
 
 # categories
-rootCategory = {category: 'root'}
-docsCategory = {category: 'docs'}
-parametersCategory = {category: 'parameters'}
-schemasCategory = {category: 'schemas'}
-bodyCategory = {category: 'body'}
-responsesCategory = {category: 'responses'}
-methodsCategory = {category: 'methods'}
-securityCategory = {category: 'security'}
+rootCategory        = {category: 'root'}
+docsCategory        = {category: 'docs'}
+parametersCategory  = {category: 'parameters'}
+schemasCategory     = {category: 'schemas'}
+bodyCategory        = {category: 'body'}
+responsesCategory   = {category: 'responses'}
+methodsCategory     = {category: 'methods'}
+securityCategory    = {category: 'security'}
 traitsAndResourceTypesCategory = {category: 'traits and resourceTypes'}
-resourcesCategory = {category: 'resources', id: 'resource'}
+resourcesCategory   = {category: 'resources', id: 'resource'}
 
 # Base Attributes
-
-title = new Tuple(new ConstantString('title'),  stringNode, rootCategory)
+title   = new Tuple(new ConstantString('title'),  stringNode, rootCategory)
 version = new Tuple(new ConstantString('version'),  stringNode, rootCategory)
 baseUri = new Tuple(new ConstantString('baseUri'),  stringNode, rootCategory)
-model = new Tuple(stringNode,  jsonSchema, rootCategory)
+model   = new Tuple(stringNode,  jsonSchema, rootCategory)
 schemas = new Tuple(new ConstantString('schemas'), new Multiple(model), rootCategory)
 
+# Protocols
+protocolsAlternatives = new Alternatives(new ConstantString('HTTP'), new ConstantString('HTTPS'))
+protocols             = new Tuple(new ConstantString('protocols'), protocolsAlternatives, rootCategory)
+
 # Parameter fields
+name          = new Tuple(new ConstantString('displayName'), stringNode, docsCategory)
+description   = new Tuple(new ConstantString('description'),  stringNode, docsCategory)
+parameterType = new Tuple(new ConstantString('type'), new Alternatives(
+                    new ConstantString('string'),
+                    new ConstantString('number'),
+                    new ConstantString('integer'),
+                    new ConstantString('date'),
+                    new ConstantString('boolean')), parametersCategory)
+enum2         = new Tuple(new ConstantString('enum'), new Multiple(stringNode), parametersCategory)
+pattern       = new Tuple(new ConstantString('pattern'),  regex, parametersCategory)
+minLength     = new Tuple(new ConstantString('minLength'),  integer, parametersCategory)
+maxLength     = new Tuple(new ConstantString('maxLength'),  integer, parametersCategory)
+minimum       = new Tuple(new ConstantString('minimum'),  integer, parametersCategory)
+maximum       = new Tuple(new ConstantString('maximum'),  integer, parametersCategory)
+required      = new Tuple(new ConstantString('required'),  boolean, parametersCategory)
+d3fault       = new Tuple(new ConstantString('default'),  stringNode, parametersCategory)
+parameterProperty = new Alternatives(name, description, parameterType, enum2, pattern, minLength,  maxLength, maximum, minimum, required, d3fault)
 
-name = new Tuple(new ConstantString('displayName'), stringNode, docsCategory)
-description = new Tuple(new ConstantString('description'),  stringNode, docsCategory)
-parameterType = new Tuple(new ConstantString('type'), new Alternatives(new ConstantString('string'), new ConstantString('number'), new ConstantString('integer'), new ConstantString('date'),
-  new ConstantString('boolean')), parametersCategory)
-enum2 = new Tuple(new ConstantString('enum'), new Multiple(stringNode), parametersCategory)
-pattern = new Tuple(new ConstantString('pattern'),  regex, parametersCategory)
-minLength = new Tuple(new ConstantString('minLength'),  integer, parametersCategory)
-maxLength = new Tuple(new ConstantString('maxLength'),  integer, parametersCategory)
-minimum = new Tuple(new ConstantString('minimum'),  integer, parametersCategory)
-maximum = new Tuple(new ConstantString('maximum'),  integer, parametersCategory)
-required = new Tuple(new ConstantString('required'),  boolean, parametersCategory)
-d3fault = new Tuple(new ConstantString('default'),  stringNode, parametersCategory)
-parameterProperty = new Alternatives(name, description, parameterType, enum2, pattern, minLength,
-  maxLength, maximum, minimum, required, d3fault)
-
-uriParameter = new Tuple(stringNode,  new Multiple(parameterProperty), parametersCategory)
-uriParameters = new Tuple(new ConstantString('uriParameters'),  new Multiple(uriParameter), parametersCategory)
+uriParameter      = new Tuple(stringNode,  new Multiple(parameterProperty), parametersCategory)
+uriParameters     = new Tuple(new ConstantString('uriParameters'),  new Multiple(uriParameter), parametersCategory)
 baseUriParameters = new Tuple(new ConstantString('baseUriParameters'),  new Multiple(uriParameter), parametersCategory)
-mediaType = new Tuple(new ConstantString('mediaType'),
-  new Alternatives(stringNode, new Multiple(stringNode)), rootCategory)
-chapter = new Alternatives(title, new Tuple(new ConstantString('content'),  stringNode))
-documentation = new Tuple(new ConstantString('documentation'),  new Multiple(chapter), rootCategory)
-summary = new Tuple(new ConstantString('summary'),  stringNode, docsCategory)
-example = new Tuple(new ConstantString('example'),  stringNode, docsCategory)
+mediaType         = new Tuple(new ConstantString('mediaType'), new Alternatives(stringNode, new Multiple(stringNode)), rootCategory)
+chapter           = new Alternatives(title, new Tuple(new ConstantString('content'),  stringNode))
+documentation     = new Tuple(new ConstantString('documentation'),  new Multiple(chapter), rootCategory)
+summary           = new Tuple(new ConstantString('summary'),  stringNode, docsCategory)
+example           = new Tuple(new ConstantString('example'),  stringNode, docsCategory)
 
 # Header
-
-header = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty, example)), parametersCategory)
+header  = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty, example)), parametersCategory)
 headers = new Tuple(new ConstantString('headers'),  new Multiple(header), parametersCategory)
 
 # Parameters
-
-queryParameterDefinition = new Tuple(stringNode,
-  new Multiple(new Alternatives(parameterProperty, example)), parametersCategory)
-queryParameters = new Tuple(new ConstantString('queryParameters'),  new Multiple(queryParameterDefinition), parametersCategory)
-formParameters = new Tuple(new ConstantString('formParameters'),
-  new Multiple(new Alternatives(parameterProperty, example)), parametersCategory)
-
+queryParameterDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty, example)), parametersCategory)
+queryParameters           = new Tuple(new ConstantString('queryParameters'),  new Multiple(queryParameterDefinition), parametersCategory)
+formParameters            = new Tuple(new ConstantString('formParameters'), new Multiple(new Alternatives(parameterProperty, example)), parametersCategory)
 
 # Body and MIME Type
-
-bodySchema = new Tuple(new ConstantString('schema'),  new Alternatives(xmlSchema, jsonSchema), schemasCategory)
-mimeTypeParameters = new Multiple(new Alternatives(bodySchema, example))
-mimeType = new Alternatives(
-  new Tuple(new ConstantString('application/x-www-form-urlencoded'), new Multiple(formParameters)),   new Tuple(new ConstantString('multipart/form-data'),  new Multiple(formParameters)),
-  new Tuple(new ConstantString('application/json'),  new Multiple(mimeTypeParameters))
-  new Tuple(new ConstantString('application/xml'),  new Multiple(mimeTypeParameters)),
-  new Tuple(stringNode,  new Multiple(mimeTypeParameters)))
-body = new Tuple(new ConstantString('body'),  new Multiple(mimeType), bodyCategory)
+bodySchema          = new Tuple(new ConstantString('schema'),  new Alternatives(xmlSchema, jsonSchema), schemasCategory)
+mimeTypeParameters  = new Multiple(new Alternatives(bodySchema, example))
+mimeType            = new Alternatives(
+                        new Tuple(new ConstantString('application/x-www-form-urlencoded'), new Multiple(formParameters)),   new Tuple(new ConstantString('multipart/form-data'),  new Multiple(formParameters)),
+                        new Tuple(new ConstantString('application/json'),  new Multiple(mimeTypeParameters))
+                        new Tuple(new ConstantString('application/xml'),  new Multiple(mimeTypeParameters)),
+                        new Tuple(stringNode,  new Multiple(mimeTypeParameters)))
+body                = new Tuple(new ConstantString('body'),  new Multiple(mimeType), bodyCategory)
 
 # Responses
-
-responseCode = new Tuple(new Multiple(integer),
-  new Multiple(new Alternatives(body, description)), responsesCategory)
-responses = new Tuple(new ConstantString('responses'),  new Multiple(responseCode), responsesCategory)
+responseCode  = new Tuple(new Multiple(integer), new Multiple(new Alternatives(body, description)), responsesCategory)
+responses     = new Tuple(new ConstantString('responses'),  new Multiple(responseCode), responsesCategory)
 
 # Secured by
-
 securedBy = new Tuple(new ConstantString('securedBy'), listNode, securityCategory)
 
 # Actions
-
-actionDefinition = new Alternatives(summary, description, headers, queryParameters,
-  body, responses, securedBy)
-action = new Alternatives(((new Tuple(actionName, new Multiple(actionDefinition), methodsCategory)) for actionName in [new ConstantString('get'), new ConstantString('post'), new ConstantString('put'), new ConstantString('delete'), new ConstantString('head'), new ConstantString('patch'), new ConstantString('options')])...)
-
+actionDefinition = new Alternatives(
+                                    summary,
+                                    description,
+                                    headers,
+                                    queryParameters,
+                                    body,
+                                    responses,
+                                    securedBy,
+                                    protocols)
+action = new Alternatives(
+  ((new Tuple(new ConstantString(actionName), new Multiple(actionDefinition), methodsCategory)) \
+      for actionName in ['get', 'post', 'put', 'delete', 'head', 'patch', 'options'])...)
 
 # Is
-
 isTrait = new Tuple(new ConstantString('is'),  listNode, traitsAndResourceTypesCategory)
 
 # Type
-
 type = new Tuple(new ConstantString('type'), stringNode, traitsAndResourceTypesCategory)
 
 # Resource
-
-postposedResource = new Tuple(stringNode, new PostposedExecution( -> resourceDefinition),
-  resourcesCategory)
-
-resourceDefinition = new Alternatives(name, action, isTrait, type, postposedResource, securedBy,
-  uriParameters, baseUriParameters)
-
-resource = new Tuple(stringNode,  new Multiple(resourceDefinition),
-  resourcesCategory)
+postposedResource   = new Tuple(stringNode, new PostposedExecution( -> resourceDefinition),  resourcesCategory)
+resourceDefinition  = new Alternatives(name, action, isTrait, type, postposedResource, securedBy,  uriParameters, baseUriParameters)
+resource            = new Tuple(stringNode,  new Multiple(resourceDefinition),  resourcesCategory)
 
 # Traits
-
-traitsDefinition = new Tuple(stringNode,  new Multiple(
-  new Alternatives(name, summary, description, headers, queryParameters, body, responses, securedBy)), traitsAndResourceTypesCategory)
-traits = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition), traitsAndResourceTypesCategory)
+traitsDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(name, summary, description, headers, queryParameters, body, responses, securedBy, protocols)), traitsAndResourceTypesCategory)
+traits            = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition), traitsAndResourceTypesCategory)
 
 # Resource Types
-
-resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(summary, description, name, action,
-  isTrait, type, securedBy, baseUriParameters, uriParameters)), traitsAndResourceTypesCategory)
-resourceTypes = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition, traitsAndResourceTypesCategory)
+resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(summary, description, name, action,  isTrait, type, securedBy, baseUriParameters, uriParameters)), traitsAndResourceTypesCategory)
+resourceTypes           = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition, traitsAndResourceTypesCategory)
 
 # Security Schemes
-securityType = new Tuple(new ConstantString('type'), new Alternatives(
-  new ConstantString('OAuth 1.0'), new ConstantString('OAuth 2.0'),
-  new ConstantString('Basic Authentication'),
-  new ConstantString('Digest Authentication'), stringNode), securityCategory)
-describedBy = new Tuple(new ConstantString('describedBy'),
-  new Alternatives(headers, queryParameters, responses), securityCategory)
-settings = new Tuple(new ConstantString('settings'), new Alternatives(
+settingAlternative = []
+# OAuth 1.0
+settingAlternative = settingAlternative.concat( [
+  new Tuple(new ConstantString('requestTokenUri'), stringNode,      {category: 'security', type: ['OAuth 1.0']})
+  new Tuple(new ConstantString('authorizationUri'), stringNode,     {category: 'security', type: ['OAuth 1.0', 'OAuth 2.0']})
+  new Tuple(new ConstantString('tokenCredentialsUri'), stringNode,  {category: 'security', type: ['OAuth 1.0']})
+])
+# OAuth 2.0
+settingAlternative = settingAlternative.concat( [
+  new Tuple(new ConstantString('accessTokenUri'), stringNode,       {category: 'security', type: ['OAuth 2.0']})
+  new Tuple(new ConstantString('authorizationGrants'), stringNode,  {category: 'security', type: ['OAuth 2.0']})
+  new Tuple(new ConstantString('scopes'), stringNode,               {category: 'security', type: ['OAuth 2.0']})
+])
+# Other
+settingAlternative = settingAlternative.concat( [
+  new Tuple(stringNode, stringNode, {category: 'security'})
+])
 
-  # OAuth 1.0
-  new Tuple(new ConstantString('requestTokenUri'), stringNode, {category: 'security', type: ['OAuth 1.0']}),
-  new Tuple(new ConstantString('authorizationUri'), stringNode,
-    {category: 'security', type: ['OAuth 1.0', 'OAuth 2.0']}),
-  new Tuple(new ConstantString('tokenCredentialsUri'), stringNode, {category: 'security', type: ['OAuth 1.0']})
-
-  # OAuth 2.0
-  new Tuple(new ConstantString('accessTokenUri'), stringNode, {category: 'security', type: ['OAuth 2.0']})
-  new Tuple(new ConstantString('authorizationGrants'), stringNode, {category: 'security', type: ['OAuth 2.0']})
-  new Tuple(new ConstantString('scopes'), stringNode, {category: 'security', type: ['OAuth 2.0']})
-
-  # Other
-  new Tuple(stringNode, stringNode, securityCategory)
-
-  ))
-securitySchemesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(
-  description, securityType, settings, describedBy)), securityCategory)
-securitySchemes = new Tuple(new ConstantString('securitySchemes'), securitySchemesDefinition, securityCategory)
+securityType              = new Tuple(new ConstantString('type'), new Alternatives(
+                                          new ConstantString('OAuth 1.0'),
+                                          new ConstantString('OAuth 2.0'),
+                                          new ConstantString('Basic Authentication'),
+                                          new ConstantString('Digest Authentication'), stringNode), {category: 'security'})
+describedBy               = new Tuple(new ConstantString('describedBy'), new Alternatives(headers, queryParameters, responses), {category: 'security'})
+settings                  = new Tuple(new ConstantString('settings'), new Alternatives(settingAlternative...))
+securitySchemesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, securityType, settings, describedBy)))
+securitySchemes           = new Tuple(new ConstantString('securitySchemes'), securitySchemesDefinition)
 
 # Root Element
-
-rootElement = new Alternatives(title, version, schemas, baseUri, baseUriParameters,
-  mediaType, documentation, resource, traits, resourceTypes, securitySchemes, securedBy)
+rootElement = new Alternatives(
+                                title,
+                                version,
+                                schemas,
+                                baseUri,
+                                baseUriParameters,
+                                mediaType,
+                                documentation,
+                                resource,
+                                traits,
+                                resourceTypes,
+                                securitySchemes,
+                                securedBy,
+                                protocols)
 root = new Multiple(rootElement)
 
 @root = root
