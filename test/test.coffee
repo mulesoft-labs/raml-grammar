@@ -256,6 +256,12 @@ describe '0.2', ->
       suggestion = suggestRAML ['resourceTypes', '- collection', 'type', 'hello']
       suggestion.constructor.name.should.be.equal('InvalidState')
 
+    it 'should suggest "protocols" key inside a resource type', ->
+      suggestion = suggestRAML [ 'resourceTypes', 'someResourceTypeName', 'get' ]
+      suggestion.should.be.ok
+      {suggestions} = suggestion
+      suggestions.should.include.key 'protocols'
+
   describe 'Responses', ->
     it 'should support arrays as keys', ->
       arraysAsKeysSuggestion = suggestRAML ['/foo', 'get', 'responses', '[200, 210]']
@@ -373,6 +379,12 @@ describe '0.2', ->
       suggestion.should.be.ok
       suggestion.constructor.name.should.not.be.equal('InvalidState')
 
+    it 'should suggest "protocols"', ->
+      suggestion = suggestRAML [ '/resource', 'get' ]
+      suggestion.should.be.ok
+      {suggestions} = suggestion
+      suggestions.should.include.key 'protocols'
+
   describe 'Security Schemes', ->
     it 'support "securitySchemes" keyword at the root level', ->
       suggestion = suggestRAML ['securitySchemes']
@@ -395,7 +407,6 @@ describe '0.2', ->
       {suggestions} = suggestion
       suggestions.should.include.keys 'OAuth 1.0', 'OAuth 2.0', 'Basic Authentication',
         'Digest Authentication'
-      suggestion.should.have.property 'open'
 
     it 'should support "settings" attribute', ->
       suggestion = suggestRAML ['securitySchemes', '- oauth_2_0', 'settings']
@@ -428,5 +439,34 @@ describe '0.2', ->
 
       suggestions.should.not.include.key 'uriParameters'
 
+    it 'should suggest "protocols"', ->
+      suggestion = suggestRAML []
+      suggestion.should.be.ok
+      {suggestions} = suggestion
 
+      suggestions.should.include.key 'protocols'
 
+  describe 'Protocols', ->
+    it.skip 'should suggest both HTTP and HTTPS inside a "protocols" key inside an action', ->
+      suggestion = suggestRAML [ '/resource', 'get', 'protocols' ]
+      suggestion.should.be.ok
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'HTTP', 'HTTPS'
+
+    it.skip 'should suggest both HTTP and HTTPS inside a "protocols" key in the root element', ->
+      suggestion = suggestRAML [ 'protocols' ]
+      suggestion.should.be.ok
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'HTTP', 'HTTPS'
+
+    it.skip 'should suggest both HTTP and HTTPS inside a "protocols" key in a trait', ->
+      suggestion = suggestRAML [ 'traits', 'someTraitName', 'protocols' ]
+      suggestion.should.be.ok
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'HTTP', 'HTTPS'
+
+    it.skip 'should suggest both HTTP and HTTPS inside a "protocols" key inside a resource type', ->
+      suggestion = suggestRAML [ 'resourceTypes', 'someResourceTypeName', 'get', 'protocols' ]
+      suggestion.should.be.ok
+      {suggestions} = suggestion
+      suggestions.should.include.keys 'HTTP', 'HTTPS'

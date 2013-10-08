@@ -58,7 +58,6 @@ class TreeMapToSuggestionTree extends TreeMap
         when SimpleSuggestion
           ((d[key] = value) for key, value of suggestions)
         when OpenSuggestion
-          ((d[key] = value) for key, value of suggestions)
           [open, metadata] = [possibleOpen, possibleMetadata]
         when SuggestionNode, StringWildcard, IntegerWildcard
           # TODO Nothing interesting to do here
