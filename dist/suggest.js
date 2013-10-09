@@ -369,7 +369,7 @@ securityCategory = {
 };
 
 traitsAndResourceTypesCategory = {
-  category: 'traits and resourceTypes'
+  category: 'traits and types'
 };
 
 resourcesCategory = {

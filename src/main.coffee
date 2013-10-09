@@ -153,7 +153,7 @@ bodyCategory        = {category: 'body'}
 responsesCategory   = {category: 'responses'}
 methodsCategory     = {category: 'methods'}
 securityCategory    = {category: 'security'}
-traitsAndResourceTypesCategory = {category: 'traits and resourceTypes'}
+traitsAndResourceTypesCategory = {category: 'traits and types'}
 resourcesCategory   = {category: 'resources', id: 'resource'}
 
 # Base Attributes
