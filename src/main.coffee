@@ -277,11 +277,11 @@ securityType              = new Tuple(new ConstantString('type'), new Alternativ
                                           new ConstantString('OAuth 1.0'),
                                           new ConstantString('OAuth 2.0'),
                                           new ConstantString('Basic Authentication'),
-                                          new ConstantString('Digest Authentication'), stringNode), {category: 'security'})
-describedBy               = new Tuple(new ConstantString('describedBy'), new Alternatives(headers, queryParameters, responses), {category: 'security'})
+                                          new ConstantString('Digest Authentication'), stringNode), securityCategory)
+describedBy               = new Tuple(new ConstantString('describedBy'), new Alternatives(headers, queryParameters, responses), securityCategory)
 settings                  = new Tuple(new ConstantString('settings'), new Alternatives(settingAlternative...))
 securitySchemesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, securityType, settings, describedBy)))
-securitySchemes           = new Tuple(new ConstantString('securitySchemes'), securitySchemesDefinition)
+securitySchemes           = new Tuple(new ConstantString('securitySchemes'), securitySchemesDefinition, securityCategory)
 
 # Root Element
 rootElement = new Alternatives(
