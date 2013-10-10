@@ -93,6 +93,8 @@ class TreeMapToSuggestionTree extends TreeMap
 suggestionTree = transverse(TreeMapToSuggestionTree, root)
 
 suggest = (root, index, path) ->
+  return root unless path
+
   key = path[index]
 
   if not key?

@@ -42,6 +42,14 @@ describe 'Tree Mapping', ->
     done()
 
 describe 'suggest',  ->
+  it 'should handle null path', (done) ->
+    suggestion = suggestRAML null
+    suggestion.should.be.ok
+    suggestion.should.have.property('suggestions')
+    {suggestions} = suggestion
+    suggestions.title.should.be.ok
+    done()
+
   it 'should handle root node', (done) ->
     suggestion = suggestRAML []
     suggestion.should.be.ok
