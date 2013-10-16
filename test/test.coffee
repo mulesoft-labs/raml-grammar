@@ -219,55 +219,19 @@ describe '0.2', ->
       suggestion = suggestRAML ['/resource', 'get', 'body', 'multipart/form-data', 'formParameters', 'someName']
       suggestion.should.be.ok
       {suggestions} = suggestion
-      (Object.keys suggestions).length.should.be.equal(12)
-      (Object.keys suggestions).should.include('displayName')
-      (Object.keys suggestions).should.include('description')
-      (Object.keys suggestions).should.include('type')
-      (Object.keys suggestions).should.include('enum')
-      (Object.keys suggestions).should.include('pattern')
-      (Object.keys suggestions).should.include('minLength')
-      (Object.keys suggestions).should.include('maxLength')
-      (Object.keys suggestions).should.include('maximum')
-      (Object.keys suggestions).should.include('minimum')
-      (Object.keys suggestions).should.include('required')
-      (Object.keys suggestions).should.include('default')
-      (Object.keys suggestions).should.include('example')
+      (Object.keys suggestions).should.be.deep.equal(['displayName', 'description', 'type', 'enum', 'pattern', 'minLength', 'maxLength', 'maximum', 'minimum', 'required', 'default', 'example'])
 
     it 'should support namedParameters properties in a formParameter in a trait', ->
       suggestion = suggestRAML ['traits', 'someTraitName', 'body', 'multipart/form-data', 'formParameters', 'someName']
       suggestion.should.be.ok
       {suggestions} = suggestion
-      (Object.keys suggestions).length.should.be.equal(12)
-      (Object.keys suggestions).should.include('displayName')
-      (Object.keys suggestions).should.include('description')
-      (Object.keys suggestions).should.include('type')
-      (Object.keys suggestions).should.include('enum')
-      (Object.keys suggestions).should.include('pattern')
-      (Object.keys suggestions).should.include('minLength')
-      (Object.keys suggestions).should.include('maxLength')
-      (Object.keys suggestions).should.include('maximum')
-      (Object.keys suggestions).should.include('minimum')
-      (Object.keys suggestions).should.include('required')
-      (Object.keys suggestions).should.include('default')
-      (Object.keys suggestions).should.include('example')
+      (Object.keys suggestions).should.be.deep.equal(['displayName', 'description', 'type', 'enum', 'pattern', 'minLength', 'maxLength', 'maximum', 'minimum', 'required', 'default', 'example'])
 
     it 'should support namedParameters properties in a formParameter in a resource type', ->
       suggestion = suggestRAML ['resourceTypes', 'someResourceTypeName', 'post', 'body', 'multipart/form-data', 'formParameters', 'someName']
       suggestion.should.be.ok
       {suggestions} = suggestion
-      (Object.keys suggestions).length.should.be.equal(12)
-      (Object.keys suggestions).should.include('displayName')
-      (Object.keys suggestions).should.include('description')
-      (Object.keys suggestions).should.include('type')
-      (Object.keys suggestions).should.include('enum')
-      (Object.keys suggestions).should.include('pattern')
-      (Object.keys suggestions).should.include('minLength')
-      (Object.keys suggestions).should.include('maxLength')
-      (Object.keys suggestions).should.include('maximum')
-      (Object.keys suggestions).should.include('minimum')
-      (Object.keys suggestions).should.include('required')
-      (Object.keys suggestions).should.include('default')
-      (Object.keys suggestions).should.include('example')
+      (Object.keys suggestions).should.be.deep.equal(['displayName', 'description', 'type', 'enum', 'pattern', 'minLength', 'maxLength', 'maximum', 'minimum', 'required', 'default', 'example'])
 
   describe 'Resource Types', ->
     it 'should support resourceTypes keyword', ->
