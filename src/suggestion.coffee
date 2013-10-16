@@ -3,30 +3,34 @@
 
 class Suggestion
 
+# A list of options to suggest
 class SimpleSuggestion extends Suggestion
   constructor: (@suggestions) ->
     @isScalar = false
 
+# Allows having a parent which matches any string
 class OpenSuggestion extends Suggestion
   constructor: (@suggestions, @open, @metadata) ->
     @isScalar = false
 
+# This is a branch node
 class SuggestItem then constructor: (@open, @value, @metadata) -> @isScalar = false
 
+# This represents a leaf node
 class SuggestionNode then constructor: (@name, @isScalar=true) ->
 
+# Matches any string
 class StringWildcard extends SuggestionNode then constructor: -> @isScalar = true
 
-stringWilcard = new StringWildcard
-
+# Matches any integer
 class IntegerWildcard extends SuggestionNode then constructor: -> @isScalar = true
-
-integerWildcard = new IntegerWildcard
 
 class InvalidState
   constructor: (@suggestions={}) ->
   open: -> @
 
+stringWilcard = new StringWildcard
+integerWildcard = new IntegerWildcard
 invalidState = new InvalidState
 
 class SuggestionNodeMap extends NodeMap
@@ -91,9 +95,13 @@ class TreeMapToSuggestionTree extends TreeMap
 
 
 suggestionTree = transverse(TreeMapToSuggestionTree, root)
+versionSuggestion = new SimpleSuggestion(new SuggestItem(null, "#%RAML 0.8", { category: "root" }));
 
 suggest = (root, index, path) ->
-  return root unless path
+  if path is null
+    return versionSuggestion
+  else if path is undefined
+    return root
 
   key = path[index]
 

@@ -47,6 +47,13 @@ describe 'suggest',  ->
     suggestion.should.be.ok
     suggestion.should.have.property('suggestions')
     {suggestions} = suggestion
+    done()
+
+  it 'should handle undefined path', (done) ->
+    suggestion = suggestRAML undefined
+    suggestion.should.be.ok
+    suggestion.should.have.property('suggestions')
+    {suggestions} = suggestion
     suggestions.title.should.be.ok
     done()
 
