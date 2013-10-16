@@ -28,15 +28,13 @@ required: ("required", Boolean)
 
 default: ("default", <any string>)
 
-uriParameters: ("uriParameters", ((<any string>, (displayName | description | type | enum | pattern | minLength | maxLength | maximum | minimum | required | default)*))*)
+baseUriParameters: ("baseUriParameters", ((<any string>, (displayName | description | type | enum | pattern | minLength | maxLength | maximum | minimum | required | default)*))*)
 
-defaultMediaTypes: ("defaultMediaTypes", <any string> | (<any string>)*)
+mediaType: ("mediaType", <any string> | (<any string>)*)
 
 content: ("content", <any string>)
 
 documentation: ("documentation", (title | content)*)
-
-summary: ("summary", <any string>)
 
 example: ("example", <any string>)
 
@@ -44,7 +42,7 @@ headers: ("headers", ((<any string>, (displayName | description | type | enum | 
 
 queryParameters: ("queryParameters", ((<any string>, (displayName | description | type | enum | pattern | minLength | maxLength | maximum | minimum | required | default | example)*))*)
 
-formParameters: ("formParameters", (displayName | description | type | enum | pattern | minLength | maxLength | maximum | minimum | required | default | example)*)
+formParameters: ("formParameters", ((<any string>, (displayName | description | type | enum | pattern | minLength | maxLength | maximum | minimum | required | default | example)*))*)
 
 application/x-www-form-urlencoded: ("application/x-www-form-urlencoded", (formParameters)*)
 
@@ -64,27 +62,31 @@ responses: ("responses", ((Integer)*)*)
 
 securedBy: ("securedBy", list)
 
-get: ("get", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+protocols: ("protocols", HTTP | HTTPS)
 
-post: ("post", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+get: ("get", (description | baseUriParameters | headers | queryParameters | body | responses | securedBy | protocols)*)
 
-put: ("put", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+post: ("post", (description | baseUriParameters | headers | queryParameters | body | responses | securedBy | protocols)*)
 
-delete: ("delete", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+put: ("put", (description | baseUriParameters | headers | queryParameters | body | responses | securedBy | protocols)*)
 
-head: ("head", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+delete: ("delete", (description | baseUriParameters | headers | queryParameters | body | responses | securedBy | protocols)*)
 
-path: ("path", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+head: ("head", (description | baseUriParameters | headers | queryParameters | body | responses | securedBy | protocols)*)
 
-options: ("options", (summary | description | headers | queryParameters | body | responses | securedBy)*)
+patch: ("patch", (description | baseUriParameters | headers | queryParameters | body | responses | securedBy | protocols)*)
+
+options: ("options", (description | baseUriParameters | headers | queryParameters | body | responses | securedBy | protocols)*)
 
 is: ("is", list)
 
 type': ("type", <any string>)
 
-traits: ("traits", ((<any string>, (displayName | summary | description | headers | queryParameters | body | responses | securedBy)*))*)
+uriParameters: ("uriParameters", ((<any string>, (displayName | description | type | enum | pattern | minLength | maxLength | maximum | minimum | required | default)*))*)
 
-resourceTypes: ("resourceTypes", (<any string>, (summary | description | displayName | get | post | put | delete | head | path | options | is | type' | securedBy)*))
+traits: ("traits", ((<any string>, (displayName | description | baseUriParameters | headers | queryParameters | body | responses | securedBy | protocols)*))*)
+
+resourceTypes: ("resourceTypes", (<any string>, (description | displayName | get | post | put | delete | head | patch | options | is | type' | securedBy | baseUriParameters | uriParameters)*))
 
 type'': ("type", OAuth 1.0 | OAuth 2.0 | Basic Authentication | Digest Authentication | <any string>)
 
@@ -106,4 +108,4 @@ describedBy: ("describedBy", headers | queryParameters | responses)
 
 securitySchemes: ("securitySchemes", (<any string>, (description | type'' | settings | describedBy)*))
 
-root: (title | version | schemas | baseUri | uriParameters | defaultMediaTypes | documentation | (<any string>, (displayName | get | post | put | delete | head | path | options | is | type' | (<any string>, PostposedExecution) | securedBy)*) | traits | resourceTypes | securitySchemes | securedBy)*
+root: (title | version | schemas | baseUri | baseUriParameters | mediaType | documentation | (<any string>, (displayName | get | post | put | delete | head | patch | options | is | type' | (<any string>, PostposedExecution) | securedBy | uriParameters | baseUriParameters)*) | traits | resourceTypes | securitySchemes | securedBy | protocols)*

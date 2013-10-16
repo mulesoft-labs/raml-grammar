@@ -52,7 +52,6 @@ class NodeMap
   @listNode: notImplemented
   @constantString: notImplemented
 
-
 # primitives
 markdown = new Markdown()
 include = new Include()
@@ -192,7 +191,6 @@ baseUriParameters = new Tuple(new ConstantString('baseUriParameters'),  new Mult
 mediaType         = new Tuple(new ConstantString('mediaType'), new Alternatives(stringNode, new Multiple(stringNode)), rootCategory)
 chapter           = new Alternatives(title, new Tuple(new ConstantString('content'),  stringNode))
 documentation     = new Tuple(new ConstantString('documentation'),  new Multiple(chapter), rootCategory)
-summary           = new Tuple(new ConstantString('summary'),  stringNode, docsCategory)
 example           = new Tuple(new ConstantString('example'),  stringNode, docsCategory)
 
 # Header
@@ -202,7 +200,8 @@ headers = new Tuple(new ConstantString('headers'),  new Multiple(header), parame
 # Parameters
 queryParameterDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty, example)), parametersCategory)
 queryParameters           = new Tuple(new ConstantString('queryParameters'),  new Multiple(queryParameterDefinition), parametersCategory)
-formParameters            = new Tuple(new ConstantString('formParameters'), new Multiple(new Alternatives(parameterProperty, example)), parametersCategory)
+formParameterDefinition   = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty, example)), parametersCategory)
+formParameters            = new Tuple(new ConstantString('formParameters'), new Multiple(formParameterDefinition), parametersCategory)
 
 # Body and MIME Type
 bodySchema          = new Tuple(new ConstantString('schema'),  new Alternatives(xmlSchema, jsonSchema), schemasCategory)
@@ -223,8 +222,8 @@ securedBy = new Tuple(new ConstantString('securedBy'), listNode, securityCategor
 
 # Actions
 actionDefinition = new Alternatives(
-                                    summary,
                                     description,
+                                    baseUriParameters,
                                     headers,
                                     queryParameters,
                                     body,
@@ -247,11 +246,11 @@ resourceDefinition  = new Alternatives(name, action, isTrait, type, postposedRes
 resource            = new Tuple(stringNode,  new Multiple(resourceDefinition),  resourcesCategory)
 
 # Traits
-traitsDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(name, summary, description, headers, queryParameters, body, responses, securedBy, protocols)), traitsAndResourceTypesCategory)
+traitsDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(name, description, baseUriParameters, headers, queryParameters, body, responses, securedBy, protocols)), traitsAndResourceTypesCategory)
 traits            = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition), traitsAndResourceTypesCategory)
 
 # Resource Types
-resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(summary, description, name, action,  isTrait, type, securedBy, baseUriParameters, uriParameters)), traitsAndResourceTypesCategory)
+resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, name, action,  isTrait, type, securedBy, baseUriParameters, uriParameters)), traitsAndResourceTypesCategory)
 resourceTypes           = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition, traitsAndResourceTypesCategory)
 
 # Security Schemes
