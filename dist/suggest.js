@@ -790,9 +790,12 @@ TreeMapToSuggestionTree = (function(_super) {
 
 suggestionTree = transverse(TreeMapToSuggestionTree, root);
 
-versionSuggestion = new SimpleSuggestion(new SuggestItem(null, "#%RAML 0.8", {
-  category: "root"
-}));
+versionSuggestion = new SimpleSuggestion({
+  "#%RAML 0.8": new SuggestItem(null, "#%RAML 0.8", {
+    category: "root",
+    isText: true
+  })
+});
 
 suggest = function(root, index, path) {
   var currentSuggestion, key, suggestions, val;

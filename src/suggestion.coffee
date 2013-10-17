@@ -95,7 +95,7 @@ class TreeMapToSuggestionTree extends TreeMap
 
 
 suggestionTree = transverse(TreeMapToSuggestionTree, root)
-versionSuggestion = new SimpleSuggestion(new SuggestItem(null, "#%RAML 0.8", { category: "root" }));
+versionSuggestion = new SimpleSuggestion({"#%RAML 0.8": new SuggestItem(null, "#%RAML 0.8", { category: "root", isText: true })});
 
 suggest = (root, index, path) ->
   if path is null
