@@ -70,15 +70,15 @@ class TreeMapToSuggestionTree extends TreeMap
           throw new Error("Invalid type: #{alternative} of type #{constructor}")
     if open?
       new OpenSuggestion(d, ( -> do open), metadata)
-    else 
+    else
       new SimpleSuggestion(d)
 
-  @multiple: (root, element) -> 
+  @multiple: (root, element) ->
     element
 
-  @tuple: (root, key, value) -> 
+  @tuple: (root, key, value) ->
     {metadata} = root
-    
+
     switch key.constructor
       when StringWildcard, IntegerWildcard
         new OpenSuggestion({}, functionize(value), metadata)
@@ -95,7 +95,7 @@ class TreeMapToSuggestionTree extends TreeMap
 
 
 suggestionTree = transverse(TreeMapToSuggestionTree, root)
-versionSuggestion = new SimpleSuggestion({"#%RAML 0.8": new SuggestItem(null, "#%RAML 0.8", { category: "root", isText: true })});
+versionSuggestion = new SimpleSuggestion({"#%RAML 0.8": new SuggestItem(null, "#%RAML 0.8", { category: "main", isText: true })});
 
 suggest = (root, index, path) ->
   if path is null
@@ -113,7 +113,7 @@ suggest = (root, index, path) ->
     currentSuggestion = suggestions[key]
   else
     currentSuggestion = undefined
-  
+
   val = if currentSuggestion
     switch currentSuggestion.constructor
       when OpenSuggestion, SuggestItem
