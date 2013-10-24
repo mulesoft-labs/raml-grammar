@@ -190,7 +190,7 @@ uriParameters     = new Tuple(new ConstantString('uriParameters'),  new Multiple
 baseUriParameters = new Tuple(new ConstantString('baseUriParameters'),  new Multiple(uriParameter), parametersCategory)
 mediaType         = new Tuple(new ConstantString('mediaType'), new Alternatives(stringNode, new Multiple(stringNode)), rootCategory)
 chapter           = new Alternatives(title, new Tuple(new ConstantString('content'),  stringNode))
-documentation     = new Tuple(new ConstantString('documentation'),  new Multiple(chapter), rootCategory)
+documentation     = new Tuple(new ConstantString('documentation'),  new Multiple(chapter), docsCategory)
 example           = new Tuple(new ConstantString('example'),  stringNode, docsCategory)
 
 # Header
