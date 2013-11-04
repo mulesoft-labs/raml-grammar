@@ -220,6 +220,9 @@ responses     = new Tuple(new ConstantString('responses'),  new Multiple(respons
 # Secured by
 securedBy = new Tuple(new ConstantString('securedBy'), listNode, securityCategory)
 
+# Is
+isTrait = new Tuple(new ConstantString('is'),  listNode, traitsAndResourceTypesCategory)
+
 # Actions
 actionDefinition = new Alternatives(
                                     description,
@@ -229,13 +232,11 @@ actionDefinition = new Alternatives(
                                     body,
                                     responses,
                                     securedBy,
-                                    protocols)
+                                    protocols,
+                                    isTrait)
 action = new Alternatives(
   ((new Tuple(new ConstantString(actionName), new Multiple(actionDefinition), methodsCategory)) \
       for actionName in ['get', 'post', 'put', 'delete', 'head', 'patch', 'options'])...)
-
-# Is
-isTrait = new Tuple(new ConstantString('is'),  listNode, traitsAndResourceTypesCategory)
 
 # Type
 type = new Tuple(new ConstantString('type'), stringNode, traitsAndResourceTypesCategory)

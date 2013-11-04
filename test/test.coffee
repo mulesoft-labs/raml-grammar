@@ -203,7 +203,9 @@ describe '0.2', ->
       suggestion = suggestRAML ['traits', '- traitA']
       {suggestions} = suggestion
       {suggestions: getMethodSuggestions} = suggestRAML ['/hello', 'get']
-      suggestions.should.include.keys (Object.keys getMethodSuggestions)
+      suggestionsCopy = JSON.parse(JSON.stringify(getMethodSuggestions))
+      delete suggestionsCopy.is
+      suggestions.should.include.keys (Object.keys suggestionsCopy)
 
     it 'should support nesting inside properties', ->
       suggestion = suggestRAML ['traits', 'traitA', 'responses']
@@ -418,6 +420,12 @@ describe '0.2', ->
       suggestion.should.be.ok
       {suggestions} = suggestion
       suggestions.should.include.key 'protocols'
+    
+    it 'should suggest "is" inside an action', ->
+      suggestion = suggestRAML [ '/resource', 'get' ]
+      suggestion.should.be.ok
+      {suggestions} = suggestion
+      suggestions.should.include.key 'is'
 
   describe 'Security Schemes', ->
     it 'support "securitySchemes" keyword at the root level', ->
