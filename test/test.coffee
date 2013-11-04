@@ -4,6 +4,19 @@
 type =
   of: type
 should = (require '../node_modules/chai/index').should()
+supportedHttpMethods = [
+  # RFC2616
+  'options',
+  'get',
+  'head',
+  'post',
+  'put',
+  'delete',
+  'trace',
+  'connect',
+  # RFC5789
+  'patch'
+]
 
 class TreeMapToString extends TreeMap
   @constructor: () ->
@@ -76,7 +89,7 @@ describe 'suggest',  ->
     suggestion = suggestRAML ['/hello', '/this', '/{is}', '/a', '/resource']
     suggestion.should.have.property('suggestions')
     {suggestions} = suggestion
-    suggestions.should.include.keys('get', 'put', 'post', 'delete')
+    suggestions.should.include.keys(supportedHttpMethods)
 
     get = suggestions.get
     get.should.have.property.open
@@ -147,14 +160,13 @@ describe 'Methods', ->
 
 describe 'Metadata', ->
   describe 'Category assignment', ->
-    it 'should be "actions" for get, post, put and delete', (done) ->
+    it 'should be "actions" for supported HTTP methods', (done) ->
       suggestion = suggestRAML ['/pet']
       suggestion.should.have.property('suggestions')
       suggestions = suggestion.suggestions
-      suggestions.should.have.property(action) for action in ['get', 'put', 'post',
-        'delete']
+      suggestions.should.have.property(action) for action in supportedHttpMethods
 
-      for methodName in ['get', 'put', 'post', 'delete']
+      for methodName in supportedHttpMethods
         method = suggestions[methodName]
         method.should.have.property.open
         open = method.open
@@ -420,7 +432,7 @@ describe '0.2', ->
       suggestion.should.be.ok
       {suggestions} = suggestion
       suggestions.should.include.key 'protocols'
-    
+
     it 'should suggest "is" inside an action', ->
       suggestion = suggestRAML [ '/resource', 'get' ]
       suggestion.should.be.ok

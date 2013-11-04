@@ -236,7 +236,19 @@ actionDefinition = new Alternatives(
                                     isTrait)
 action = new Alternatives(
   ((new Tuple(new ConstantString(actionName), new Multiple(actionDefinition), methodsCategory)) \
-      for actionName in ['get', 'post', 'put', 'delete', 'head', 'patch', 'options'])...)
+      for actionName in [
+        # RFC2616
+        'options',
+        'get',
+        'head',
+        'post',
+        'put',
+        'delete',
+        'trace',
+        'connect',
+        # RFC5789
+        'patch'
+      ])...)
 
 # Type
 type = new Tuple(new ConstantString('type'), stringNode, traitsAndResourceTypesCategory)
