@@ -1,5 +1,7 @@
 # RAML Suggestion Engine
 
+[![Build Status](https://travis-ci.org/mulesoft/raml-grammar.png)](https://travis-ci.org/mulesoft/raml-grammar)
+
 This project provides the suggestions to be used on the [API Designer](https://github.com/mulesoft/api-designer).
 
 ## How to build
