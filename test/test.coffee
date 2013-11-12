@@ -524,3 +524,22 @@ describe '0.2', ->
       suggestion.should.be.ok
       {suggestions} = suggestion
       suggestions.should.include.keys 'HTTP', 'HTTPS'
+
+describe 'Optional elements (get?, post?...)', ->
+  it 'should not display them as options', ->
+    {suggestions} = suggestRAML ['/resource']
+    suggestions.should.not.include.keys ((method+'?') for method in supportedHttpMethods)
+    
+    {suggestions} = suggestRAML ['/resource', '/nested']
+    suggestions.should.not.include.keys ((method+'?') for method in supportedHttpMethods)
+    
+    {suggestions} = suggestRAML ['/resource/merged']
+    suggestions.should.not.include.keys ((method+'?') for method in supportedHttpMethods)
+    
+  it 'should display the same susggestions as in their non-optional counterparts', ->
+    {suggestions: optionalSuggestions} = suggestRAML [ '/hello', 'get?' ]
+    {suggestions} = suggestRAML [ '/hello', 'get' ]
+
+    optionalSuggestions.should.be.deep.equal(suggestions)
+
+

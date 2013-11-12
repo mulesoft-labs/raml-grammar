@@ -114,6 +114,14 @@ suggest = (root, index, path) ->
   else
     currentSuggestion = undefined
 
+  # Check if key is an optional one
+  [baseKey..., modifier] = key
+  baseKey = baseKey.join ''
+  if modifier == '?'
+    possibleSuggestion = suggestions[baseKey]
+    if possibleSuggestion?.metadata?.canBeOptional
+      currentSuggestion = possibleSuggestion
+
   val = if currentSuggestion
     switch currentSuggestion.constructor
       when OpenSuggestion, SuggestItem

@@ -361,7 +361,8 @@ responsesCategory = {
 };
 
 methodsCategory = {
-  category: 'methods'
+  category: 'methods',
+  canBeOptional: true
 };
 
 securityCategory = {
@@ -558,7 +559,8 @@ this.integer = integer;
 },{"./utils.coffee":3}],2:[function(require,module,exports){
 var IntegerWildcard, InvalidState, NodeMap, OpenSuggestion, SimpleSuggestion, StringWildcard, SuggestItem, Suggestion, SuggestionNode, SuggestionNodeMap, TreeMap, TreeMapToSuggestionTree, functionize, integer, integerWildcard, invalidState, root, stringWilcard, suggest, suggestRAML, suggestionTree, transverse, transversePrimitive, type, versionSuggestion, _ref, _ref1, _ref2,
   __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __slice = [].slice;
 
 type = require('./utils.coffee').typ3;
 
@@ -798,7 +800,7 @@ versionSuggestion = new SimpleSuggestion({
 });
 
 suggest = function(root, index, path) {
-  var currentSuggestion, key, suggestions, val;
+  var baseKey, currentSuggestion, key, modifier, possibleSuggestion, suggestions, val, _i, _ref3;
   if (path === null) {
     return versionSuggestion;
   } else if (path === void 0) {
@@ -813,6 +815,14 @@ suggest = function(root, index, path) {
     currentSuggestion = suggestions[key];
   } else {
     currentSuggestion = void 0;
+  }
+  baseKey = 2 <= key.length ? __slice.call(key, 0, _i = key.length - 1) : (_i = 0, []), modifier = key[_i++];
+  baseKey = baseKey.join('');
+  if (modifier === '?') {
+    possibleSuggestion = suggestions[baseKey];
+    if (possibleSuggestion != null ? (_ref3 = possibleSuggestion.metadata) != null ? _ref3.canBeOptional : void 0 : void 0) {
+      currentSuggestion = possibleSuggestion;
+    }
   }
   val = (function() {
     if (currentSuggestion) {
