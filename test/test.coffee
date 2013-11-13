@@ -192,7 +192,7 @@ describe 'InvalidState', ->
 describe 'cache', ->
   # TODO Add tests here
 
-describe '0.2', ->
+describe '0.8', ->
   describe 'Traits', ->
     it 'should support traits keyword', ->
       suggestion = suggestRAML ['traits']
@@ -267,12 +267,13 @@ describe '0.2', ->
       suggestion.should.be.ok
       suggestion.should.not.have.property('open')
 
-    it 'should include displayName, description and type properties', ->
+    it 'should include displayName, description, type and usage properties', ->
       suggestion = suggestRAML ['resourceTypes', '- collection']
       {suggestions} = suggestion
       (Object.keys suggestions).should.include 'displayName'
       (Object.keys suggestions).should.include 'description'
       (Object.keys suggestions).should.include 'type'
+      (Object.keys suggestions).should.include 'usage'
 
     it 'should contain all the properties found in a resource', ->
       suggestion = suggestRAML ['resourceTypes', '- collection']

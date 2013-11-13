@@ -262,8 +262,10 @@ resource            = new Tuple(stringNode,  new Multiple(resourceDefinition),  
 traitsDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(name, description, baseUriParameters, headers, queryParameters, body, responses, securedBy, protocols)), traitsAndResourceTypesCategory)
 traits            = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition), traitsAndResourceTypesCategory)
 
+usage = new Tuple(new ConstantString('usage'), stringNode)
+
 # Resource Types
-resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, name, action,  isTrait, type, securedBy, baseUriParameters, uriParameters)), traitsAndResourceTypesCategory)
+resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, name, action,  isTrait, type, securedBy, baseUriParameters, uriParameters, usage)), traitsAndResourceTypesCategory)
 resourceTypes           = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition, traitsAndResourceTypesCategory)
 
 # Security Schemes
