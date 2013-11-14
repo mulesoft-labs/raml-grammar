@@ -183,16 +183,13 @@ minimum       = new Tuple(new ConstantString('minimum'),  integer, parametersCat
 maximum       = new Tuple(new ConstantString('maximum'),  integer, parametersCategory)
 required      = new Tuple(new ConstantString('required'),  boolean, parametersCategory)
 d3fault       = new Tuple(new ConstantString('default'),  stringNode, parametersCategory)
+example       = new Tuple(new ConstantString('example'),  stringNode, docsCategory)
 
-parameterProperties = [name, description, parameterType, enum2, pattern, minLength,  maxLength, maximum, minimum, required, d3fault]
+parameterProperties = [name, description, parameterType, enum2, pattern, minLength,  maxLength, maximum, minimum, required, d3fault, example]
 
 parameterProperty = new Alternatives(parameterProperties...)
 
-example           = new Tuple(new ConstantString('example'),  stringNode, docsCategory)
-
-parameterPropertyWithExample = new Alternatives(parameterProperties.concat([example])...)
-
-uriParameter      = new Tuple(stringNode,  new Multiple(parameterPropertyWithExample), parametersCategory)
+uriParameter      = new Tuple(stringNode,  new Multiple(parameterProperty), parametersCategory)
 uriParameters     = new Tuple(new ConstantString('uriParameters'),  new Multiple(uriParameter), parametersCategory)
 baseUriParameters = new Tuple(new ConstantString('baseUriParameters'),  new Multiple(uriParameter), parametersCategory)
 mediaType         = new Tuple(new ConstantString('mediaType'), new Alternatives(stringNode, new Multiple(stringNode)), rootCategory)
@@ -200,13 +197,13 @@ chapter           = new Alternatives(title, new Tuple(new ConstantString('conten
 documentation     = new Tuple(new ConstantString('documentation'),  new Multiple(chapter), docsCategory)
 
 # Header
-header  = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty, example)), parametersCategory)
+header  = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty)), parametersCategory)
 headers = new Tuple(new ConstantString('headers'),  new Multiple(header), parametersCategory)
 
 # Parameters
-queryParameterDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty, example)), parametersCategory)
+queryParameterDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty)), parametersCategory)
 queryParameters           = new Tuple(new ConstantString('queryParameters'),  new Multiple(queryParameterDefinition), parametersCategory)
-formParameterDefinition   = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty, example)), parametersCategory)
+formParameterDefinition   = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty)), parametersCategory)
 formParameters            = new Tuple(new ConstantString('formParameters'), new Multiple(formParameterDefinition), parametersCategory)
 
 # Body and MIME Type
