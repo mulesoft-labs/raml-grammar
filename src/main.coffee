@@ -183,15 +183,21 @@ minimum       = new Tuple(new ConstantString('minimum'),  integer, parametersCat
 maximum       = new Tuple(new ConstantString('maximum'),  integer, parametersCategory)
 required      = new Tuple(new ConstantString('required'),  boolean, parametersCategory)
 d3fault       = new Tuple(new ConstantString('default'),  stringNode, parametersCategory)
-parameterProperty = new Alternatives(name, description, parameterType, enum2, pattern, minLength,  maxLength, maximum, minimum, required, d3fault)
 
-uriParameter      = new Tuple(stringNode,  new Multiple(parameterProperty), parametersCategory)
+parameterProperties = [name, description, parameterType, enum2, pattern, minLength,  maxLength, maximum, minimum, required, d3fault]
+
+parameterProperty = new Alternatives(parameterProperties...)
+
+example           = new Tuple(new ConstantString('example'),  stringNode, docsCategory)
+
+parameterPropertyWithExample = new Alternatives(parameterProperties.concat([example])...)
+
+uriParameter      = new Tuple(stringNode,  new Multiple(parameterPropertyWithExample), parametersCategory)
 uriParameters     = new Tuple(new ConstantString('uriParameters'),  new Multiple(uriParameter), parametersCategory)
 baseUriParameters = new Tuple(new ConstantString('baseUriParameters'),  new Multiple(uriParameter), parametersCategory)
 mediaType         = new Tuple(new ConstantString('mediaType'), new Alternatives(stringNode, new Multiple(stringNode)), rootCategory)
 chapter           = new Alternatives(title, new Tuple(new ConstantString('content'),  stringNode))
 documentation     = new Tuple(new ConstantString('documentation'),  new Multiple(chapter), docsCategory)
-example           = new Tuple(new ConstantString('example'),  stringNode, docsCategory)
 
 # Header
 header  = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty, example)), parametersCategory)
