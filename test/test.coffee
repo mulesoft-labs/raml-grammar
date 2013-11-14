@@ -428,7 +428,6 @@ describe '0.8', ->
 
     it 'should suggest "example" inside and "baseUriParameters"', ->
       {suggestions} = suggestRAML ['/hello/bye', 'baseUriParameters', 'myParameter']
-      `debugger`
       suggestions.should.include.key 'example'
 
   describe 'Actions', ->
