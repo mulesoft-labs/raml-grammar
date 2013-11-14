@@ -1,5 +1,5 @@
 ;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
-var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, ListNode, Markdown, Multiple, Node, NodeMap, PostposedExecution, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionDefinitionWithUsage, actionName, actionWithUsage, baseUri, baseUriParameters, body, bodyCategory, bodySchema, boolean, cache, chapter, d3fault, describedBy, description, docsCategory, documentation, enum2, example, formParameterDefinition, formParameters, header, headers, include, integer, isTrait, jsonSchema, listNode, markdown, maxLength, maximum, mediaType, methodsCategory, mimeType, mimeTypeParameters, minLength, minimum, model, name, notImplemented, parameterProperty, parameterType, parametersCategory, pattern, postposedResource, protocols, protocolsAlternatives, queryParameterDefinition, queryParameters, regex, required, resource, resourceDefinition, resourceTypes, resourceTypesDefinition, resourcesCategory, responseCode, responses, responsesCategory, root, rootCategory, rootElement, schemas, schemasCategory, securedBy, securityCategory, securitySchemes, securitySchemesDefinition, securityType, settingAlternative, settings, stringNode, title, traits, traitsAndResourceTypesCategory, traitsDefinition, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, usage, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
+var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, ListNode, Markdown, Multiple, Node, NodeMap, PostposedExecution, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionDefinitionWithUsage, actionName, actionWithUsage, baseUri, baseUriParameters, body, bodyCategory, bodySchema, boolean, cache, chapter, d3fault, describedBy, description, docsCategory, documentation, enum2, example, formParameterDefinition, formParameters, header, headers, include, integer, isTrait, jsonSchema, listNode, markdown, maxLength, maximum, mediaType, methodsCategory, mimeType, mimeTypeParameters, minLength, minimum, model, name, notImplemented, parameterProperties, parameterProperty, parameterType, parametersCategory, pattern, postposedResource, protocols, protocolsAlternatives, queryParameterDefinition, queryParameters, regex, required, resource, resourceDefinition, resourceTypes, resourceTypesDefinition, resourcesCategory, responseCode, responses, responsesCategory, root, rootCategory, rootElement, schemas, schemasCategory, securedBy, securityCategory, securitySchemes, securitySchemesDefinition, securityType, settingAlternative, settings, stringNode, title, traits, traitsAndResourceTypesCategory, traitsDefinition, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, usage, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
   __slice = [].slice,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -414,7 +414,15 @@ required = new Tuple(new ConstantString('required'), boolean, parametersCategory
 
 d3fault = new Tuple(new ConstantString('default'), stringNode, parametersCategory);
 
-parameterProperty = new Alternatives(name, description, parameterType, enum2, pattern, minLength, maxLength, maximum, minimum, required, d3fault);
+example = new Tuple(new ConstantString('example'), stringNode, docsCategory);
+
+parameterProperties = [name, description, parameterType, enum2, pattern, minLength, maxLength, maximum, minimum, required, d3fault, example];
+
+parameterProperty = (function(func, args, ctor) {
+  ctor.prototype = func.prototype;
+  var child = new ctor, result = func.apply(child, args);
+  return Object(result) === result ? result : child;
+})(Alternatives, parameterProperties, function(){});
 
 uriParameter = new Tuple(stringNode, new Multiple(parameterProperty), parametersCategory);
 
@@ -428,17 +436,15 @@ chapter = new Alternatives(title, new Tuple(new ConstantString('content'), strin
 
 documentation = new Tuple(new ConstantString('documentation'), new Multiple(chapter), docsCategory);
 
-example = new Tuple(new ConstantString('example'), stringNode, docsCategory);
-
-header = new Tuple(stringNode, new Multiple(new Alternatives(parameterProperty, example)), parametersCategory);
+header = new Tuple(stringNode, new Multiple(new Alternatives(parameterProperty)), parametersCategory);
 
 headers = new Tuple(new ConstantString('headers'), new Multiple(header), parametersCategory);
 
-queryParameterDefinition = new Tuple(stringNode, new Multiple(new Alternatives(parameterProperty, example)), parametersCategory);
+queryParameterDefinition = new Tuple(stringNode, new Multiple(new Alternatives(parameterProperty)), parametersCategory);
 
 queryParameters = new Tuple(new ConstantString('queryParameters'), new Multiple(queryParameterDefinition), parametersCategory);
 
-formParameterDefinition = new Tuple(stringNode, new Multiple(new Alternatives(parameterProperty, example)), parametersCategory);
+formParameterDefinition = new Tuple(stringNode, new Multiple(new Alternatives(parameterProperty)), parametersCategory);
 
 formParameters = new Tuple(new ConstantString('formParameters'), new Multiple(formParameterDefinition), parametersCategory);
 

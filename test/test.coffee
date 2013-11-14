@@ -434,6 +434,14 @@ describe '0.8', ->
       {suggestions} = suggestRAML ['/hello/bye']
       suggestions.should.not.include.key 'usage'
 
+    it 'should suggest "example" inside and "uriParameters"', ->
+      {suggestions} = suggestRAML ['/hello/bye', 'uriParameters', 'myParameter']
+      suggestions.should.include.key 'example'
+
+    it 'should suggest "example" inside and "baseUriParameters"', ->
+      {suggestions} = suggestRAML ['/hello/bye', 'baseUriParameters', 'myParameter']
+      suggestions.should.include.key 'example'
+
   describe 'Actions', ->
     it 'should allow to use "securedBy" to specify a securing policy', ->
       suggestion = suggestRAML ['/hello', 'get', 'securedBy']
