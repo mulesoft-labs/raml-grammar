@@ -218,6 +218,10 @@ describe '0.8', ->
       suggestionsCopy = JSON.parse(JSON.stringify(getMethodSuggestions))
       delete suggestionsCopy.is
       suggestions.should.include.keys (Object.keys suggestionsCopy)
+    
+    it 'should contain "usage" property', ->
+      {suggestions} = suggestRAML ['traits', '- traitA']
+      suggestions.should.include.key 'usage'
 
     it 'should support nesting inside properties', ->
       suggestion = suggestRAML ['traits', 'traitA', 'responses']
@@ -268,23 +272,17 @@ describe '0.8', ->
       suggestion.should.not.have.property('open')
 
     it 'should include displayName, description, type and usage properties', ->
-      suggestion = suggestRAML ['resourceTypes', '- collection']
-      {suggestions} = suggestion
-      (Object.keys suggestions).should.include 'displayName'
-      (Object.keys suggestions).should.include 'description'
-      (Object.keys suggestions).should.include 'type'
-      (Object.keys suggestions).should.include 'usage'
+      {suggestions} = suggestRAML ['resourceTypes', '- collection']
+      suggestions.should.include.keys 'displayName',  'description',  'type',  'usage'
 
     it 'should contain all the properties found in a resource', ->
-      suggestion = suggestRAML ['resourceTypes', '- collection']
-      {suggestions} = suggestion
+      {suggestions} = suggestRAML ['resourceTypes', '- collection']
       {suggestions: resourceSuggestions} = suggestRAML ['/hello']
 
       suggestions.should.include.keys (Object.keys resourceSuggestions)
 
     it 'should support nesting inside properties', ->
       suggestion = suggestRAML ['resourceTypes', '- collection', 'get']
-      suggestion.should.be.ok
       suggestion.should.not.have.property 'open'
       {suggestions} = suggestion
       {suggestions: getMethodSuggestions} = suggestRAML ['/hello', 'get']
@@ -293,6 +291,10 @@ describe '0.8', ->
       suggestion = suggestRAML ['resourceTypes', '- collection', 'get', 'responses', '200']
       {suggestions} = suggestion
       suggestions.should.include.keys 'description'
+    
+    it 'should include "usage" property inside "methods"', ->
+      {suggestions} = suggestRAML ['resourceTypes', '- collection', 'get']
+      suggestions.should.include.key 'usage'
 
     it 'should not allow nesting of resources', ->
       suggestion = suggestRAML ['resourceTypes', '- collection', '/hello']
@@ -421,6 +423,16 @@ describe '0.8', ->
 
       suggestions.should.include.key 'uriParameters'
       suggestions.should.include.key 'baseUriParameters'
+    
+    it 'should not suggest "usage" property', ->
+      {suggestions} = suggestRAML ['/hello']
+      suggestions.should.not.include.key 'usage'
+
+      {suggestions} = suggestRAML ['/hello', '/bye']
+      suggestions.should.not.include.key 'usage'
+
+      {suggestions} = suggestRAML ['/hello/bye']
+      suggestions.should.not.include.key 'usage'
 
     it 'should suggest "example" inside and "uriParameters"', ->
       {suggestions} = suggestRAML ['/hello/bye', 'uriParameters', 'myParameter']
@@ -447,6 +459,10 @@ describe '0.8', ->
       suggestion.should.be.ok
       {suggestions} = suggestion
       suggestions.should.include.key 'is'
+    
+    it 'should not suggest "usage" property', ->
+      {suggestions} = suggestRAML ['/hello/get']
+      suggestions.should.not.include.key 'usage'
 
   describe 'Security Schemes', ->
     it 'support "securitySchemes" keyword at the root level', ->
