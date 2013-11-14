@@ -223,6 +223,9 @@ securedBy = new Tuple(new ConstantString('securedBy'), listNode, securityCategor
 # Is
 isTrait = new Tuple(new ConstantString('is'),  listNode, traitsAndResourceTypesCategory)
 
+# Usage Property
+usage = new Tuple(new ConstantString('usage'), stringNode)
+
 # Actions
 actionDefinition = new Alternatives(
                                     description,
@@ -234,8 +237,28 @@ actionDefinition = new Alternatives(
                                     securedBy,
                                     protocols,
                                     isTrait)
+
+# Actions with usage property (for resource types)
+actionDefinitionWithUsage = new Alternatives(actionDefinition, usage)
+
 action = new Alternatives(
   ((new Tuple(new ConstantString(actionName), new Multiple(actionDefinition), methodsCategory)) \
+      for actionName in [
+        # RFC2616
+        'options',
+        'get',
+        'head',
+        'post',
+        'put',
+        'delete',
+        'trace',
+        'connect',
+        # RFC5789
+        'patch'
+      ])...)
+
+actionWithUsage = new Alternatives(
+  ((new Tuple(new ConstantString(actionName), new Multiple(actionDefinitionWithUsage), methodsCategory)) \
       for actionName in [
         # RFC2616
         'options',
@@ -259,13 +282,11 @@ resourceDefinition  = new Alternatives(name, action, isTrait, type, postposedRes
 resource            = new Tuple(stringNode,  new Multiple(resourceDefinition),  resourcesCategory)
 
 # Traits
-traitsDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(name, description, baseUriParameters, headers, queryParameters, body, responses, securedBy, protocols)), traitsAndResourceTypesCategory)
+traitsDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(name, description, baseUriParameters, headers, queryParameters, body, responses, securedBy, protocols, usage)), traitsAndResourceTypesCategory)
 traits            = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition), traitsAndResourceTypesCategory)
 
-usage = new Tuple(new ConstantString('usage'), stringNode)
-
 # Resource Types
-resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, name, action,  isTrait, type, securedBy, baseUriParameters, uriParameters, usage)), traitsAndResourceTypesCategory)
+resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, name, actionWithUsage, isTrait, type, securedBy, baseUriParameters, uriParameters, usage)), traitsAndResourceTypesCategory)
 resourceTypes           = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition, traitsAndResourceTypesCategory)
 
 # Security Schemes
