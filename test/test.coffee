@@ -218,7 +218,7 @@ describe '0.8', ->
       suggestionsCopy = JSON.parse(JSON.stringify(getMethodSuggestions))
       delete suggestionsCopy.is
       suggestions.should.include.keys (Object.keys suggestionsCopy)
-    
+
     it 'should contain "usage" property', ->
       {suggestions} = suggestRAML ['traits', '- traitA']
       suggestions.should.include.key 'usage'
@@ -291,7 +291,7 @@ describe '0.8', ->
       suggestion = suggestRAML ['resourceTypes', '- collection', 'get', 'responses', '200']
       {suggestions} = suggestion
       suggestions.should.include.keys 'description'
-    
+
     it 'should include "usage" property inside "methods"', ->
       {suggestions} = suggestRAML ['resourceTypes', '- collection', 'get']
       suggestions.should.include.key 'usage'
@@ -312,6 +312,11 @@ describe '0.8', ->
       suggestion.should.be.ok
       {suggestions} = suggestion
       suggestions.should.include.key 'protocols'
+
+    it 'should suggest the same properties as for optional properties', ->
+      {suggestions: suggestions1} = suggestRAML ['resourceTypes', 'resourceType1', 'get?']
+      {suggestions: suggestions2} = suggestRAML ['resourceTypes', 'resourceType2', 'get' ]
+      suggestions1.should.be.deep.equal(suggestions2)
 
   describe 'Responses', ->
     it 'should support arrays as keys', ->
@@ -423,7 +428,7 @@ describe '0.8', ->
 
       suggestions.should.include.key 'uriParameters'
       suggestions.should.include.key 'baseUriParameters'
-    
+
     it 'should not suggest "usage" property', ->
       {suggestions} = suggestRAML ['/hello']
       suggestions.should.not.include.key 'usage'
@@ -459,7 +464,7 @@ describe '0.8', ->
       suggestion.should.be.ok
       {suggestions} = suggestion
       suggestions.should.include.key 'is'
-    
+
     it 'should not suggest "usage" property', ->
       {suggestions} = suggestRAML ['/hello/get']
       suggestions.should.not.include.key 'usage'
@@ -554,17 +559,16 @@ describe 'Optional elements (get?, post?...)', ->
   it 'should not display them as options', ->
     {suggestions} = suggestRAML ['/resource']
     suggestions.should.not.include.keys ((method+'?') for method in supportedHttpMethods)
-    
+
     {suggestions} = suggestRAML ['/resource', '/nested']
     suggestions.should.not.include.keys ((method+'?') for method in supportedHttpMethods)
-    
+
     {suggestions} = suggestRAML ['/resource/merged']
     suggestions.should.not.include.keys ((method+'?') for method in supportedHttpMethods)
-    
-  it 'should display the same susggestions as in their non-optional counterparts', ->
-    {suggestions: optionalSuggestions} = suggestRAML [ '/hello', 'get?' ]
-    {suggestions} = suggestRAML [ '/hello', 'get' ]
 
-    optionalSuggestions.should.be.deep.equal(suggestions)
-
-
+  it 'should not display suggestions for non-optional properties', ->
+    # properties with question mark at the end under resource
+    # are treated as a nested resources so we expect engine to
+    # suggest HTTP methods for instance
+    {suggestions} = suggestRAML [ '/hello', 'get?' ]
+    suggestions.should.include.key('get')

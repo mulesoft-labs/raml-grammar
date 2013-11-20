@@ -1,5 +1,5 @@
-;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
-var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, ListNode, Markdown, Multiple, Node, NodeMap, PostposedExecution, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionDefinitionWithUsage, actionName, actionWithUsage, baseUri, baseUriParameters, body, bodyCategory, bodySchema, boolean, cache, chapter, d3fault, describedBy, description, docsCategory, documentation, enum2, example, formParameterDefinition, formParameters, header, headers, include, integer, isTrait, jsonSchema, listNode, markdown, maxLength, maximum, mediaType, methodsCategory, mimeType, mimeTypeParameters, minLength, minimum, model, name, notImplemented, parameterProperties, parameterProperty, parameterType, parametersCategory, pattern, postposedResource, protocols, protocolsAlternatives, queryParameterDefinition, queryParameters, regex, required, resource, resourceDefinition, resourceTypes, resourceTypesDefinition, resourcesCategory, responseCode, responses, responsesCategory, root, rootCategory, rootElement, schemas, schemasCategory, securedBy, securityCategory, securitySchemes, securitySchemesDefinition, securityType, settingAlternative, settings, stringNode, title, traits, traitsAndResourceTypesCategory, traitsDefinition, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, usage, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
+;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var Alternatives, Boolean, ConstantString, Include, Integer, JSONSchema, ListNode, Markdown, Multiple, Node, NodeMap, PostposedExecution, Regex, StringNode, TreeMap, Tuple, XMLSchema, action, actionDefinition, actionDefinitionWithUsage, actionName, actionWithUsage, baseUri, baseUriParameters, body, bodyCategory, bodySchema, boolean, cache, chapter, d3fault, describedBy, description, displayName, docsCategory, documentation, enum2, example, formParameterDefinition, formParameters, header, headers, include, integer, isTrait, jsonSchema, listNode, markdown, maxLength, maximum, mediaType, methodsCategory, methodsCategoryOptional, mimeType, mimeTypeParameters, minLength, minimum, model, notImplemented, parameterProperties, parameterProperty, parameterType, parametersCategory, pattern, postposedResource, protocols, protocolsAlternatives, queryParameterDefinition, queryParameters, regex, required, resource, resourceDefinition, resourceTypes, resourceTypesDefinition, resourcesCategory, responseCode, responses, responsesCategory, root, rootCategory, rootElement, schemas, schemasCategory, securedBy, securityCategory, securitySchemes, securitySchemesDefinition, securityType, settingAlternative, settings, stringNode, title, traits, traitsAndResourceTypesCategory, traitsDefinition, transverse, transversePrimitive, typ3, type, uriParameter, uriParameters, usage, version, xmlSchema, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
   __slice = [].slice,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -361,6 +361,10 @@ responsesCategory = {
 };
 
 methodsCategory = {
+  category: 'methods'
+};
+
+methodsCategoryOptional = {
   category: 'methods',
   canBeOptional: true
 };
@@ -392,7 +396,7 @@ protocolsAlternatives = new Alternatives(new ConstantString('HTTP'), new Constan
 
 protocols = new Tuple(new ConstantString('protocols'), protocolsAlternatives, rootCategory);
 
-name = new Tuple(new ConstantString('displayName'), stringNode, docsCategory);
+displayName = new Tuple(new ConstantString('displayName'), stringNode, docsCategory);
 
 description = new Tuple(new ConstantString('description'), stringNode, docsCategory);
 
@@ -416,7 +420,7 @@ d3fault = new Tuple(new ConstantString('default'), stringNode, parametersCategor
 
 example = new Tuple(new ConstantString('example'), stringNode, docsCategory);
 
-parameterProperties = [name, description, parameterType, enum2, pattern, minLength, maxLength, maximum, minimum, required, d3fault, example];
+parameterProperties = [displayName, description, parameterType, enum2, pattern, minLength, maxLength, maximum, minimum, required, d3fault, example];
 
 parameterProperty = (function(func, args, ctor) {
   ctor.prototype = func.prototype;
@@ -495,7 +499,7 @@ actionWithUsage = (function(func, args, ctor) {
   _results = [];
   for (_i = 0, _len = _ref9.length; _i < _len; _i++) {
     actionName = _ref9[_i];
-    _results.push(new Tuple(new ConstantString(actionName), new Multiple(actionDefinitionWithUsage), methodsCategory));
+    _results.push(new Tuple(new ConstantString(actionName), new Multiple(actionDefinitionWithUsage), methodsCategoryOptional));
   }
   return _results;
 })(), function(){});
@@ -506,15 +510,15 @@ postposedResource = new Tuple(stringNode, new PostposedExecution(function() {
   return resourceDefinition;
 }), resourcesCategory);
 
-resourceDefinition = new Alternatives(name, action, isTrait, type, postposedResource, securedBy, uriParameters, baseUriParameters);
+resourceDefinition = new Alternatives(displayName, action, isTrait, type, postposedResource, securedBy, uriParameters, baseUriParameters);
 
 resource = new Tuple(stringNode, new Multiple(resourceDefinition), resourcesCategory);
 
-traitsDefinition = new Tuple(stringNode, new Multiple(new Alternatives(name, description, baseUriParameters, headers, queryParameters, body, responses, securedBy, protocols, usage)), traitsAndResourceTypesCategory);
+traitsDefinition = new Tuple(stringNode, new Multiple(new Alternatives(displayName, description, baseUriParameters, headers, queryParameters, body, responses, securedBy, protocols, usage)), traitsAndResourceTypesCategory);
 
 traits = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition), traitsAndResourceTypesCategory);
 
-resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, name, actionWithUsage, isTrait, type, securedBy, baseUriParameters, uriParameters, usage)), traitsAndResourceTypesCategory);
+resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, displayName, actionWithUsage, isTrait, type, securedBy, baseUriParameters, uriParameters, usage)), traitsAndResourceTypesCategory);
 
 resourceTypes = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition, traitsAndResourceTypesCategory);
 

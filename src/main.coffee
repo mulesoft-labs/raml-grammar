@@ -150,7 +150,8 @@ parametersCategory  = {category: 'parameters'}
 schemasCategory     = {category: 'schemas'}
 bodyCategory        = {category: 'body'}
 responsesCategory   = {category: 'responses'}
-methodsCategory     = {category: 'methods', canBeOptional: true}
+methodsCategory     = {category: 'methods'}
+methodsCategoryOptional = {category: 'methods', canBeOptional: true}
 securityCategory    = {category: 'security'}
 traitsAndResourceTypesCategory = {category: 'traits and types'}
 resourcesCategory   = {category: 'resources', id: 'resource'}
@@ -167,7 +168,7 @@ protocolsAlternatives = new Alternatives(new ConstantString('HTTP'), new Constan
 protocols             = new Tuple(new ConstantString('protocols'), protocolsAlternatives, rootCategory)
 
 # Parameter fields
-name          = new Tuple(new ConstantString('displayName'), stringNode, docsCategory)
+displayName   = new Tuple(new ConstantString('displayName'), stringNode, docsCategory)
 description   = new Tuple(new ConstantString('description'),  stringNode, docsCategory)
 parameterType = new Tuple(new ConstantString('type'), new Alternatives(
                     new ConstantString('string'),
@@ -185,7 +186,7 @@ required      = new Tuple(new ConstantString('required'),  boolean, parametersCa
 d3fault       = new Tuple(new ConstantString('default'),  stringNode, parametersCategory)
 example       = new Tuple(new ConstantString('example'),  stringNode, docsCategory)
 
-parameterProperties = [name, description, parameterType, enum2, pattern, minLength,  maxLength, maximum, minimum, required, d3fault, example]
+parameterProperties = [displayName, description, parameterType, enum2, pattern, minLength,  maxLength, maximum, minimum, required, d3fault, example]
 
 parameterProperty = new Alternatives(parameterProperties...)
 
@@ -261,7 +262,7 @@ action = new Alternatives(
       ])...)
 
 actionWithUsage = new Alternatives(
-  ((new Tuple(new ConstantString(actionName), new Multiple(actionDefinitionWithUsage), methodsCategory)) \
+  ((new Tuple(new ConstantString(actionName), new Multiple(actionDefinitionWithUsage), methodsCategoryOptional)) \
       for actionName in [
         # RFC2616
         'options',
@@ -281,15 +282,15 @@ type = new Tuple(new ConstantString('type'), stringNode, traitsAndResourceTypesC
 
 # Resource
 postposedResource   = new Tuple(stringNode, new PostposedExecution( -> resourceDefinition),  resourcesCategory)
-resourceDefinition  = new Alternatives(name, action, isTrait, type, postposedResource, securedBy,  uriParameters, baseUriParameters)
+resourceDefinition  = new Alternatives(displayName, action, isTrait, type, postposedResource, securedBy,  uriParameters, baseUriParameters)
 resource            = new Tuple(stringNode,  new Multiple(resourceDefinition),  resourcesCategory)
 
 # Traits
-traitsDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(name, description, baseUriParameters, headers, queryParameters, body, responses, securedBy, protocols, usage)), traitsAndResourceTypesCategory)
+traitsDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(displayName, description, baseUriParameters, headers, queryParameters, body, responses, securedBy, protocols, usage)), traitsAndResourceTypesCategory)
 traits            = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition), traitsAndResourceTypesCategory)
 
 # Resource Types
-resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, name, actionWithUsage, isTrait, type, securedBy, baseUriParameters, uriParameters, usage)), traitsAndResourceTypesCategory)
+resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, displayName, actionWithUsage, isTrait, type, securedBy, baseUriParameters, uriParameters, usage)), traitsAndResourceTypesCategory)
 resourceTypes           = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition, traitsAndResourceTypesCategory)
 
 # Security Schemes
