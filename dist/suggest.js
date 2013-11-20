@@ -510,7 +510,7 @@ postposedResource = new Tuple(stringNode, new PostposedExecution(function() {
   return resourceDefinition;
 }), resourcesCategory);
 
-resourceDefinition = new Alternatives(displayName, action, isTrait, type, postposedResource, securedBy, uriParameters, baseUriParameters);
+resourceDefinition = new Alternatives(displayName, description, action, isTrait, type, postposedResource, securedBy, uriParameters, baseUriParameters);
 
 resource = new Tuple(stringNode, new Multiple(resourceDefinition), resourcesCategory);
 
@@ -518,7 +518,7 @@ traitsDefinition = new Tuple(stringNode, new Multiple(new Alternatives(displayNa
 
 traits = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition), traitsAndResourceTypesCategory);
 
-resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, displayName, actionWithUsage, isTrait, type, securedBy, baseUriParameters, uriParameters, usage)), traitsAndResourceTypesCategory);
+resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(displayName, description, actionWithUsage, isTrait, type, securedBy, baseUriParameters, uriParameters, usage)), traitsAndResourceTypesCategory);
 
 resourceTypes = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition, traitsAndResourceTypesCategory);
 

@@ -326,32 +326,27 @@ describe '0.8', ->
       arraysAsKeysSuggestion.suggestions.should.include.keys (Object.keys suggestion.suggestions)
 
   describe 'Resources', ->
-    it 'should offer "is" keyword as part of the suggestions', ->
-      suggestion = suggestRAML ['/hello']
-      {suggestions} = suggestion
-      suggestions.should.include.keys 'is'
-
-      suggestion = suggestRAML ['/hello', '/bye']
-      {suggestions} = suggestion
-      suggestions.should.include.keys 'is'
-
-      suggestion = suggestRAML ['/hello/bye']
-      {suggestions} = suggestion
-      suggestions.should.include.keys 'is'
-
+    it 'should offer expected suggestions', ->
+      for path in [
+        ['/hello'],
+        ['/hello', '/bye'],
+        ['/hello/bye']
+      ]
+        {suggestions} = suggestRAML path
+        suggestions.should.include.key 'baseUriParameters'
+        suggestions.should.include.key 'description'
+        suggestions.should.include.key 'is'
+        suggestions.should.include.key 'type'
+        suggestions.should.include.key 'uriParameters'
 
     it 'should not offer the "use" keyword as part of the suggestions', ->
-      suggestion = suggestRAML ['/hello']
-      {suggestions} = suggestion
-      suggestions.should.not.include.keys 'use'
-
-      suggestion = suggestRAML ['/hello', '/bye']
-      {suggestions} = suggestion
-      suggestions.should.not.include.keys 'use'
-
-      suggestion = suggestRAML ['/hello/bye']
-      {suggestions} = suggestion
-      suggestions.should.not.include.keys 'use'
+      for path in [
+        ['/hello'],
+        ['/hello', '/bye'],
+        ['/hello/bye']
+      ]
+        {suggestions} = suggestRAML path
+        suggestions.should.not.include.key 'use'
 
     it 'should display "is" suggestion as being scalar (in order to indent it on the same line)', ->
       suggestion = suggestRAML ['/hello', 'is']
@@ -365,20 +360,6 @@ describe '0.8', ->
       suggestion = suggestRAML ['/hello/bye', 'is']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
-
-    it 'should offer "type" keyword as part of the suggestions', ->
-      suggestion = suggestRAML ['/hello']
-      {suggestions} = suggestion
-      suggestions.should.include.keys 'type'
-
-      suggestion = suggestRAML ['/hello', '/bye']
-      {suggestions} = suggestion
-      suggestions.should.include.keys 'type'
-
-      suggestion = suggestRAML ['/hello/bye']
-      {suggestions} = suggestion
-      suggestions.should.include.keys 'type'
-
 
     it 'should display "type" suggestion as being scalar (in order to indent it on the same line)', ->
       suggestion = suggestRAML ['/hello', 'type']
@@ -405,29 +386,6 @@ describe '0.8', ->
       suggestion = suggestRAML ['/hello/bye', 'securedBy']
       suggestion.should.be.ok
       suggestion.isScalar.should.be.true
-
-    it 'should suggest "baseUriParameters" and "uriParameters"', ->
-      suggestion = suggestRAML ['/hello']
-      suggestion.should.be.ok
-
-      {suggestions} = suggestion
-
-      suggestions.should.include.key 'uriParameters'
-      suggestions.should.include.key 'baseUriParameters'
-
-      suggestion = suggestRAML ['/hello', '/bye']
-      suggestion.should.be.ok
-      {suggestions} = suggestion
-
-      suggestions.should.include.key 'uriParameters'
-      suggestions.should.include.key 'baseUriParameters'
-
-      suggestion = suggestRAML ['/hello/bye']
-      suggestion.should.be.ok
-      {suggestions} = suggestion
-
-      suggestions.should.include.key 'uriParameters'
-      suggestions.should.include.key 'baseUriParameters'
 
     it 'should not suggest "usage" property', ->
       {suggestions} = suggestRAML ['/hello']
