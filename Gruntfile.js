@@ -1,7 +1,15 @@
-module.exports = function (grunt) {
+'use strict';
 
+module.exports = function (grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+
+    browserify: {
+      options: {
+        transform: ['coffeeify']
+      },
+      'dist/suggest.js': ['src/suggestion.coffee']
+    },
 
     simplemocha: {
       options: {
@@ -14,14 +22,7 @@ module.exports = function (grunt) {
 
     watch: {
       files: ['src/**/*.coffee', 'test/**/*.coffee'],
-      tasks: ['default']
-    },
-
-    browserify: {
-      options: {
-        transform: ['coffeeify']
-      },
-      'dist/suggest.js': ['src/suggestion.coffee']
+      tasks: ['test']
     }
   });
 
@@ -29,6 +30,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-simple-mocha');
 
-  grunt.registerTask('default', ['browserify', 'simplemocha']);
-
+  grunt.registerTask('test',    ['simplemocha']);
+  grunt.registerTask('build',   ['test', 'browserify']);
+  grunt.registerTask('default', ['build']);
 };
