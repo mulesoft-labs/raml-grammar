@@ -157,10 +157,10 @@ traitsAndResourceTypesCategory = {category: 'traits and types'}
 resourcesCategory   = {category: 'resources', id: 'resource'}
 
 # Base Attributes
-title   = new Tuple(new ConstantString('title'),  stringNode, rootCategory)
-version = new Tuple(new ConstantString('version'),  stringNode, rootCategory)
-baseUri = new Tuple(new ConstantString('baseUri'),  stringNode, rootCategory)
-model   = new Tuple(stringNode,  jsonSchema, rootCategory)
+title   = new Tuple(new ConstantString('title'), stringNode, rootCategory)
+version = new Tuple(new ConstantString('version'), stringNode, rootCategory)
+baseUri = new Tuple(new ConstantString('baseUri'), stringNode, rootCategory)
+model   = new Tuple(stringNode, jsonSchema, rootCategory)
 schemas = new Tuple(new ConstantString('schemas'), new Multiple(model), rootCategory)
 
 # Protocols
@@ -169,7 +169,7 @@ protocols             = new Tuple(new ConstantString('protocols'), protocolsAlte
 
 # Parameter fields
 displayName   = new Tuple(new ConstantString('displayName'), stringNode, docsCategory)
-description   = new Tuple(new ConstantString('description'),  stringNode, docsCategory)
+description   = new Tuple(new ConstantString('description'), stringNode, docsCategory)
 parameterType = new Tuple(new ConstantString('type'), new Alternatives(
                     new ConstantString('string'),
                     new ConstantString('number'),
@@ -177,55 +177,55 @@ parameterType = new Tuple(new ConstantString('type'), new Alternatives(
                     new ConstantString('date'),
                     new ConstantString('boolean')), parametersCategory)
 enum2         = new Tuple(new ConstantString('enum'), new Multiple(stringNode), parametersCategory)
-pattern       = new Tuple(new ConstantString('pattern'),  regex, parametersCategory)
-minLength     = new Tuple(new ConstantString('minLength'),  integer, parametersCategory)
-maxLength     = new Tuple(new ConstantString('maxLength'),  integer, parametersCategory)
-minimum       = new Tuple(new ConstantString('minimum'),  integer, parametersCategory)
-maximum       = new Tuple(new ConstantString('maximum'),  integer, parametersCategory)
-required      = new Tuple(new ConstantString('required'),  boolean, parametersCategory)
-d3fault       = new Tuple(new ConstantString('default'),  stringNode, parametersCategory)
-example       = new Tuple(new ConstantString('example'),  stringNode, docsCategory)
+pattern       = new Tuple(new ConstantString('pattern'), regex, parametersCategory)
+minLength     = new Tuple(new ConstantString('minLength'), integer, parametersCategory)
+maxLength     = new Tuple(new ConstantString('maxLength'), integer, parametersCategory)
+minimum       = new Tuple(new ConstantString('minimum'), integer, parametersCategory)
+maximum       = new Tuple(new ConstantString('maximum'), integer, parametersCategory)
+required      = new Tuple(new ConstantString('required'), boolean, parametersCategory)
+d3fault       = new Tuple(new ConstantString('default'), stringNode, parametersCategory)
+example       = new Tuple(new ConstantString('example'), stringNode, docsCategory)
 
 parameterProperties = [displayName, description, parameterType, enum2, pattern, minLength,  maxLength, maximum, minimum, required, d3fault, example]
 
 parameterProperty = new Alternatives(parameterProperties...)
 
-uriParameter      = new Tuple(stringNode,  new Multiple(parameterProperty), parametersCategory)
-uriParameters     = new Tuple(new ConstantString('uriParameters'),  new Multiple(uriParameter), parametersCategory)
-baseUriParameters = new Tuple(new ConstantString('baseUriParameters'),  new Multiple(uriParameter), parametersCategory)
+uriParameter      = new Tuple(stringNode, new Multiple(parameterProperty), parametersCategory)
+uriParameters     = new Tuple(new ConstantString('uriParameters'), new Multiple(uriParameter), parametersCategory)
+baseUriParameters = new Tuple(new ConstantString('baseUriParameters'), new Multiple(uriParameter), parametersCategory)
 mediaType         = new Tuple(new ConstantString('mediaType'), new Alternatives(stringNode, new Multiple(stringNode)), rootCategory)
-chapter           = new Alternatives(title, new Tuple(new ConstantString('content'),  stringNode))
-documentation     = new Tuple(new ConstantString('documentation'),  new Multiple(chapter), docsCategory)
+chapter           = new Alternatives(title, new Tuple(new ConstantString('content'), stringNode))
+documentation     = new Tuple(new ConstantString('documentation'), new Multiple(chapter), docsCategory)
 
 # Header
-header  = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty)), parametersCategory)
-headers = new Tuple(new ConstantString('headers'),  new Multiple(header), parametersCategory)
+header  = new Tuple(stringNode, new Multiple(new Alternatives(parameterProperty)), parametersCategory)
+headers = new Tuple(new ConstantString('headers'), new Multiple(header), parametersCategory)
 
 # Parameters
-queryParameterDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty)), parametersCategory)
-queryParameters           = new Tuple(new ConstantString('queryParameters'),  new Multiple(queryParameterDefinition), parametersCategory)
-formParameterDefinition   = new Tuple(stringNode,  new Multiple(new Alternatives(parameterProperty)), parametersCategory)
+queryParameterDefinition  = new Tuple(stringNode, new Multiple(new Alternatives(parameterProperty)), parametersCategory)
+queryParameters           = new Tuple(new ConstantString('queryParameters'), new Multiple(queryParameterDefinition), parametersCategory)
+formParameterDefinition   = new Tuple(stringNode, new Multiple(new Alternatives(parameterProperty)), parametersCategory)
 formParameters            = new Tuple(new ConstantString('formParameters'), new Multiple(formParameterDefinition), parametersCategory)
 
 # Body and MIME Type
-bodySchema          = new Tuple(new ConstantString('schema'),  new Alternatives(xmlSchema, jsonSchema), schemasCategory)
+bodySchema          = new Tuple(new ConstantString('schema'), new Alternatives(xmlSchema, jsonSchema), schemasCategory)
 mimeTypeParameters  = new Multiple(new Alternatives(bodySchema, example))
 mimeType            = new Alternatives(
-                        new Tuple(new ConstantString('application/x-www-form-urlencoded'), new Multiple(formParameters)),   new Tuple(new ConstantString('multipart/form-data'),  new Multiple(formParameters)),
-                        new Tuple(new ConstantString('application/json'),  new Multiple(mimeTypeParameters))
-                        new Tuple(new ConstantString('application/xml'),  new Multiple(mimeTypeParameters)),
-                        new Tuple(stringNode,  new Multiple(mimeTypeParameters)))
-body                = new Tuple(new ConstantString('body'),  new Multiple(mimeType), bodyCategory)
+                        new Tuple(new ConstantString('application/x-www-form-urlencoded'), new Multiple(formParameters)), new Tuple(new ConstantString('multipart/form-data'), new Multiple(formParameters)),
+                        new Tuple(new ConstantString('application/json'), new Multiple(mimeTypeParameters))
+                        new Tuple(new ConstantString('application/xml'), new Multiple(mimeTypeParameters)),
+                        new Tuple(stringNode, new Multiple(mimeTypeParameters)))
+body                = new Tuple(new ConstantString('body'), new Multiple(mimeType), bodyCategory)
 
 # Responses
 responseCode  = new Tuple(new Multiple(integer), new Multiple(new Alternatives(body, description)), responsesCategory)
-responses     = new Tuple(new ConstantString('responses'),  new Multiple(responseCode), responsesCategory)
+responses     = new Tuple(new ConstantString('responses'), new Multiple(responseCode), responsesCategory)
 
 # Secured by
 securedBy = new Tuple(new ConstantString('securedBy'), listNode, securityCategory)
 
 # Is
-isTrait = new Tuple(new ConstantString('is'),  listNode, traitsAndResourceTypesCategory)
+isTrait = new Tuple(new ConstantString('is'), listNode, traitsAndResourceTypesCategory)
 
 # Usage Property
 usage = new Tuple(new ConstantString('usage'), stringNode)
@@ -281,16 +281,16 @@ actionWithUsage = new Alternatives(
 type = new Tuple(new ConstantString('type'), stringNode, traitsAndResourceTypesCategory)
 
 # Resource
-postposedResource   = new Tuple(stringNode, new PostposedExecution( -> resourceDefinition),  resourcesCategory)
-resourceDefinition  = new Alternatives(displayName, action, isTrait, type, postposedResource, securedBy,  uriParameters, baseUriParameters)
-resource            = new Tuple(stringNode,  new Multiple(resourceDefinition),  resourcesCategory)
+postposedResource   = new Tuple(stringNode, new PostposedExecution( -> resourceDefinition), resourcesCategory)
+resourceDefinition  = new Alternatives(displayName, description, action, isTrait, type, postposedResource, securedBy, uriParameters, baseUriParameters)
+resource            = new Tuple(stringNode, new Multiple(resourceDefinition), resourcesCategory)
 
 # Traits
-traitsDefinition  = new Tuple(stringNode,  new Multiple(new Alternatives(displayName, description, baseUriParameters, headers, queryParameters, body, responses, securedBy, protocols, usage)), traitsAndResourceTypesCategory)
+traitsDefinition  = new Tuple(stringNode, new Multiple(new Alternatives(displayName, description, baseUriParameters, headers, queryParameters, body, responses, securedBy, protocols, usage)), traitsAndResourceTypesCategory)
 traits            = new Tuple(new ConstantString('traits'), new Multiple(traitsDefinition), traitsAndResourceTypesCategory)
 
 # Resource Types
-resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(description, displayName, actionWithUsage, isTrait, type, securedBy, baseUriParameters, uriParameters, usage)), traitsAndResourceTypesCategory)
+resourceTypesDefinition = new Tuple(stringNode, new Multiple(new Alternatives(displayName, description, actionWithUsage, isTrait, type, securedBy, baseUriParameters, uriParameters, usage)), traitsAndResourceTypesCategory)
 resourceTypes           = new Tuple(new ConstantString('resourceTypes'), resourceTypesDefinition, traitsAndResourceTypesCategory)
 
 # Security Schemes
