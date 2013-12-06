@@ -7,33 +7,24 @@ This project provides the suggestions to be used on the [API Designer](https://g
 ## Build and Run
 
 Install global tools
-=======
-## Install
-
-Install Grunt
 
 ```
 npm install -g grunt-cli
 ```
 
 Install node modules
-=======
 
 ```
 npm install
 ```
 
 Run the test suite
-=======
-## Test
 
 ```
 grunt test
 ```
 
 Build the application
-=======
-## Build
 
 ```
 grunt
