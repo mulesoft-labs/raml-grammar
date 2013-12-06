@@ -4,9 +4,27 @@
 
 This project provides the suggestions to be used on the [API Designer](https://github.com/mulesoft/api-designer).
 
-## How to build
+## Build and Run
 
-In order to build you will need to have Grunt installed. After that just run `grunt` on the root directory and you are all set. 
+Install global tools
+```
+npm install -g grunt-cli
+```
+
+Install node modules
+```
+npm install
+```
+
+Run the test suite
+```
+grunt test
+```
+
+Build the application
+```
+grunt
+```
 
 ## License
 
