@@ -266,7 +266,13 @@ resourceFallback = function(key) {
   }
 };
 
-resourceSuggestor = new UnionSuggestor([resourceBasicSuggestor, makeMethodGroupSuggestor()], resourceFallback);
+resourceSuggestor = new UnionSuggestor([
+  resourceBasicSuggestor, makeMethodGroupSuggestor(), new Suggestor([
+    new SuggestionItem('<resource>', resourceSuggestor, {
+      category: 'resources'
+    })
+  ])
+], resourceFallback);
 
 traitAdditions = new Suggestor([
   new SuggestionItem('displayName', noopSuggestor, {
@@ -381,6 +387,8 @@ rootSuggestor = new Suggestor([
     category: 'traits and types'
   }), new SuggestionItem('traits', traitGroupSuggestor, {
     category: 'traits and types'
+  }), new SuggestionItem('<resource>', resourceSuggestor, {
+    category: 'resources'
   })
 ], resourceFallback);
 

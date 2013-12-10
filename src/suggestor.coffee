@@ -162,6 +162,11 @@ resourceSuggestor = new UnionSuggestor(
   [
     resourceBasicSuggestor,
     makeMethodGroupSuggestor()
+    new Suggestor(
+      [
+        new SuggestionItem('<resource>',   resourceSuggestor,             category: 'resources')
+      ]
+    )
   ],
   resourceFallback
 )
@@ -254,6 +259,8 @@ rootSuggestor = new Suggestor(
     new SuggestionItem('securitySchemes',   securitySchemesGroupSuggestor, category: 'security'),
     new SuggestionItem('resourceTypes',     resourceTypeGroupSuggestor,    category: 'traits and types'),
     new SuggestionItem('traits',            traitGroupSuggestor,           category: 'traits and types'),
+    new SuggestionItem('<resource>',        resourceSuggestor,             category: 'resources')
+
   ],
   resourceFallback
 )

@@ -107,9 +107,11 @@ describe 'Resource Types', ->
     {suggestions} = suggestRAML ['resourceTypes']
     suggestions.should.be.empty
 
-  it 'contains all the properties found in a resource suggestion', ->
+  it 'contains all the properties found in a resource suggestion except "<resource>"', ->
     {suggestions: resourceTypeSuggestion} = suggestRAML ['resourceTypes', 'collection']
     {suggestions: resourceSuggestions} = suggestRAML ['/hello']
+
+    delete resourceSuggestions["<resource>"]
 
     resourceTypeSuggestion.should.include.keys (Object.keys resourceSuggestions)
 
