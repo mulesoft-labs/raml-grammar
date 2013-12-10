@@ -8,7 +8,7 @@ module.exports = function (grunt) {
       options: {
         transform: ['coffeeify']
       },
-      'dist/suggest.js': ['src/suggestion.coffee']
+      'dist/suggest.js': ['src/suggestor.coffee']
     },
 
     simplemocha: {
@@ -17,7 +17,7 @@ module.exports = function (grunt) {
         ui: 'bdd',
         reporter: 'spec'
       },
-      all: ['test/test.coffee']
+      all: ['test/suggestor.coffee']
     },
 
     watch: {
