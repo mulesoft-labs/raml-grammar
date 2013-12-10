@@ -1,37 +1,38 @@
-class Suggestor
-  constructor: (@suggestors, options = {}) ->
-    {@fallback, @metadata, @isScalar} = options
+class SuggestionItem
+  constructor: (@key, @suggestor, @metadata = {}) ->
 
-    @isScalar ?= false
-    @metadata ?= {}
+  matches: (key) ->
+    @key == key || @metadata.canBeOptional && @key + '?' == key
+
+class Suggestor
+  constructor: (@items, @fallback) ->
     @fallback ?= ->
 
   suggestorFor: (key) ->
-    suggestors = @suggestors.filter (suggestor) ->
-      suggestor[0] == key ||
-      suggestor[0] + '?' == key && suggestor[1].metadata.canBeOptional
+    matchingItems = @items.filter (item) -> item.matches(key)
 
-    if suggestors.length > 0
-      suggestors[0][1]
+    if matchingItems.length > 0
+      matchingItems[0].suggestor
     else
       @fallback(key)
 
   suggestions: ->
     suggestions = {}
-    for suggestor in @suggestors
-      suggestions[suggestor[0]] = {
-        metadata: suggestor[1].metadata
+    for item in @items
+      suggestions[item.key] = {
+        metadata: item.metadata
       }
 
     suggestions
 
 class EmptySuggestor extends Suggestor
-  constructor:  (options) ->
-    super [], options
+  constructor: (fallback) ->
+    super [], fallback
 
-  suggestorFor: (key) -> @
+class UnionSuggestor
+  constructor: (@suggestors, @fallback) ->
+    @fallback ?= ->
 
-class UnionSuggestor extends Suggestor
   suggestorFor: (key) ->
     for suggestor in @suggestors
       if suggestor = suggestor.suggestorFor key
@@ -50,120 +51,125 @@ class UnionSuggestor extends Suggestor
     suggestions
 
 noopSuggestor    = new EmptySuggestor
-scalarSuggestor  = new EmptySuggestor isScalar: true
-resourceFallback = (key) -> resourceSuggestor if /^\//.test key
 
 namedParameterSuggestor = new Suggestor(
   [
-    ['default',     scalarSuggestor],
-    ['description', scalarSuggestor],
-    ['displayName', scalarSuggestor],
-    ['enum',        scalarSuggestor],
-    ['example',     scalarSuggestor],
-    ['maximum',     scalarSuggestor],
-    ['maxLength',   scalarSuggestor],
-    ['minimum',     scalarSuggestor],
-    ['minLength',   scalarSuggestor],
-    ['pattern',     scalarSuggestor],
-    ['required',    scalarSuggestor],
-    ['type',        scalarSuggestor]
+    new SuggestionItem('description', noopSuggestor, category: 'docs'),
+    new SuggestionItem('displayName', noopSuggestor, category: 'docs'),
+    new SuggestionItem('example',     noopSuggestor, category: 'docs'),
+    new SuggestionItem('default',     noopSuggestor, category: 'parameters'),
+    new SuggestionItem('enum',        noopSuggestor, category: 'parameters'),
+    new SuggestionItem('maximum',     noopSuggestor, category: 'parameters'),
+    new SuggestionItem('maxLength',   noopSuggestor, category: 'parameters'),
+    new SuggestionItem('minimum',     noopSuggestor, category: 'parameters'),
+    new SuggestionItem('minLength',   noopSuggestor, category: 'parameters'),
+    new SuggestionItem('pattern',     noopSuggestor, category: 'parameters'),
+    new SuggestionItem('required',    noopSuggestor, category: 'parameters'),
+    new SuggestionItem('type',        noopSuggestor, category: 'parameters')
   ]
 )
 
-namedParameterGroupSuggestor = new Suggestor [], fallback: (key) -> namedParameterSuggestor
+namedParameterGroupSuggestor = new EmptySuggestor (key) -> namedParameterSuggestor
 
 responseBodyMimetypeSuggestor = new Suggestor(
   [
-    ['schema',    noopSuggestor],
-    ['example', noopSuggestor]
+    new SuggestionItem('schema',  noopSuggestor, category: 'schemas'),
+    new SuggestionItem('example', noopSuggestor, category: 'docs')
   ]
 )
 
 responseBodyGroupSuggestor = new Suggestor(
   [
-    ['application/json',                  responseBodyMimetypeSuggestor],
-    ['application/x-www-form-urlencoded', responseBodyMimetypeSuggestor],
-    ['application/xml',                   responseBodyMimetypeSuggestor],
-    ['multipart/form-data',               responseBodyMimetypeSuggestor]
+    new SuggestionItem('application/json',                  responseBodyMimetypeSuggestor, category: 'body'),
+    new SuggestionItem('application/x-www-form-urlencoded', responseBodyMimetypeSuggestor, category: 'body'),
+    new SuggestionItem('application/xml',                   responseBodyMimetypeSuggestor, category: 'body'),
+    new SuggestionItem('multipart/form-data',               responseBodyMimetypeSuggestor, category: 'body')
   ]
 )
 
 responseSuggestor = new Suggestor(
   [
-    ['body',        responseBodyGroupSuggestor],
-    ['description', scalarSuggestor],
+    new SuggestionItem('body',        responseBodyGroupSuggestor, category: 'responses'),
+    new SuggestionItem('description', noopSuggestor,              category: 'docs'),
   ]
 )
 
-responseGroupSuggestor = new Suggestor [], fallback: (key) -> responseSuggestor if /\d{3}/.test key
-requestBodySuggestor   = new Suggestor [], fallback: -> namedParameterGroupSuggestor
+responseGroupSuggestor = new EmptySuggestor (key) -> responseSuggestor if /\d{3}/.test key
+requestBodySuggestor   = new EmptySuggestor -> namedParameterGroupSuggestor
 
 methodBodySuggestor = new Suggestor(
   [
-    ['application/json',                  noopSuggestor],
-    ['application/x-www-form-urlencoded', requestBodySuggestor],
-    ['application/xml',                   noopSuggestor],
-    ['multipart/form-data',               requestBodySuggestor]
+    new SuggestionItem('application/json',                  noopSuggestor,        category: 'body'),
+    new SuggestionItem('application/x-www-form-urlencoded', requestBodySuggestor, category: 'body'),
+    new SuggestionItem('application/xml',                   noopSuggestor,        category: 'body'),
+    new SuggestionItem('multipart/form-data',               requestBodySuggestor, category: 'body')
   ]
 )
 
 protocolsSuggestor = new Suggestor(
   [
-    ['HTTP',  noopSuggestor],
-    ['HTTPS', noopSuggestor]
+    new SuggestionItem('HTTP',  noopSuggestor),
+    new SuggestionItem('HTTPS', noopSuggestor)
   ]
 )
 
-makeMethodSuggestor = (optional = false) ->
+makeMethodSuggestor = ->
   new Suggestor(
     [
-      ['body',            methodBodySuggestor],
-      ['headers',         namedParameterGroupSuggestor],
-      ['is',              noopSuggestor],
-      ['protocols',       protocolsSuggestor],
-      ['queryParameters', namedParameterGroupSuggestor],
-      ['responses',       responseGroupSuggestor],
-      ['securedBy',       noopSuggestor]
-    ],
-    {
-      metadata: { category: 'methods', canBeOptional: optional }
-    }
+      new SuggestionItem('description',        noopSuggestor,                 category: 'docs'),
+      new SuggestionItem('body',               methodBodySuggestor,           category: 'body'),
+      new SuggestionItem('protocols',          protocolsSuggestor,            category: 'root'),
+      new SuggestionItem('baseUriParameters',  namedParameterGroupSuggestor,  category: 'parameters'),
+      new SuggestionItem('headers',            namedParameterGroupSuggestor,  category: 'parameters'),
+      new SuggestionItem('queryParameters',    namedParameterGroupSuggestor,  category: 'parameters'),
+      new SuggestionItem('responses',          responseGroupSuggestor,        category: 'responses'),
+      new SuggestionItem('securedBy',          noopSuggestor,                 category: 'security')
+    ]
   )
 
 makeMethodGroupSuggestor = (optional = false) ->
-  methodSuggestor = makeMethodSuggestor(optional)
+  methodSuggestor = new UnionSuggestor(
+    [
+      makeMethodSuggestor(),
+      new Suggestor(
+        [
+          new SuggestionItem('is', noopSuggestor, category: 'traits and types')
+        ]
+      )
+    ]
+  )
+
 
   new Suggestor(
-    [method, methodSuggestor] for method in ['get', 'post', 'put', 'delete', 'head', 'patch', 'trace', 'connect', 'options']
+    new SuggestionItem(method, methodSuggestor, category: 'methods', canBeOptional: optional) for method in ['get', 'post', 'put', 'delete', 'head', 'patch', 'trace', 'connect', 'options']
   )
 
 resourceBasicSuggestor = new Suggestor(
   [
-    ['baseUriParameters', namedParameterGroupSuggestor],
-    ['description',       scalarSuggestor],
-    ['displayName',       scalarSuggestor],
-    ['is',                scalarSuggestor],
-    ['securedBy',         scalarSuggestor],
-    ['type',              scalarSuggestor],
-    ['uriParameters',     namedParameterGroupSuggestor]
+    new SuggestionItem('baseUriParameters', namedParameterGroupSuggestor, category: 'parameters'),
+    new SuggestionItem('uriParameters',     namedParameterGroupSuggestor, category: 'parameters'),
+    new SuggestionItem('description',       noopSuggestor,                category: 'docs'),
+    new SuggestionItem('displayName',       noopSuggestor,                category: 'docs'),
+    new SuggestionItem('securedBy',         noopSuggestor,                category: 'security'),
+    new SuggestionItem('type',              noopSuggestor,                category: 'traits and types'),
+    new SuggestionItem('is',                noopSuggestor,                category: 'traits and types')
   ]
 )
+
+resourceFallback = (key) -> resourceSuggestor if /^\//.test key
 
 resourceSuggestor = new UnionSuggestor(
   [
     resourceBasicSuggestor,
     makeMethodGroupSuggestor()
   ],
-  {
-   fallback: resourceFallback,
-   metadata: { id: 'resource' }
-  }
+  resourceFallback
 )
 
 traitAdditions = new Suggestor(
   [
-    ['displayName', noopSuggestor],
-    ['usage',       noopSuggestor]
+    new SuggestionItem('displayName', noopSuggestor, category: 'docs'),
+    new SuggestionItem('usage',       noopSuggestor, category: 'docs')
   ]
 )
 
@@ -180,7 +186,7 @@ resourceTypeSuggestor = new UnionSuggestor(
     makeMethodGroupSuggestor(true),
     new Suggestor (
       [
-        ['usage', noopSuggestor]
+        new SuggestionItem('usage', noopSuggestor, category: 'docs')
       ]
     )
   ]
@@ -188,54 +194,68 @@ resourceTypeSuggestor = new UnionSuggestor(
 
 securitySchemesSettingSuggestor = new Suggestor(
   [
-    ['requestTokenUri',        noopSuggestor],
-    ['authorizationUri',       noopSuggestor],
-    ['tokenCredentialsUri',    noopSuggestor],
-    ['accessTokenUri',         noopSuggestor],
-    ['scopes',                 noopSuggestor],
-    ['authorizationGrants',    noopSuggestor]
+    new SuggestionItem('accessTokenUri',      noopSuggestor, category: 'security'),
+    new SuggestionItem('authorizationGrants', noopSuggestor, category: 'security'),
+    new SuggestionItem('authorizationUri',    noopSuggestor, category: 'security'),
+    new SuggestionItem('requestTokenUri',     noopSuggestor, category: 'security'),
+    new SuggestionItem('scopes',              noopSuggestor, category: 'security'),
+    new SuggestionItem('tokenCredentialsUri', noopSuggestor, category: 'security')
   ]
 )
 
 securitySchemeTypeSuggestor = new Suggestor(
   [
-    ['OAuth 1.0',              noopSuggestor],
-    ['OAuth 2.0',              noopSuggestor],
-    ['Basic Authentication',   noopSuggestor],
-    ['Digest Authentication',  noopSuggestor]
+    new SuggestionItem('OAuth 1.0',             noopSuggestor, category: 'security'),
+    new SuggestionItem('OAuth 2.0',             noopSuggestor, category: 'security'),
+    new SuggestionItem('Basic Authentication',  noopSuggestor, category: 'security'),
+    new SuggestionItem('Digest Authentication', noopSuggestor, category: 'security')
+  ]
+)
+
+describedBySuggestor = new Suggestor(
+  [
+    new SuggestionItem('headers',         namedParameterGroupSuggestor, category: 'parameters'),
+    new SuggestionItem('queryParameters', namedParameterGroupSuggestor, category: 'parameters'),
+    new SuggestionItem('responses',       responseGroupSuggestor,       category: 'responses')
   ]
 )
 
 securitySchemesSuggestor = new Suggestor(
   [
-    ['description', noopSuggestor],
-    ['type',        securitySchemeTypeSuggestor],
-    ['settings',    securitySchemesSettingSuggestor]
+    new SuggestionItem('description', noopSuggestor,                   category: 'docs'),
+    new SuggestionItem('describedBy', describedBySuggestor,            category: 'security'),
+    new SuggestionItem('type',        securitySchemeTypeSuggestor,     category: 'security'),
+    new SuggestionItem('settings',    securitySchemesSettingSuggestor, category: 'security')
   ]
 )
 
-traitGroupSuggestor           = new Suggestor [], fallback: -> traitSuggestor
-resourceTypeGroupSuggestor    = new Suggestor [], fallback: -> resourceTypeSuggestor
-securitySchemesGroupSuggestor = new Suggestor [], fallback: -> securitySchemesSuggestor
+traitGroupSuggestor           = new EmptySuggestor -> traitSuggestor
+resourceTypeGroupSuggestor    = new EmptySuggestor -> resourceTypeSuggestor
+securitySchemesGroupSuggestor = new EmptySuggestor -> securitySchemesSuggestor
+
+rootDocumentationSuggestor = new Suggestor(
+  [
+    new SuggestionItem('content', noopSuggestor, category: 'docs'),
+    new SuggestionItem('title',   noopSuggestor, category: 'docs')
+  ]
+)
 
 rootSuggestor = new Suggestor(
   [
-    ['baseUri',           scalarSuggestor],
-    ['baseUriParameters', namedParameterGroupSuggestor],
-    ['documentation',     noopSuggestor],
-    ['mediaType',         noopSuggestor],
-    ['protocols',         protocolsSuggestor],
-    ['resourceTypes',     resourceTypeGroupSuggestor],
-    ['schemas',           noopSuggestor],
-    ['securedBy',         noopSuggestor],
-    ['securitySchemes',   securitySchemesGroupSuggestor],
-    ['title',             scalarSuggestor],
-    ['traits',            traitGroupSuggestor],
-    ['version',           scalarSuggestor]
+    new SuggestionItem('baseUriParameters', namedParameterGroupSuggestor,  category: 'parameters'),
+    new SuggestionItem('baseUri',           noopSuggestor,                 category: 'root'),
+    new SuggestionItem('mediaType',         noopSuggestor,                 category: 'root'),
+    new SuggestionItem('protocols',         protocolsSuggestor,            category: 'root'),
+    new SuggestionItem('title',             noopSuggestor,                 category: 'root'),
+    new SuggestionItem('version',           noopSuggestor,                 category: 'root')
+    new SuggestionItem('documentation',     rootDocumentationSuggestor,    category: 'docs'),
+    new SuggestionItem('schemas',           noopSuggestor,                 category: 'schemas'),
+    new SuggestionItem('securedBy',         noopSuggestor,                 category: 'security'),
+    new SuggestionItem('securitySchemes',   securitySchemesGroupSuggestor, category: 'security'),
+    new SuggestionItem('resourceTypes',     resourceTypeGroupSuggestor,    category: 'traits and types'),
+    new SuggestionItem('traits',            traitGroupSuggestor,           category: 'traits and types'),
   ],
-  {
-    fallback: resourceFallback
-  }
+  resourceFallback
 )
 
 suggestorForPath = (path) ->
@@ -255,5 +275,5 @@ suggestorForPath = (path) ->
     isScalar:    suggestor.isScalar
   }
 
-window.suggestRAML = @suggestRAML if typeof window != 'undefined'
-
+if window?
+  window.suggestRAML = @suggestRAML

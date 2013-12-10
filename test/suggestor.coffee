@@ -20,56 +20,87 @@ supportedMimeTypes = [ 'application/json', 'application/xml', 'application/x-www
 describe 'suggestRAML',  ->
   it 'offers expected suggestions for empty arrays, null, and undefined', ->
     for root in [[], null, undefined]
-      {suggestions} = suggestRAML []
+      {suggestions} = suggestRAML root
       suggestions.should.include.keys 'title', 'version', 'schemas', 'baseUri', 'baseUriParameters', 'mediaType', 'documentation', 'traits', 'resourceTypes', 'securitySchemes', 'securedBy', 'protocols'
 
-  it 'handles an string value nodes', ->
-    result = suggestRAML ['title']
-    result.suggestions.should.be.empty
-    result.isScalar.should.be.true
+  it 'classifies title, version, baseUri, mediaType, and protocols as "root"', ->
+    {suggestions} = suggestRAML []
 
-###
-describe 'Metadata', ->
-  describe 'Category assignment', ->
-    it 'should be "actions" for supported HTTP methods', ->
-      suggestion = suggestRAML ['/pet']
-      suggestion.should.have.property('suggestions')
-      suggestions = suggestion.suggestions
-      suggestions.should.have.property(action) for action in supportedHttpMethods
+    for key in ['title', 'version', 'baseUri', 'mediaType', 'protocols']
+      suggestions[key].metadata.category.should.be.equal "root"
 
-      for methodName in supportedHttpMethods
-        method = suggestions[methodName]
-        method.should.have.property('metadata')
-        {metadata: {category}} = method
-        category.should.be.equal('methods')
+  it 'classifies schemas keys as "schemas"', ->
+    {suggestions} = suggestRAML []
 
-  describe 'id', ->
-    it 'should be assigned correctly to the resource node', ->
-      suggestion = suggestRAML ['/pet']
-      suggestion.should.have.property 'metadata'
-      suggestion.metadata.should.be.ok
-      {metadata: {id}} = suggestion
-      id.should.be.ok
-      id.should.be.equal 'resource'
-###
+    suggestions.schemas.metadata.category.should.be.equal "schemas"
+
+  it 'classifies root documentation keys as "docs"', ->
+    {suggestions} = suggestRAML []
+
+    suggestions.documentation.metadata.category.should.be.equal "docs"
+
+    {suggestions} = suggestRAML ['documentation']
+
+    suggestions.title.metadata.category.should.be.equal "docs"
+    suggestions.content.metadata.category.should.be.equal "docs"
+
+  it 'classifies securedBy and securitySchemes keys as "security"', ->
+    {suggestions} = suggestRAML []
+
+    suggestions.securedBy.metadata.category.should.be.equal "security"
+    suggestions.securitySchemes.metadata.category.should.be.equal "security"
+
+ it 'classifies resourceTypes and traits as "traits and types"', ->
+    {suggestions} = suggestRAML []
+
+    suggestions.resourceTypes.metadata.category.should.be.equal "traits and types"
+    suggestions.traits.metadata.category.should.be.equal "traits and types"
+
+ it 'classifies baseUriParameters as parameters', ->
+    {suggestions} = suggestRAML []
+
+    suggestions.baseUriParameters.metadata.category.should.be.equal "parameters"
 
 describe 'Security Schemes', ->
   it 'offers expected suggestions', ->
     suggestion = suggestRAML ['securitySchemes', 'oauth_2_0']
     {suggestions} = suggestion
-    suggestions.should.include.keys 'description', 'type', 'settings'
+    suggestions.should.include.keys 'description', 'type', 'settings', 'describedBy'
+
+    suggestions.description.metadata.category.should.be.equal 'docs'
+    suggestions.type.metadata.category.should.be.equal 'security'
+    suggestions.settings.metadata.category.should.be.equal 'security'
+    suggestions.describedBy.metadata.category.should.be.equal 'security'
+
+  it 'offers suggestions for describedBy', ->
+    suggestion = suggestRAML ['securitySchemes', 'oauth_2_0', 'describedBy']
+    {suggestions} = suggestion
+    suggestions.should.include.keys 'headers', 'queryParameters', 'responses'
+    suggestions.queryParameters.metadata.category.should.be.equal 'parameters'
+    suggestions.headers.metadata.category.should.be.equal 'parameters'
+    suggestions.responses.metadata.category.should.be.equal 'responses'
+
 
   it 'supports "type" suggestions', ->
     suggestion = suggestRAML ['securitySchemes', 'oauth_2_0', 'type']
     {suggestions} = suggestion
-    suggestions.should.include.keys 'OAuth 1.0', 'OAuth 2.0', 'Basic Authentication',
-      'Digest Authentication'
+    for key in ['OAuth 1.0', 'OAuth 2.0', 'Basic Authentication',
+          'Digest Authentication']
+
+      suggestions.should.include.key key
+      suggestions[key].metadata.category.should.be.equal 'security'
 
   it 'suggests keys for the "settings" attribute', ->
     suggestion = suggestRAML ['securitySchemes', 'oauth_2_0', 'settings']
     {suggestions} = suggestion
-    suggestions.should.include.keys 'requestTokenUri', 'authorizationUri', 'tokenCredentialsUri',
-      'accessTokenUri', 'authorizationGrants', 'scopes'
+
+    for key in ['requestTokenUri', 'authorizationUri', 'tokenCredentialsUri',
+      'accessTokenUri', 'authorizationGrants', 'scopes']
+
+      suggestions.should.include.key key
+      suggestions[key].metadata.category.should.be.equal 'security'
+
+    suggestions.should.include.keys
 
 describe 'Resource Types', ->
   it 'returns no suggestions in the array', ->
@@ -85,6 +116,7 @@ describe 'Resource Types', ->
   it 'also includes the usage property', ->
     {suggestions} = suggestRAML ['resourceTypes', 'collection']
     suggestions.should.include.key 'usage'
+    suggestions.usage.metadata.category.should.be.equal 'docs'
 
   it 'supports nesting inside properties', ->
     {suggestions} = suggestRAML ['resourceTypes', 'collection', 'get']
@@ -108,16 +140,19 @@ describe 'Traits', ->
     {suggestions} = suggestRAML ['traits']
     suggestions.should.be.empty
 
-  it 'contains all the properties found in a method suggestion', ->
+  it 'contains all the properties found in a method suggestion except "is"', ->
     {suggestions: traitSuggestions} = suggestRAML ['traits', 'traitA']
     {suggestions: methodSuggestions} = suggestRAML ['/', 'get']
 
+    delete methodSuggestions.is
     traitSuggestions.should.include.keys(Object.keys(methodSuggestions))
+    traitSuggestions.should.not.include.key 'is'
 
   it 'also contains "usage" and "displayName" properties', ->
     {suggestions} = suggestRAML ['traits', 'traitA']
-    suggestions.should.include.key 'usage'
-    suggestions.should.include.key 'displayName'
+    for key in ['usage', 'displayName', 'description']
+      suggestions.should.include.key key
+      suggestions[key].metadata.category.should.be.equal 'docs'
 
   it 'allows for nested suggestions inside its properties', ->
     {suggestions} = suggestRAML ['traits', 'traitA', 'responses']
@@ -135,13 +170,23 @@ describe 'Resources', ->
       ['/hello', '/{param}', '/bye']
     ]
       {suggestions} = suggestRAML path
-      suggestions.should.include.key 'baseUriParameters'
-      suggestions.should.include.key 'description'
-      suggestions.should.include.key 'is'
-      suggestions.should.include.key 'type'
-      suggestions.should.include.key 'securedBy'
-      suggestions.should.include.key 'uriParameters'
+      suggestions.should.include.keys 'displayName', 'baseUriParameters', 'description', 'is', 'type', 'securedBy', 'uriParameters'
       suggestions.should.include.keys(supportedHttpMethods)
+
+      for method in supportedHttpMethods
+        suggestions[method].metadata.category.should.be.equal 'methods'
+
+      for key in ['displayName', 'description']
+        suggestions[key].metadata.category.should.be.equal 'docs'
+
+      for key in ['uriParameters', 'baseUriParameters']
+        suggestions[key].metadata.category.should.be.equal 'parameters'
+
+      for key in ['is', 'type']
+        suggestions[key].metadata.category.should.be.equal 'traits and types'
+
+      for key in ['securedBy']
+        suggestions[key].metadata.category.should.be.equal 'security'
 
       suggestions.should.not.include.key 'usage'
 
@@ -149,15 +194,17 @@ describe 'Methods', ->
   it 'offers expected suggestions', ->
     {suggestions} = suggestRAML ['/hello', 'get']
 
-    suggestions.should.include.key 'protocols'
-    suggestions.should.include.key 'is'
-    suggestions.should.include.key 'body'
-    suggestions.should.include.key 'headers'
-    suggestions.should.include.key 'securedBy'
-    suggestions.should.include.key 'responses'
-    suggestions.should.include.key 'queryParameters'
-
+    suggestions.should.include.keys 'description', 'protocols', 'is', 'body', 'headers', 'securedBy', 'responses', 'queryParameters', 'baseUriParameters'
     suggestions.should.not.include.key 'usage'
+
+    suggestions.protocols.metadata.category.should.be.equal 'root'
+    suggestions.is.metadata.category.should.be.equal 'traits and types'
+    suggestions.body.metadata.category.should.be.equal 'body'
+    suggestions.securedBy.metadata.category.should.be.equal 'security'
+    suggestions.responses.metadata.category.should.be.equal 'responses'
+    suggestions.headers.metadata.category.should.be.equal 'parameters'
+    suggestions.queryParameters.metadata.category.should.be.equal 'parameters'
+    suggestions.baseUriParameters.metadata.category.should.be.equal 'parameters'
 
   describe 'body', ->
     it 'contains common mime-types as sublevel suggestions (RT-81)', ->
@@ -165,8 +212,24 @@ describe 'Methods', ->
 
       suggestions.should.include.keys supportedMimeTypes
 
+      for mimeType in supportedMimeTypes
+        suggestions[mimeType].metadata.category.should.be.equal 'body'
+
 describe 'Named Parameters', ->
   expectedKeys = ['displayName', 'description', 'type', 'enum', 'pattern', 'minLength', 'maxLength', 'maximum', 'minimum', 'required', 'default', 'example']
+
+  it 'categorizes displayName, description, and example as docs', ->
+    {suggestions} = suggestRAML ['/resource', 'get', 'queryParameters', 'someName']
+
+    for key in ['displayName', 'description', 'example']
+      suggestions[key].metadata.category.should.be.equal 'docs'
+
+  it 'categorizes all other keys as parameters', ->
+    {suggestions} = suggestRAML ['/resource', 'get', 'queryParameters', 'someName']
+
+    for key in expectedKeys
+      unless key in ['displayName', 'description', 'example']
+        suggestions[key].metadata.category.should.be.equal 'parameters'
 
   it 'is supported within the path resource/method/body/form-mime-type/formParameters', ->
     {suggestions} = suggestRAML ['/resource', 'get', 'body', 'multipart/form-data', 'formParameters', 'someName']
@@ -212,11 +275,20 @@ describe 'Responses', ->
     {suggestions} = suggestRAML ['/hello', '/bye', 'get', 'responses', '200']
     suggestions.should.include.keys 'body', 'description'
 
+    suggestions.body.metadata.category.should.be.equal 'responses'
+    suggestions.description.metadata.category.should.be.equal 'docs'
+
     {suggestions} = suggestRAML ['/hello', '/bye', 'get', 'responses', '200', 'body']
     suggestions.should.include.keys supportedMimeTypes
 
+    for mimeType in supportedMimeTypes
+      suggestions[mimeType].metadata.category.should.be.equal 'body'
+
     {suggestions} = suggestRAML ['/hello', '/bye', 'get', 'responses', '200', 'body', 'application/json']
     suggestions.should.include.keys 'schema', 'example'
+
+    suggestions.schema.metadata.category.should.be.equal 'schemas'
+    suggestions.example.metadata.category.should.be.equal 'docs'
 
   it 'supports arrays as keys', ->
     arraysAsKeysSuggestion = suggestRAML ['/foo', 'get', 'responses', '[200, 210]']

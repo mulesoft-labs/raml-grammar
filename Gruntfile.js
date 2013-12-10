@@ -17,7 +17,7 @@ module.exports = function (grunt) {
         ui: 'bdd',
         reporter: 'spec'
       },
-      all: ['test/suggestor_test.coffee']
+      all: ['test/suggestor.coffee']
     },
 
     watch: {

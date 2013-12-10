@@ -1,46 +1,52 @@
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var EmptySuggestor, Suggestor, UnionSuggestor, makeMethodGroupSuggestor, makeMethodSuggestor, methodBodySuggestor, namedParameterGroupSuggestor, namedParameterSuggestor, noopSuggestor, protocolsSuggestor, requestBodySuggestor, resourceBasicSuggestor, resourceFallback, resourceSuggestor, resourceTypeGroupSuggestor, resourceTypeSuggestor, responseBodyGroupSuggestor, responseBodyMimetypeSuggestor, responseGroupSuggestor, responseSuggestor, rootSuggestor, scalarSuggestor, securitySchemeTypeSuggestor, securitySchemesGroupSuggestor, securitySchemesSettingSuggestor, securitySchemesSuggestor, suggestorForPath, traitAdditions, traitGroupSuggestor, traitSuggestor, _ref,
+var EmptySuggestor, SuggestionItem, Suggestor, UnionSuggestor, describedBySuggestor, makeMethodGroupSuggestor, makeMethodSuggestor, methodBodySuggestor, namedParameterGroupSuggestor, namedParameterSuggestor, noopSuggestor, protocolsSuggestor, requestBodySuggestor, resourceBasicSuggestor, resourceFallback, resourceSuggestor, resourceTypeGroupSuggestor, resourceTypeSuggestor, responseBodyGroupSuggestor, responseBodyMimetypeSuggestor, responseGroupSuggestor, responseSuggestor, rootDocumentationSuggestor, rootSuggestor, securitySchemeTypeSuggestor, securitySchemesGroupSuggestor, securitySchemesSettingSuggestor, securitySchemesSuggestor, suggestorForPath, traitAdditions, traitGroupSuggestor, traitSuggestor,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
+SuggestionItem = (function() {
+  function SuggestionItem(key, suggestor, metadata) {
+    this.key = key;
+    this.suggestor = suggestor;
+    this.metadata = metadata != null ? metadata : {};
+  }
+
+  SuggestionItem.prototype.matches = function(key) {
+    return this.key === key || this.metadata.canBeOptional && this.key + '?' === key;
+  };
+
+  return SuggestionItem;
+
+})();
+
 Suggestor = (function() {
-  function Suggestor(suggestors, options) {
-    this.suggestors = suggestors;
-    if (options == null) {
-      options = {};
-    }
-    this.fallback = options.fallback, this.metadata = options.metadata, this.isScalar = options.isScalar;
-    if (this.isScalar == null) {
-      this.isScalar = false;
-    }
-    if (this.metadata == null) {
-      this.metadata = {};
-    }
+  function Suggestor(items, fallback) {
+    this.items = items;
+    this.fallback = fallback;
     if (this.fallback == null) {
       this.fallback = function() {};
     }
   }
 
   Suggestor.prototype.suggestorFor = function(key) {
-    var suggestors;
-    suggestors = this.suggestors.filter(function(suggestor) {
-      return suggestor[0] === key || suggestor[0] + '?' === key && suggestor[1].metadata.canBeOptional;
+    var matchingItems;
+    matchingItems = this.items.filter(function(item) {
+      return item.matches(key);
     });
-    if (suggestors.length > 0) {
-      return suggestors[0][1];
+    if (matchingItems.length > 0) {
+      return matchingItems[0].suggestor;
     } else {
       return this.fallback(key);
     }
   };
 
   Suggestor.prototype.suggestions = function() {
-    var suggestions, suggestor, _i, _len, _ref;
+    var item, suggestions, _i, _len, _ref;
     suggestions = {};
-    _ref = this.suggestors;
+    _ref = this.items;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      suggestor = _ref[_i];
-      suggestions[suggestor[0]] = {
-        metadata: suggestor[1].metadata
+      item = _ref[_i];
+      suggestions[item.key] = {
+        metadata: item.metadata
       };
     }
     return suggestions;
@@ -53,31 +59,28 @@ Suggestor = (function() {
 EmptySuggestor = (function(_super) {
   __extends(EmptySuggestor, _super);
 
-  function EmptySuggestor(options) {
-    EmptySuggestor.__super__.constructor.call(this, [], options);
+  function EmptySuggestor(fallback) {
+    EmptySuggestor.__super__.constructor.call(this, [], fallback);
   }
-
-  EmptySuggestor.prototype.suggestorFor = function(key) {
-    return this;
-  };
 
   return EmptySuggestor;
 
 })(Suggestor);
 
-UnionSuggestor = (function(_super) {
-  __extends(UnionSuggestor, _super);
-
-  function UnionSuggestor() {
-    _ref = UnionSuggestor.__super__.constructor.apply(this, arguments);
-    return _ref;
+UnionSuggestor = (function() {
+  function UnionSuggestor(suggestors, fallback) {
+    this.suggestors = suggestors;
+    this.fallback = fallback;
+    if (this.fallback == null) {
+      this.fallback = function() {};
+    }
   }
 
   UnionSuggestor.prototype.suggestorFor = function(key) {
-    var suggestor, _i, _len, _ref1;
-    _ref1 = this.suggestors;
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      suggestor = _ref1[_i];
+    var suggestor, _i, _len, _ref;
+    _ref = this.suggestors;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      suggestor = _ref[_i];
       if (suggestor = suggestor.suggestorFor(key)) {
         return suggestor;
       }
@@ -86,11 +89,11 @@ UnionSuggestor = (function(_super) {
   };
 
   UnionSuggestor.prototype.suggestions = function() {
-    var key, suggestions, suggestor, suggestorSuggestions, value, _i, _len, _ref1;
+    var key, suggestions, suggestor, suggestorSuggestions, value, _i, _len, _ref;
     suggestions = {};
-    _ref1 = this.suggestors;
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      suggestor = _ref1[_i];
+    _ref = this.suggestors;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      suggestor = _ref[_i];
       suggestorSuggestions = suggestor.suggestions();
       for (key in suggestorSuggestions) {
         value = suggestorSuggestions[key];
@@ -102,62 +105,114 @@ UnionSuggestor = (function(_super) {
 
   return UnionSuggestor;
 
-})(Suggestor);
+})();
 
 noopSuggestor = new EmptySuggestor;
 
-scalarSuggestor = new EmptySuggestor({
-  isScalar: true
+namedParameterSuggestor = new Suggestor([
+  new SuggestionItem('description', noopSuggestor, {
+    category: 'docs'
+  }), new SuggestionItem('displayName', noopSuggestor, {
+    category: 'docs'
+  }), new SuggestionItem('example', noopSuggestor, {
+    category: 'docs'
+  }), new SuggestionItem('default', noopSuggestor, {
+    category: 'parameters'
+  }), new SuggestionItem('enum', noopSuggestor, {
+    category: 'parameters'
+  }), new SuggestionItem('maximum', noopSuggestor, {
+    category: 'parameters'
+  }), new SuggestionItem('maxLength', noopSuggestor, {
+    category: 'parameters'
+  }), new SuggestionItem('minimum', noopSuggestor, {
+    category: 'parameters'
+  }), new SuggestionItem('minLength', noopSuggestor, {
+    category: 'parameters'
+  }), new SuggestionItem('pattern', noopSuggestor, {
+    category: 'parameters'
+  }), new SuggestionItem('required', noopSuggestor, {
+    category: 'parameters'
+  }), new SuggestionItem('type', noopSuggestor, {
+    category: 'parameters'
+  })
+]);
+
+namedParameterGroupSuggestor = new EmptySuggestor(function(key) {
+  return namedParameterSuggestor;
 });
 
-resourceFallback = function(key) {
-  if (/^\//.test(key)) {
-    return resourceSuggestor;
-  }
-};
+responseBodyMimetypeSuggestor = new Suggestor([
+  new SuggestionItem('schema', noopSuggestor, {
+    category: 'schemas'
+  }), new SuggestionItem('example', noopSuggestor, {
+    category: 'docs'
+  })
+]);
 
-namedParameterSuggestor = new Suggestor([['default', scalarSuggestor], ['description', scalarSuggestor], ['displayName', scalarSuggestor], ['enum', scalarSuggestor], ['example', scalarSuggestor], ['maximum', scalarSuggestor], ['maxLength', scalarSuggestor], ['minimum', scalarSuggestor], ['minLength', scalarSuggestor], ['pattern', scalarSuggestor], ['required', scalarSuggestor], ['type', scalarSuggestor]]);
+responseBodyGroupSuggestor = new Suggestor([
+  new SuggestionItem('application/json', responseBodyMimetypeSuggestor, {
+    category: 'body'
+  }), new SuggestionItem('application/x-www-form-urlencoded', responseBodyMimetypeSuggestor, {
+    category: 'body'
+  }), new SuggestionItem('application/xml', responseBodyMimetypeSuggestor, {
+    category: 'body'
+  }), new SuggestionItem('multipart/form-data', responseBodyMimetypeSuggestor, {
+    category: 'body'
+  })
+]);
 
-namedParameterGroupSuggestor = new Suggestor([], {
-  fallback: function(key) {
-    return namedParameterSuggestor;
+responseSuggestor = new Suggestor([
+  new SuggestionItem('body', responseBodyGroupSuggestor, {
+    category: 'responses'
+  }), new SuggestionItem('description', noopSuggestor, {
+    category: 'docs'
+  })
+]);
+
+responseGroupSuggestor = new EmptySuggestor(function(key) {
+  if (/\d{3}/.test(key)) {
+    return responseSuggestor;
   }
 });
 
-responseBodyMimetypeSuggestor = new Suggestor([['schema', noopSuggestor], ['example', noopSuggestor]]);
-
-responseBodyGroupSuggestor = new Suggestor([['application/json', responseBodyMimetypeSuggestor], ['application/x-www-form-urlencoded', responseBodyMimetypeSuggestor], ['application/xml', responseBodyMimetypeSuggestor], ['multipart/form-data', responseBodyMimetypeSuggestor]]);
-
-responseSuggestor = new Suggestor([['body', responseBodyGroupSuggestor], ['description', scalarSuggestor]]);
-
-responseGroupSuggestor = new Suggestor([], {
-  fallback: function(key) {
-    if (/\d{3}/.test(key)) {
-      return responseSuggestor;
-    }
-  }
+requestBodySuggestor = new EmptySuggestor(function() {
+  return namedParameterGroupSuggestor;
 });
 
-requestBodySuggestor = new Suggestor([], {
-  fallback: function() {
-    return namedParameterGroupSuggestor;
-  }
-});
+methodBodySuggestor = new Suggestor([
+  new SuggestionItem('application/json', noopSuggestor, {
+    category: 'body'
+  }), new SuggestionItem('application/x-www-form-urlencoded', requestBodySuggestor, {
+    category: 'body'
+  }), new SuggestionItem('application/xml', noopSuggestor, {
+    category: 'body'
+  }), new SuggestionItem('multipart/form-data', requestBodySuggestor, {
+    category: 'body'
+  })
+]);
 
-methodBodySuggestor = new Suggestor([['application/json', noopSuggestor], ['application/x-www-form-urlencoded', requestBodySuggestor], ['application/xml', noopSuggestor], ['multipart/form-data', requestBodySuggestor]]);
+protocolsSuggestor = new Suggestor([new SuggestionItem('HTTP', noopSuggestor), new SuggestionItem('HTTPS', noopSuggestor)]);
 
-protocolsSuggestor = new Suggestor([['HTTP', noopSuggestor], ['HTTPS', noopSuggestor]]);
-
-makeMethodSuggestor = function(optional) {
-  if (optional == null) {
-    optional = false;
-  }
-  return new Suggestor([['body', methodBodySuggestor], ['headers', namedParameterGroupSuggestor], ['is', noopSuggestor], ['protocols', protocolsSuggestor], ['queryParameters', namedParameterGroupSuggestor], ['responses', responseGroupSuggestor], ['securedBy', noopSuggestor]], {
-    metadata: {
-      category: 'methods',
-      canBeOptional: optional
-    }
-  });
+makeMethodSuggestor = function() {
+  return new Suggestor([
+    new SuggestionItem('description', noopSuggestor, {
+      category: 'docs'
+    }), new SuggestionItem('body', methodBodySuggestor, {
+      category: 'body'
+    }), new SuggestionItem('protocols', protocolsSuggestor, {
+      category: 'root'
+    }), new SuggestionItem('baseUriParameters', namedParameterGroupSuggestor, {
+      category: 'parameters'
+    }), new SuggestionItem('headers', namedParameterGroupSuggestor, {
+      category: 'parameters'
+    }), new SuggestionItem('queryParameters', namedParameterGroupSuggestor, {
+      category: 'parameters'
+    }), new SuggestionItem('responses', responseGroupSuggestor, {
+      category: 'responses'
+    }), new SuggestionItem('securedBy', noopSuggestor, {
+      category: 'security'
+    })
+  ]);
 };
 
 makeMethodGroupSuggestor = function(optional) {
@@ -165,61 +220,169 @@ makeMethodGroupSuggestor = function(optional) {
   if (optional == null) {
     optional = false;
   }
-  methodSuggestor = makeMethodSuggestor(optional);
+  methodSuggestor = new UnionSuggestor([
+    makeMethodSuggestor(), new Suggestor([
+      new SuggestionItem('is', noopSuggestor, {
+        category: 'traits and types'
+      })
+    ])
+  ]);
   return new Suggestor((function() {
-    var _i, _len, _ref1, _results;
-    _ref1 = ['get', 'post', 'put', 'delete', 'head', 'patch', 'trace', 'connect', 'options'];
+    var _i, _len, _ref, _results;
+    _ref = ['get', 'post', 'put', 'delete', 'head', 'patch', 'trace', 'connect', 'options'];
     _results = [];
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      method = _ref1[_i];
-      _results.push([method, methodSuggestor]);
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      method = _ref[_i];
+      _results.push(new SuggestionItem(method, methodSuggestor, {
+        category: 'methods',
+        canBeOptional: optional
+      }));
     }
     return _results;
   })());
 };
 
-resourceBasicSuggestor = new Suggestor([['baseUriParameters', namedParameterGroupSuggestor], ['description', scalarSuggestor], ['displayName', scalarSuggestor], ['is', scalarSuggestor], ['securedBy', scalarSuggestor], ['type', scalarSuggestor], ['uriParameters', namedParameterGroupSuggestor]]);
+resourceBasicSuggestor = new Suggestor([
+  new SuggestionItem('baseUriParameters', namedParameterGroupSuggestor, {
+    category: 'parameters'
+  }), new SuggestionItem('uriParameters', namedParameterGroupSuggestor, {
+    category: 'parameters'
+  }), new SuggestionItem('description', noopSuggestor, {
+    category: 'docs'
+  }), new SuggestionItem('displayName', noopSuggestor, {
+    category: 'docs'
+  }), new SuggestionItem('securedBy', noopSuggestor, {
+    category: 'security'
+  }), new SuggestionItem('type', noopSuggestor, {
+    category: 'traits and types'
+  }), new SuggestionItem('is', noopSuggestor, {
+    category: 'traits and types'
+  })
+]);
 
-resourceSuggestor = new UnionSuggestor([resourceBasicSuggestor, makeMethodGroupSuggestor()], {
-  fallback: resourceFallback,
-  metadata: {
-    id: 'resource'
+resourceFallback = function(key) {
+  if (/^\//.test(key)) {
+    return resourceSuggestor;
   }
-});
+};
 
-traitAdditions = new Suggestor([['displayName', noopSuggestor], ['usage', noopSuggestor]]);
+resourceSuggestor = new UnionSuggestor([resourceBasicSuggestor, makeMethodGroupSuggestor()], resourceFallback);
+
+traitAdditions = new Suggestor([
+  new SuggestionItem('displayName', noopSuggestor, {
+    category: 'docs'
+  }), new SuggestionItem('usage', noopSuggestor, {
+    category: 'docs'
+  })
+]);
 
 traitSuggestor = new UnionSuggestor([traitAdditions, makeMethodSuggestor()]);
 
-resourceTypeSuggestor = new UnionSuggestor([resourceBasicSuggestor, makeMethodGroupSuggestor(true), new Suggestor([['usage', noopSuggestor]])]);
+resourceTypeSuggestor = new UnionSuggestor([
+  resourceBasicSuggestor, makeMethodGroupSuggestor(true), new Suggestor([
+    new SuggestionItem('usage', noopSuggestor, {
+      category: 'docs'
+    })
+  ])
+]);
 
-securitySchemesSettingSuggestor = new Suggestor([['requestTokenUri', noopSuggestor], ['authorizationUri', noopSuggestor], ['tokenCredentialsUri', noopSuggestor], ['accessTokenUri', noopSuggestor], ['scopes', noopSuggestor], ['authorizationGrants', noopSuggestor]]);
+securitySchemesSettingSuggestor = new Suggestor([
+  new SuggestionItem('accessTokenUri', noopSuggestor, {
+    category: 'security'
+  }), new SuggestionItem('authorizationGrants', noopSuggestor, {
+    category: 'security'
+  }), new SuggestionItem('authorizationUri', noopSuggestor, {
+    category: 'security'
+  }), new SuggestionItem('requestTokenUri', noopSuggestor, {
+    category: 'security'
+  }), new SuggestionItem('scopes', noopSuggestor, {
+    category: 'security'
+  }), new SuggestionItem('tokenCredentialsUri', noopSuggestor, {
+    category: 'security'
+  })
+]);
 
-securitySchemeTypeSuggestor = new Suggestor([['OAuth 1.0', noopSuggestor], ['OAuth 2.0', noopSuggestor], ['Basic Authentication', noopSuggestor], ['Digest Authentication', noopSuggestor]]);
+securitySchemeTypeSuggestor = new Suggestor([
+  new SuggestionItem('OAuth 1.0', noopSuggestor, {
+    category: 'security'
+  }), new SuggestionItem('OAuth 2.0', noopSuggestor, {
+    category: 'security'
+  }), new SuggestionItem('Basic Authentication', noopSuggestor, {
+    category: 'security'
+  }), new SuggestionItem('Digest Authentication', noopSuggestor, {
+    category: 'security'
+  })
+]);
 
-securitySchemesSuggestor = new Suggestor([['description', noopSuggestor], ['type', securitySchemeTypeSuggestor], ['settings', securitySchemesSettingSuggestor]]);
+describedBySuggestor = new Suggestor([
+  new SuggestionItem('headers', namedParameterGroupSuggestor, {
+    category: 'parameters'
+  }), new SuggestionItem('queryParameters', namedParameterGroupSuggestor, {
+    category: 'parameters'
+  }), new SuggestionItem('responses', responseGroupSuggestor, {
+    category: 'responses'
+  })
+]);
 
-traitGroupSuggestor = new Suggestor([], {
-  fallback: function() {
-    return traitSuggestor;
-  }
+securitySchemesSuggestor = new Suggestor([
+  new SuggestionItem('description', noopSuggestor, {
+    category: 'docs'
+  }), new SuggestionItem('describedBy', describedBySuggestor, {
+    category: 'security'
+  }), new SuggestionItem('type', securitySchemeTypeSuggestor, {
+    category: 'security'
+  }), new SuggestionItem('settings', securitySchemesSettingSuggestor, {
+    category: 'security'
+  })
+]);
+
+traitGroupSuggestor = new EmptySuggestor(function() {
+  return traitSuggestor;
 });
 
-resourceTypeGroupSuggestor = new Suggestor([], {
-  fallback: function() {
-    return resourceTypeSuggestor;
-  }
+resourceTypeGroupSuggestor = new EmptySuggestor(function() {
+  return resourceTypeSuggestor;
 });
 
-securitySchemesGroupSuggestor = new Suggestor([], {
-  fallback: function() {
-    return securitySchemesSuggestor;
-  }
+securitySchemesGroupSuggestor = new EmptySuggestor(function() {
+  return securitySchemesSuggestor;
 });
 
-rootSuggestor = new Suggestor([['baseUri', scalarSuggestor], ['baseUriParameters', namedParameterGroupSuggestor], ['documentation', noopSuggestor], ['mediaType', noopSuggestor], ['protocols', protocolsSuggestor], ['resourceTypes', resourceTypeGroupSuggestor], ['schemas', noopSuggestor], ['securedBy', noopSuggestor], ['securitySchemes', securitySchemesGroupSuggestor], ['title', scalarSuggestor], ['traits', traitGroupSuggestor], ['version', scalarSuggestor]], {
-  fallback: resourceFallback
-});
+rootDocumentationSuggestor = new Suggestor([
+  new SuggestionItem('content', noopSuggestor, {
+    category: 'docs'
+  }), new SuggestionItem('title', noopSuggestor, {
+    category: 'docs'
+  })
+]);
+
+rootSuggestor = new Suggestor([
+  new SuggestionItem('baseUriParameters', namedParameterGroupSuggestor, {
+    category: 'parameters'
+  }), new SuggestionItem('baseUri', noopSuggestor, {
+    category: 'root'
+  }), new SuggestionItem('mediaType', noopSuggestor, {
+    category: 'root'
+  }), new SuggestionItem('protocols', protocolsSuggestor, {
+    category: 'root'
+  }), new SuggestionItem('title', noopSuggestor, {
+    category: 'root'
+  }), new SuggestionItem('version', noopSuggestor, {
+    category: 'root'
+  }), new SuggestionItem('documentation', rootDocumentationSuggestor, {
+    category: 'docs'
+  }), new SuggestionItem('schemas', noopSuggestor, {
+    category: 'schemas'
+  }), new SuggestionItem('securedBy', noopSuggestor, {
+    category: 'security'
+  }), new SuggestionItem('securitySchemes', securitySchemesGroupSuggestor, {
+    category: 'security'
+  }), new SuggestionItem('resourceTypes', resourceTypeGroupSuggestor, {
+    category: 'traits and types'
+  }), new SuggestionItem('traits', traitGroupSuggestor, {
+    category: 'traits and types'
+  })
+], resourceFallback);
 
 suggestorForPath = function(path) {
   var suggestor;
@@ -243,7 +406,7 @@ this.suggestRAML = function(path) {
   };
 };
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined" && window !== null) {
   window.suggestRAML = this.suggestRAML;
 }
 
