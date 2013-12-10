@@ -72,17 +72,33 @@ namedParameterSuggestor = new Suggestor(
 
 namedParameterGroupSuggestor = new Suggestor [], fallback: (key) -> namedParameterSuggestor
 
+responseBodyMimetypeSuggestor = new Suggestor(
+  [
+    ['schema',    noopSuggestor],
+    ['example', noopSuggestor]
+  ]
+)
+
+responseBodyGroupSuggestor = new Suggestor(
+  [
+    ['application/json',                  responseBodyMimetypeSuggestor],
+    ['application/x-www-form-urlencoded', responseBodyMimetypeSuggestor],
+    ['application/xml',                   responseBodyMimetypeSuggestor],
+    ['multipart/form-data',               responseBodyMimetypeSuggestor]
+  ]
+)
+
 responseSuggestor = new Suggestor(
   [
-    ['body',        noopSuggestor],
-    ['description', scalarSuggestor]
+    ['body',        responseBodyGroupSuggestor],
+    ['description', scalarSuggestor],
   ]
 )
 
 responseGroupSuggestor = new Suggestor [], fallback: (key) -> responseSuggestor if /\d{3}/.test key
 requestBodySuggestor   = new Suggestor [], fallback: -> namedParameterGroupSuggestor
 
-bodySuggestor = new Suggestor(
+methodBodySuggestor = new Suggestor(
   [
     ['application/json',                  noopSuggestor],
     ['application/x-www-form-urlencoded', requestBodySuggestor],
@@ -101,12 +117,13 @@ protocolsSuggestor = new Suggestor(
 makeMethodSuggestor = (optional = false) ->
   new Suggestor(
     [
-      ['body',           bodySuggestor],
-      ['headers',        namedParameterGroupSuggestor],
-      ['is',             noopSuggestor],
-      ['protocols',      protocolsSuggestor],
-      ['queryParameter', noopSuggestor],
-      ['responses',      responseGroupSuggestor]
+      ['body',            methodBodySuggestor],
+      ['headers',         namedParameterGroupSuggestor],
+      ['is',              noopSuggestor],
+      ['protocols',       protocolsSuggestor],
+      ['queryParameters', namedParameterGroupSuggestor],
+      ['responses',       responseGroupSuggestor],
+      ['securedBy',       noopSuggestor]
     ],
     {
       metadata: { category: 'methods', canBeOptional: optional }
@@ -180,10 +197,19 @@ securitySchemesSettingSuggestor = new Suggestor(
   ]
 )
 
+securitySchemeTypeSuggestor = new Suggestor(
+  [
+    ['OAuth 1.0',              noopSuggestor],
+    ['OAuth 2.0',              noopSuggestor],
+    ['Basic Authentication',   noopSuggestor],
+    ['Digest Authentication',  noopSuggestor]
+  ]
+)
+
 securitySchemesSuggestor = new Suggestor(
   [
     ['description', noopSuggestor],
-    ['type',        noopSuggestor],
+    ['type',        securitySchemeTypeSuggestor],
     ['settings',    securitySchemesSettingSuggestor]
   ]
 )
@@ -195,7 +221,7 @@ securitySchemesGroupSuggestor = new Suggestor [], fallback: -> securitySchemesSu
 rootSuggestor = new Suggestor(
   [
     ['baseUri',           scalarSuggestor],
-    ['baseUriParameters', scalarSuggestor],
+    ['baseUriParameters', namedParameterGroupSuggestor],
     ['documentation',     noopSuggestor],
     ['mediaType',         noopSuggestor],
     ['protocols',         protocolsSuggestor],
@@ -228,3 +254,6 @@ suggestorForPath = (path) ->
     metadata:    suggestor.metadata
     isScalar:    suggestor.isScalar
   }
+
+window.suggestRAML = @suggestRAML if typeof window != 'undefined'
+
