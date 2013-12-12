@@ -5,7 +5,7 @@ class SuggestionItem
     @key == key || @metadata.canBeOptional && @key + '?' == key
 
 class Suggestor
-  constructor: (@items, @fallback) ->
+  constructor: (@items, @fallback, @metadata = {}) ->
     @fallback ?= ->
 
   suggestorFor: (key) ->
@@ -242,7 +242,9 @@ rootDocumentationSuggestor = new Suggestor(
   [
     new SuggestionItem('content', noopSuggestor, category: 'docs'),
     new SuggestionItem('title',   noopSuggestor, category: 'docs')
-  ]
+  ],
+    null,
+    { isList: true }
 )
 
 rootSuggestor = new Suggestor(
@@ -277,9 +279,8 @@ suggestorForPath = (path) ->
 @suggestRAML = (path) ->
   suggestor = (suggestorForPath path) or noopSuggestor
   return {
-    suggestions: suggestor.suggestions()
-    metadata:    suggestor.metadata
-    isScalar:    suggestor.isScalar
+    suggestions: suggestor.suggestions(),
+    metadata: suggestor.metadata
   }
 
 if window?
