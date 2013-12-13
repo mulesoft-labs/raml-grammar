@@ -158,15 +158,12 @@ resourceBasicSuggestor = new Suggestor(
 
 resourceFallback = (key) -> resourceSuggestor if /^\//.test key
 
+dynamicResource = new SuggestionItem('<resource>',   resourceSuggestor,             category: 'resources',    dynamic: true)
 resourceSuggestor = new UnionSuggestor(
   [
     resourceBasicSuggestor,
-    makeMethodGroupSuggestor()
-    new Suggestor(
-      [
-        new SuggestionItem('<resource>',   resourceSuggestor,             category: 'resources')
-      ]
-    )
+    makeMethodGroupSuggestor(),
+    new Suggestor([ dynamicResource ])
   ],
   resourceFallback
 )
@@ -259,7 +256,7 @@ rootSuggestor = new Suggestor(
     new SuggestionItem('securitySchemes',   securitySchemesGroupSuggestor, category: 'security'),
     new SuggestionItem('resourceTypes',     resourceTypeGroupSuggestor,    category: 'traits and types'),
     new SuggestionItem('traits',            traitGroupSuggestor,           category: 'traits and types'),
-    new SuggestionItem('<resource>',        resourceSuggestor,             category: 'resources')
+    dynamicResource
 
   ],
   resourceFallback

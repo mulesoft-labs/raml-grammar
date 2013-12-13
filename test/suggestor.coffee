@@ -23,6 +23,12 @@ describe 'suggestRAML',  ->
       {suggestions} = suggestRAML root
       suggestions.should.include.keys 'title', 'version', 'schemas', 'baseUri', 'baseUriParameters', 'mediaType', 'documentation', 'traits', 'resourceTypes', 'securitySchemes', 'securedBy', 'protocols'
 
+  it 'returns a <resource> suggestion that is dynamic', ->
+    {suggestions} = suggestRAML []
+
+    suggestions.should.include.key '<resource>'
+    suggestions["<resource>"].metadata.dynamic.should.be.true
+
   it 'classifies title, version, baseUri, mediaType, and protocols as "root"', ->
     {suggestions} = suggestRAML []
 
@@ -191,6 +197,12 @@ describe 'Resources', ->
         suggestions[key].metadata.category.should.be.equal 'security'
 
       suggestions.should.not.include.key 'usage'
+
+  it 'returns a <resource> suggestion that is dynamic', ->
+    {suggestions} = suggestRAML ['/hello']
+
+    suggestions.should.include.key '<resource>'
+    suggestions["<resource>"].metadata.dynamic.should.be.true
 
 describe 'Methods', ->
   it 'offers expected suggestions', ->
