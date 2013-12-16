@@ -19,9 +19,10 @@ SuggestionItem = (function() {
 })();
 
 Suggestor = (function() {
-  function Suggestor(items, fallback) {
+  function Suggestor(items, fallback, metadata) {
     this.items = items;
     this.fallback = fallback;
+    this.metadata = metadata != null ? metadata : {};
     if (this.fallback == null) {
       this.fallback = function() {};
     }
@@ -359,7 +360,9 @@ rootDocumentationSuggestor = new Suggestor([
   }), new SuggestionItem('title', noopSuggestor, {
     category: 'docs'
   })
-]);
+], null, {
+  isList: true
+});
 
 rootSuggestor = new Suggestor([
   new SuggestionItem('baseUriParameters', namedParameterGroupSuggestor, {
@@ -406,8 +409,7 @@ this.suggestRAML = function(path) {
   suggestor = (suggestorForPath(path)) || noopSuggestor;
   return {
     suggestions: suggestor.suggestions(),
-    metadata: suggestor.metadata,
-    isScalar: suggestor.isScalar
+    metadata: suggestor.metadata
   };
 };
 
