@@ -1,3 +1,10 @@
+###
+To debug these tests:
+1. Install the mocha and node-inspector npm packages
+2. In one shell run node-inspector
+3. In another shell, run 'mocha test/suggestor.coffee --debug-brk --compilers coffee:coffee-script'
+4. Launch your browser and point it at the debugger, at http://127.0.0.1:8080/debug?port=5858
+###
 {suggestRAML} = require '../src/suggestor.coffee'
 should = (require '../node_modules/chai/index').should()
 
@@ -50,19 +57,24 @@ describe 'suggestRAML',  ->
     suggestions.title.metadata.category.should.be.equal "docs"
     suggestions.content.metadata.category.should.be.equal "docs"
 
+  it 'classifies all documentation keys as containers of a list', ->
+    suggestor = suggestRAML ['documentation']
+
+    suggestor.metadata.isList.should.be.equal true
+
   it 'classifies securedBy and securitySchemes keys as "security"', ->
     {suggestions} = suggestRAML []
 
     suggestions.securedBy.metadata.category.should.be.equal "security"
     suggestions.securitySchemes.metadata.category.should.be.equal "security"
 
- it 'classifies resourceTypes and traits as "traits and types"', ->
+  it 'classifies resourceTypes and traits as "traits and types"', ->
     {suggestions} = suggestRAML []
 
     suggestions.resourceTypes.metadata.category.should.be.equal "traits and types"
     suggestions.traits.metadata.category.should.be.equal "traits and types"
 
- it 'classifies baseUriParameters as parameters', ->
+  it 'classifies baseUriParameters as parameters', ->
     {suggestions} = suggestRAML []
 
     suggestions.baseUriParameters.metadata.category.should.be.equal "parameters"
