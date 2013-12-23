@@ -230,7 +230,7 @@ makeMethodGroupSuggestor = function(optional) {
   ]);
   return new Suggestor((function() {
     var _i, _len, _ref, _results;
-    _ref = ['get', 'post', 'put', 'delete', 'head', 'patch', 'trace', 'connect', 'options'];
+    _ref = ['options', 'get', 'head', 'post', 'put', 'delete', 'trace', 'connect', 'patch'];
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       method = _ref[_i];
@@ -244,11 +244,7 @@ makeMethodGroupSuggestor = function(optional) {
 };
 
 resourceBasicSuggestor = new Suggestor([
-  new SuggestionItem('baseUriParameters', namedParameterGroupSuggestor, {
-    category: 'parameters'
-  }), new SuggestionItem('uriParameters', namedParameterGroupSuggestor, {
-    category: 'parameters'
-  }), new SuggestionItem('description', noopSuggestor, {
+  new SuggestionItem('description', noopSuggestor, {
     category: 'docs'
   }), new SuggestionItem('displayName', noopSuggestor, {
     category: 'docs'
@@ -272,7 +268,15 @@ dynamicResource = new SuggestionItem('<resource>', resourceSuggestor, {
   dynamic: true
 });
 
-resourceSuggestor = new UnionSuggestor([resourceBasicSuggestor, makeMethodGroupSuggestor(), new Suggestor([dynamicResource])], resourceFallback);
+resourceSuggestor = new UnionSuggestor([
+  resourceBasicSuggestor, makeMethodGroupSuggestor(), new Suggestor([
+    new SuggestionItem('baseUriParameters', namedParameterGroupSuggestor, {
+      category: 'parameters'
+    }), new SuggestionItem('uriParameters', namedParameterGroupSuggestor, {
+      category: 'parameters'
+    }), dynamicResource
+  ])
+], resourceFallback);
 
 traitAdditions = new Suggestor([
   new SuggestionItem('displayName', noopSuggestor, {
@@ -286,7 +290,13 @@ traitSuggestor = new UnionSuggestor([traitAdditions, makeMethodSuggestor()]);
 
 resourceTypeSuggestor = new UnionSuggestor([
   resourceBasicSuggestor, makeMethodGroupSuggestor(true), new Suggestor([
-    new SuggestionItem('usage', noopSuggestor, {
+    new SuggestionItem('baseUriParameters', namedParameterGroupSuggestor, {
+      category: 'parameters',
+      canBeOptional: true
+    }), new SuggestionItem('uriParameters', namedParameterGroupSuggestor, {
+      category: 'parameters',
+      canBeOptional: true
+    }), new SuggestionItem('usage', noopSuggestor, {
       category: 'docs'
     })
   ])
