@@ -50,7 +50,7 @@ class UnionSuggestor
 
     suggestions
 
-noopSuggestor    = new EmptySuggestor
+noopSuggestor = new EmptySuggestor
 
 namedParameterSuggestor = new Suggestor(
   [
@@ -90,7 +90,7 @@ responseBodyGroupSuggestor = new Suggestor(
 responseSuggestor = new Suggestor(
   [
     new SuggestionItem('body',        responseBodyGroupSuggestor, category: 'responses'),
-    new SuggestionItem('description', noopSuggestor,              category: 'docs'),
+    new SuggestionItem('description', noopSuggestor,              category: 'docs')
   ]
 )
 
@@ -116,14 +116,14 @@ protocolsSuggestor = new Suggestor(
 makeMethodSuggestor = ->
   new Suggestor(
     [
-      new SuggestionItem('description',        noopSuggestor,                 category: 'docs'),
-      new SuggestionItem('body',               methodBodySuggestor,           category: 'body'),
-      new SuggestionItem('protocols',          protocolsSuggestor,            category: 'root'),
-      new SuggestionItem('baseUriParameters',  namedParameterGroupSuggestor,  category: 'parameters'),
-      new SuggestionItem('headers',            namedParameterGroupSuggestor,  category: 'parameters'),
-      new SuggestionItem('queryParameters',    namedParameterGroupSuggestor,  category: 'parameters'),
-      new SuggestionItem('responses',          responseGroupSuggestor,        category: 'responses'),
-      new SuggestionItem('securedBy',          noopSuggestor,                 category: 'security')
+      new SuggestionItem('description',        noopSuggestor,                category: 'docs'),
+      new SuggestionItem('body',               methodBodySuggestor,          category: 'body'),
+      new SuggestionItem('protocols',          protocolsSuggestor,           category: 'root'),
+      new SuggestionItem('baseUriParameters',  namedParameterGroupSuggestor, category: 'parameters'),
+      new SuggestionItem('headers',            namedParameterGroupSuggestor, category: 'parameters'),
+      new SuggestionItem('queryParameters',    namedParameterGroupSuggestor, category: 'parameters'),
+      new SuggestionItem('responses',          responseGroupSuggestor,       category: 'responses'),
+      new SuggestionItem('securedBy',          noopSuggestor,                category: 'security')
     ]
   )
 
@@ -139,31 +139,46 @@ makeMethodGroupSuggestor = (optional = false) ->
     ]
   )
 
-
   new Suggestor(
-    new SuggestionItem(method, methodSuggestor, category: 'methods', canBeOptional: optional) for method in ['get', 'post', 'put', 'delete', 'head', 'patch', 'trace', 'connect', 'options']
+    new SuggestionItem(method, methodSuggestor, category: 'methods', canBeOptional: optional) for method in [
+      # RFC2616
+      'options',
+      'get',
+      'head',
+      'post',
+      'put',
+      'delete',
+      'trace',
+      'connect',
+      # RFC5789
+      'patch'
+    ]
   )
 
 resourceBasicSuggestor = new Suggestor(
   [
-    new SuggestionItem('baseUriParameters', namedParameterGroupSuggestor, category: 'parameters'),
-    new SuggestionItem('uriParameters',     namedParameterGroupSuggestor, category: 'parameters'),
-    new SuggestionItem('description',       noopSuggestor,                category: 'docs'),
-    new SuggestionItem('displayName',       noopSuggestor,                category: 'docs'),
-    new SuggestionItem('securedBy',         noopSuggestor,                category: 'security'),
-    new SuggestionItem('type',              noopSuggestor,                category: 'traits and types'),
-    new SuggestionItem('is',                noopSuggestor,                category: 'traits and types')
+    new SuggestionItem('description', noopSuggestor, category: 'docs'),
+    new SuggestionItem('displayName', noopSuggestor, category: 'docs'),
+    new SuggestionItem('securedBy',   noopSuggestor, category: 'security'),
+    new SuggestionItem('type',        noopSuggestor, category: 'traits and types'),
+    new SuggestionItem('is',          noopSuggestor, category: 'traits and types')
   ]
 )
 
 resourceFallback = (key) -> resourceSuggestor if /^\//.test key
 
-dynamicResource = new SuggestionItem('<resource>',   resourceSuggestor,             category: 'resources',    dynamic: true)
+dynamicResource = new SuggestionItem('<resource>', resourceSuggestor, category: 'resources', dynamic: true)
 resourceSuggestor = new UnionSuggestor(
   [
     resourceBasicSuggestor,
     makeMethodGroupSuggestor(),
-    new Suggestor([ dynamicResource ])
+    new Suggestor(
+      [
+        new SuggestionItem('baseUriParameters', namedParameterGroupSuggestor, category: 'parameters'),
+        new SuggestionItem('uriParameters',     namedParameterGroupSuggestor, category: 'parameters'),
+        dynamicResource
+      ]
+    )
   ],
   resourceFallback
 )
@@ -186,9 +201,11 @@ resourceTypeSuggestor = new UnionSuggestor(
   [
     resourceBasicSuggestor,
     makeMethodGroupSuggestor(true),
-    new Suggestor (
+    new Suggestor(
       [
-        new SuggestionItem('usage', noopSuggestor, category: 'docs')
+        new SuggestionItem('baseUriParameters', namedParameterGroupSuggestor, category: 'parameters', canBeOptional: true),
+        new SuggestionItem('uriParameters',     namedParameterGroupSuggestor, category: 'parameters', canBeOptional: true)
+        new SuggestionItem('usage',             noopSuggestor,                category: 'docs')
       ]
     )
   ]
@@ -259,7 +276,6 @@ rootSuggestor = new Suggestor(
     new SuggestionItem('resourceTypes',     resourceTypeGroupSuggestor,    category: 'traits and types'),
     new SuggestionItem('traits',            traitGroupSuggestor,           category: 'traits and types'),
     dynamicResource
-
   ],
   resourceFallback
 )

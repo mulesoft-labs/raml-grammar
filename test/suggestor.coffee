@@ -150,10 +150,19 @@ describe 'Resource Types', ->
     {suggestions} = suggestRAML ['resourceTypes', 'collection', '/hello']
     suggestions.should.be.empty
 
-  it 'suggests the same properties as optional properties', ->
-    {suggestions: suggestions1} = suggestRAML ['resourceTypes', 'resourceType1', 'get?']
-    {suggestions: suggestions2} = suggestRAML ['resourceTypes', 'resourceType2', 'get' ]
-    suggestions1.should.be.deep.equal(suggestions2)
+  for optionalProperty in supportedHttpMethods
+    do (optionalProperty) =>
+      it "suggests the same properties as optional '#{optionalProperty}' property", ->
+        {suggestions: suggestions1} = suggestRAML ['resourceTypes', 'resourceType1', optionalProperty + '?']
+        {suggestions: suggestions2} = suggestRAML ['resourceTypes', 'resourceType2', optionalProperty      ]
+        suggestions1.should.be.deep.equal(suggestions2)
+
+  for optionalProperty in ['baseUriParameters', 'uriParameters']
+    do (optionalProperty) =>
+      it "suggests the same properties as optional '#{optionalProperty}' property", ->
+        {suggestions: suggestions1} = suggestRAML ['resourceTypes', 'resourceType1', optionalProperty + '?', 'property']
+        {suggestions: suggestions2} = suggestRAML ['resourceTypes', 'resourceType2', optionalProperty      , 'property']
+        suggestions1.should.be.deep.equal(suggestions2)
 
 describe 'Traits', ->
   it 'returns no suggestions in the array', ->
