@@ -108,8 +108,8 @@ methodBodySuggestor = new Suggestor(
 
 protocolsSuggestor = new Suggestor(
   [
-    new SuggestionItem('HTTP',  noopSuggestor),
-    new SuggestionItem('HTTPS', noopSuggestor)
+    new SuggestionItem('HTTP',  noopSuggestor, { isText: true}),
+    new SuggestionItem('HTTPS', noopSuggestor, { isText: true})
   ],
     null,
     { isList: true }
