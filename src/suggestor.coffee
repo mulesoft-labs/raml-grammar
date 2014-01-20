@@ -110,7 +110,9 @@ protocolsSuggestor = new Suggestor(
   [
     new SuggestionItem('HTTP',  noopSuggestor),
     new SuggestionItem('HTTPS', noopSuggestor)
-  ]
+  ],
+    null,
+    { isList: true }
 )
 
 makeMethodSuggestor = ->
