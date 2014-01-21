@@ -340,6 +340,12 @@ describe 'Protocols', ->
     {suggestions} = suggestRAML [ 'protocols' ]
     suggestions.should.include.keys 'HTTP', 'HTTPS'
 
+  it 'suggests both HTTP and HTTPS inside a "protocols" key in the root element, both of which are marked text nodes', ->
+    {suggestions} = suggestRAML [ 'protocols' ]
+    suggestions.should.include.keys 'HTTP', 'HTTPS'
+    suggestions.HTTP.metadata.isText.should.be.equal(true);
+    suggestions.HTTPS.metadata.isText.should.be.equal(true);
+
   it 'suggests both HTTP and HTTPS inside a "protocols" key in a trait', ->
     {suggestions} = suggestRAML [ 'traits', 'someTraitName', 'protocols' ]
     suggestions.should.include.keys 'HTTP', 'HTTPS'
