@@ -1,22 +1,29 @@
 'use strict';
 
 module.exports = function (grunt) {
+  require('load-grunt-tasks')(grunt);
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
     browserify: {
       options: {
-        transform: ['coffeeify']
+        transform: ['coffeeify'],
+        bundleOptions: {
+          standalone: 'RAML.Grammar'
+        }
       },
+
       'dist/suggest.js': ['src/suggestor.coffee']
     },
 
     simplemocha: {
       options: {
         useColors: true,
-        ui: 'bdd',
-        reporter: 'spec'
+        ui:        'bdd',
+        reporter:  'spec'
       },
+
       all: ['test/suggestor.coffee']
     },
 
@@ -26,11 +33,16 @@ module.exports = function (grunt) {
     }
   });
 
-  grunt.loadNpmTasks('grunt-browserify');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-simple-mocha');
+  grunt.registerTask('test', [
+    'simplemocha'
+  ]);
 
-  grunt.registerTask('test',    ['simplemocha']);
-  grunt.registerTask('build',   ['test', 'browserify']);
-  grunt.registerTask('default', ['build']);
+  grunt.registerTask('build', [
+    'browserify'
+  ]);
+
+  grunt.registerTask('default', [
+    'test',
+    'build'
+  ]);
 };

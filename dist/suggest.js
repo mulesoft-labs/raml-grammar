@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),(f.RAML||(f.RAML={})).Grammar=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 var EmptySuggestor, SuggestionItem, Suggestor, UnionSuggestor, describedBySuggestor, dynamicResource, makeMethodGroupSuggestor, makeMethodSuggestor, methodBodySuggestor, namedParameterGroupSuggestor, namedParameterSuggestor, noopSuggestor, protocolsSuggestor, requestBodySuggestor, resourceBasicSuggestor, resourceFallback, resourceSuggestor, resourceTypeGroupSuggestor, resourceTypeSuggestor, responseBodyGroupSuggestor, responseBodyMimetypeSuggestor, responseGroupSuggestor, responseSuggestor, rootDocumentationSuggestor, rootSuggestor, securitySchemeTypeSuggestor, securitySchemesGroupSuggestor, securitySchemesSettingSuggestor, securitySchemesSuggestor, suggestorForPath, traitAdditions, traitGroupSuggestor, traitSuggestor,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -431,9 +431,7 @@ this.suggestRAML = function(path) {
   };
 };
 
-if (typeof window !== "undefined" && window !== null) {
-  window.suggestRAML = this.suggestRAML;
-}
-
 
 },{}]},{},[1])
+(1)
+});;

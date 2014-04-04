@@ -297,6 +297,3 @@ suggestorForPath = (path) ->
     suggestions: suggestor.suggestions(),
     metadata: suggestor.metadata
   }
-
-if window?
-  window.suggestRAML = @suggestRAML
