@@ -2,16 +2,20 @@
   "name": "raml-grammar",
   "version": "0.0.1",
   "devDependencies": {
-    "chai": "~1.9.1",
-    "coffeeify": "~0.6.0",
-    "grunt-browserify": "~2.0.1",
-    "grunt-contrib-coffee": "~0.10.1",
+    "chai": "~3.5.0",
+    "coffeeify": "~2.0.1",
+    "grunt": "~0.4.4",
+    "grunt-browserify": "~4.0.1",
+    "grunt-cli": "~0.1.13",
     "grunt-contrib-watch": "~0.6.1",
     "grunt-simple-mocha": "~0.4.0",
     "load-grunt-tasks": "~0.4.0",
-    "grunt": "~0.4.4"
+    "sinon": "~1.17.3",
+    "sinon-chai": "~2.8.0"
   },
   "scripts": {
+    "build": "grunt build",
+    "grunt": "grunt",
     "test": "grunt test"
   }
 }

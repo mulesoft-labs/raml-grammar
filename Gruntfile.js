@@ -8,9 +8,10 @@ module.exports = function (grunt) {
 
     browserify: {
       options: {
-        transform: ['coffeeify'],
-        bundleOptions: {
-          standalone: 'RAML.Grammar'
+        browserifyOptions: {
+          extensions: ['.coffee'],
+          standalone: 'RAML.Grammar',
+          transform:  ['coffeeify']
         }
       },
 
@@ -19,12 +20,13 @@ module.exports = function (grunt) {
 
     simplemocha: {
       options: {
-        useColors: true,
+        bail:      true,
+        reporter:  'spec',
         ui:        'bdd',
-        reporter:  'spec'
+        useColors: true
       },
 
-      all: ['test/suggestor.coffee']
+      all: ['test/_setup.coffee', 'test/*.test.coffee']
     },
 
     watch: {
